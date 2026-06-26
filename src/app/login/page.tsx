@@ -83,7 +83,7 @@ export default function LoginPage() {
             )}
 
             <div>
-              <label htmlFor="email" className="block text-[10px] font-bold uppercase tracking-wider text-zinc-400 mb-1.5">
+              <label htmlFor="email" className="block text-xs font-bold uppercase tracking-wider text-zinc-300 mb-1.5">
                 E-mail
               </label>
               <input
@@ -92,14 +92,14 @@ export default function LoginPage() {
                 placeholder="nome@condominio.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-sm text-white placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-[#0033FF]/50 focus:border-[#0033FF]/50 hover:border-zinc-700 transition-all font-medium"
+                className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-[#0033FF]/50 focus:border-[#0033FF]/50 hover:border-zinc-700 transition-all font-medium"
                 required
               />
             </div>
 
             <div>
               <div className="flex justify-between items-center mb-1.5">
-                <label htmlFor="password" className="block text-[10px] font-bold uppercase tracking-wider text-zinc-400">
+                <label htmlFor="password" className="block text-xs font-bold uppercase tracking-wider text-zinc-300">
                   Senha
                 </label>
               </div>
@@ -110,7 +110,7 @@ export default function LoginPage() {
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-3 pr-10 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-sm text-white placeholder-zinc-650 focus:outline-none focus:ring-1 focus:ring-[#0033FF]/50 focus:border-[#0033FF]/50 hover:border-zinc-700 transition-all font-medium"
+                  className="w-full pl-3 pr-10 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-[#0033FF]/50 focus:border-[#0033FF]/50 hover:border-zinc-700 transition-all font-medium"
                   required
                 />
                 <button

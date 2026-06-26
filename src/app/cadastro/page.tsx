@@ -125,7 +125,7 @@ export default function CadastroPage() {
             <ShieldCheck className="w-6 h-6" />
           </div>
           <h1 className="text-xl font-bold tracking-tight text-white">Comece com o Zelify</h1>
-          <p className="text-xs text-zinc-400 mt-1 font-medium">
+          <p className="text-sm text-zinc-300 mt-1 font-medium">
             Cadastre seu condomínio e crie sua conta de síndico
           </p>
         </div>
@@ -164,13 +164,13 @@ export default function CadastroPage() {
           {/* PASSO 1: DADOS GESTOR */}
           {step === 1 && (
             <form onSubmit={handleNextStep} className="space-y-4">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400 flex items-center">
-                <User className="w-3.5 h-3.5 mr-1.5 text-[#0033FF]" />
+              <h3 className="text-sm font-bold uppercase tracking-wider text-zinc-200 flex items-center">
+                <User className="w-4 h-4 mr-2 text-[#0033FF]" />
                 Dados do Administrador
               </h3>
 
               <div>
-                <label htmlFor="nome" className="block text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-1.5">
+                <label htmlFor="nome" className="block text-xs font-bold uppercase tracking-wider text-zinc-300 mb-1.5">
                   Nome Completo
                 </label>
                 <input
@@ -179,13 +179,13 @@ export default function CadastroPage() {
                   placeholder="Nome do síndico"
                   value={nome}
                   onChange={(e) => setNome(e.target.value)}
-                  className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-sm text-white placeholder-zinc-650 focus:outline-none focus:ring-1 focus:ring-[#0033FF]/50 focus:border-[#0033FF]/50 hover:border-zinc-700 transition-all font-medium"
+                  className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-[#0033FF]/50 focus:border-[#0033FF]/50 hover:border-zinc-700 transition-all font-medium"
                   required
                 />
               </div>
 
               <div>
-                <label htmlFor="email" className="block text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-1.5">
+                <label htmlFor="email" className="block text-xs font-bold uppercase tracking-wider text-zinc-300 mb-1.5">
                   E-mail
                 </label>
                 <input
@@ -194,13 +194,13 @@ export default function CadastroPage() {
                   placeholder="seuemail@exemplo.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-sm text-white placeholder-zinc-650 focus:outline-none focus:ring-1 focus:ring-[#0033FF]/50 focus:border-[#0033FF]/50 hover:border-zinc-700 transition-all font-medium"
+                  className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-[#0033FF]/50 focus:border-[#0033FF]/50 hover:border-zinc-700 transition-all font-medium"
                   required
                 />
               </div>
 
               <div>
-                <label htmlFor="password" className="block text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-1.5">
+                <label htmlFor="password" className="block text-xs font-bold uppercase tracking-wider text-zinc-300 mb-1.5">
                   Senha
                 </label>
                 <div className="relative">
@@ -210,7 +210,7 @@ export default function CadastroPage() {
                     placeholder="Mínimo 6 caracteres"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full pl-3 pr-10 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-sm text-white placeholder-zinc-650 focus:outline-none focus:ring-1 focus:ring-[#0033FF]/50 focus:border-[#0033FF]/50 hover:border-zinc-700 transition-all font-medium"
+                    className="w-full pl-3 pr-10 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-[#0033FF]/50 focus:border-[#0033FF]/50 hover:border-zinc-700 transition-all font-medium"
                     required
                   />
                   <button
@@ -224,7 +224,7 @@ export default function CadastroPage() {
               </div>
 
               <div>
-                <label htmlFor="confirmPassword" className="block text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-1.5">
+                <label htmlFor="confirmPassword" className="block text-xs font-bold uppercase tracking-wider text-zinc-300 mb-1.5">
                   Confirmar Senha
                 </label>
                 <input
@@ -233,7 +233,7 @@ export default function CadastroPage() {
                   placeholder="Repita a senha"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-sm text-white placeholder-zinc-650 focus:outline-none focus:ring-1 focus:ring-[#0033FF]/50 focus:border-[#0033FF]/50 hover:border-zinc-700 transition-all font-medium"
+                  className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-[#0033FF]/50 focus:border-[#0033FF]/50 hover:border-zinc-700 transition-all font-medium"
                   required
                 />
               </div>
@@ -251,13 +251,13 @@ export default function CadastroPage() {
           {/* PASSO 2: DADOS CONDOMÍNIO */}
           {step === 2 && (
             <form onSubmit={handleCadastro} className="space-y-4">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400 flex items-center">
-                <Building className="w-3.5 h-3.5 mr-1.5 text-[#0033FF]" />
+              <h3 className="text-sm font-bold uppercase tracking-wider text-zinc-200 flex items-center">
+                <Building className="w-4 h-4 mr-2 text-[#0033FF]" />
                 Dados do Condomínio
               </h3>
 
               <div>
-                <label htmlFor="condoNome" className="block text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-1.5">
+                <label htmlFor="condoNome" className="block text-xs font-bold uppercase tracking-wider text-zinc-300 mb-1.5">
                   Nome do Condomínio
                 </label>
                 <input
@@ -266,13 +266,13 @@ export default function CadastroPage() {
                   placeholder="Ex: Residencial Flores"
                   value={condominioNome}
                   onChange={(e) => handleCondoNameChange(e.target.value)}
-                  className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-sm text-white placeholder-zinc-650 focus:outline-none focus:ring-1 focus:ring-[#0033FF]/50 focus:border-[#0033FF]/50 hover:border-zinc-700 transition-all font-medium"
+                  className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-[#0033FF]/50 focus:border-[#0033FF]/50 hover:border-zinc-700 transition-all font-medium"
                   required
                 />
               </div>
 
               <div>
-                <label htmlFor="condoSlug" className="block text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-1.5">
+                <label htmlFor="condoSlug" className="block text-xs font-bold uppercase tracking-wider text-zinc-300 mb-1.5">
                   Endereço de Acesso (Slug da URL)
                 </label>
                 <div className="relative flex items-center">
@@ -285,17 +285,17 @@ export default function CadastroPage() {
                     placeholder="nome-do-condominio"
                     value={condominioSlug}
                     onChange={(e) => setCondominioSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
-                    className="w-full pl-6 pr-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-sm text-white placeholder-zinc-650 focus:outline-none focus:ring-1 focus:ring-[#0033FF]/50 focus:border-[#0033FF]/50 hover:border-zinc-700 transition-all font-mono"
+                    className="w-full pl-6 pr-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-[#0033FF]/50 focus:border-[#0033FF]/50 hover:border-zinc-700 transition-all font-mono"
                     required
                   />
                 </div>
-                <p className="text-[9px] text-zinc-500 mt-1">
-                  Seus moradores acessarão por: <span className="font-mono text-zinc-400">/{condominioSlug || '...' }</span>
+                <p className="text-xs text-zinc-400 mt-1.5 font-medium leading-relaxed">
+                  Seus moradores acessarão por: <span className="font-mono text-zinc-300">/{condominioSlug || '...' }</span>
                 </p>
               </div>
 
               <div>
-                <label htmlFor="codigoAcesso" className="block text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-1.5">
+                <label htmlFor="codigoAcesso" className="block text-xs font-bold uppercase tracking-wider text-zinc-300 mb-1.5">
                   Código de Validação dos Moradores
                 </label>
                 <div className="relative">
@@ -306,12 +306,12 @@ export default function CadastroPage() {
                     maxLength={4}
                     value={codigoAcesso}
                     onChange={(e) => setCodigoAcesso(e.target.value.replace(/\D/g, ''))}
-                    className="w-full pl-3 pr-10 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-sm text-white placeholder-zinc-650 focus:outline-none focus:ring-1 focus:ring-[#0033FF]/50 focus:border-[#0033FF]/50 hover:border-zinc-700 transition-all font-medium tracking-wider"
+                    className="w-full pl-3 pr-10 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-[#0033FF]/50 focus:border-[#0033FF]/50 hover:border-zinc-700 transition-all font-medium tracking-wider"
                     required
                   />
                   <Key className="absolute right-3 top-2.5 text-zinc-600 w-4 h-4" />
                 </div>
-                <p className="text-[9px] text-zinc-500 mt-1">
+                <p className="text-xs text-zinc-400 mt-1.5 font-medium leading-relaxed">
                   Código que os moradores usarão para liberar o envio de chamados.
                 </p>
               </div>

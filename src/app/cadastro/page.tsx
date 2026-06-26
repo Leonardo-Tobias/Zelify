@@ -117,7 +117,7 @@ export default function CadastroPage() {
       {/* Glow de fundo */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-[#0033FF]/10 blur-[130px] rounded-full pointer-events-none z-0"></div>
 
-      <div className="w-full max-w-sm space-y-6 relative z-10">
+      <div className="w-full max-w-md space-y-6 relative z-10">
         
         {/* LOGO E CABEÇALHO */}
         <div className="text-center">

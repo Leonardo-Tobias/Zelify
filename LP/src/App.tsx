@@ -662,27 +662,29 @@ export default function App() {
             {/* Card Síndicos Profissionais (Fundo Claro) */}
             <div className="bg-white border border-slate-200 rounded-3xl p-8 sm:p-10 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between group">
               <div className="space-y-6">
-                {/* Visual Placeholder (Síndico trabalhando) */}
-                <div className="w-full aspect-[16/9] rounded-2xl bg-slate-50 border border-slate-150 overflow-hidden flex items-center justify-center relative p-6">
-                  <div className="absolute inset-0 bg-gradient-to-tr from-slate-200/50 to-transparent"></div>
+                {/* Visual Placeholder (Síndico trabalhando - Foto Real Unsplash) */}
+                <div className="w-full aspect-[16/9] rounded-2xl overflow-hidden relative group border border-slate-200">
+                  <img 
+                    src="https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=800&q=80" 
+                    alt="Síndico gerenciando chamados" 
+                    className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-900/40 to-transparent"></div>
                   
-                  {/* CSS Illustration of dashboard interface */}
-                  <div className="relative z-10 w-full max-w-[280px] bg-white border border-slate-250 p-4 rounded-xl shadow-md space-y-3">
-                    <div className="flex items-center space-x-2 border-b border-slate-100 pb-2">
-                      <div className="w-6 h-6 rounded-full bg-[#001CFF]/10 flex items-center justify-center text-[#001CFF] text-[9px] font-bold">CS</div>
-                      <div>
-                        <p className="text-[9px] font-extrabold text-slate-900 leading-none">Carlos Santos (Síndico)</p>
-                        <p className="text-[7px] text-slate-450 leading-none mt-1">Viver Bem • Ativo</p>
+                  {/* Glassmorphic Overlay Card */}
+                  <div className="absolute bottom-4 left-4 right-4 bg-white/95 backdrop-blur-md border border-white/20 p-3 rounded-xl shadow-lg flex items-center justify-between">
+                    <div className="flex items-center space-x-2.5 min-w-0">
+                      <div className="w-7 h-7 rounded-full bg-[#001CFF] flex items-center justify-center text-white text-xs font-black shrink-0">
+                        CS
+                      </div>
+                      <div className="min-w-0 text-left">
+                        <p className="text-[10px] font-black text-slate-900 leading-none">Carlos Santos</p>
+                        <p className="text-[8px] text-slate-500 font-semibold mt-1">Síndico Profissional • Residencial Harmony</p>
                       </div>
                     </div>
-                    <div className="flex items-center justify-between bg-slate-50 p-2 rounded-lg border border-slate-150 text-[8px] text-slate-500 font-bold">
-                      <span>Chamados Centralizados no Kanban</span>
-                      <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 ml-2" />
-                    </div>
-                    <div className="flex items-center justify-between bg-slate-50 p-2 rounded-lg border border-slate-150 text-[8px] text-slate-500 font-bold">
-                      <span>WhatsApp Pessoal Protegido</span>
-                      <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 ml-2" />
-                    </div>
+                    <span className="text-[8px] bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">
+                      Kanban Ativo
+                    </span>
                   </div>
                 </div>
 
@@ -711,27 +713,29 @@ export default function App() {
             {/* Card Administradoras (Fundo Escuro) */}
             <div className="bg-slate-900 border border-slate-800 text-white rounded-3xl p-8 sm:p-10 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between group">
               <div className="space-y-6">
-                {/* Visual Placeholder (Administradoras) */}
-                <div className="w-full aspect-[16/9] rounded-2xl bg-slate-950 border border-slate-850 overflow-hidden flex items-center justify-center relative p-6">
-                  <div className="absolute inset-0 bg-gradient-to-br from-[#001CFF]/5 to-transparent"></div>
+                {/* Visual Placeholder (Administradoras - Foto Real Unsplash) */}
+                <div className="w-full aspect-[16/9] rounded-2xl overflow-hidden relative group border border-slate-800">
+                  <img 
+                    src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=800&q=80" 
+                    alt="Equipe de administradora em reunião" 
+                    className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/40 to-transparent"></div>
                   
-                  {/* CSS Illustration for corporate view */}
-                  <div className="relative z-10 w-full max-w-[280px] bg-slate-900 border border-slate-800 p-4 rounded-xl shadow-md space-y-3">
-                    <div className="flex justify-between items-center border-b border-slate-800 pb-2">
-                      <span className="text-[8px] font-bold text-slate-400 uppercase tracking-wider">Carteira Consolidada</span>
-                      <span className="text-[7px] bg-[#001CFF]/20 text-blue-400 border border-blue-500/30 px-1.5 py-0.5 rounded font-bold uppercase">Corporate</span>
-                    </div>
-                    
-                    <div className="space-y-1.5 text-[8px] font-semibold text-slate-300">
-                      <div className="flex justify-between items-center bg-slate-950/45 p-1.5 rounded border border-slate-850">
-                        <span>Residencial Viver Bem</span>
-                        <span className="text-emerald-500">Estável</span>
+                  {/* Glassmorphic Overlay Card */}
+                  <div className="absolute bottom-4 left-4 right-4 bg-slate-900/95 backdrop-blur-md border border-slate-800 p-3 rounded-xl shadow-lg flex items-center justify-between">
+                    <div className="flex items-center space-x-2.5 min-w-0">
+                      <div className="w-7 h-7 rounded bg-[#001CFF]/20 flex items-center justify-center text-[#001CFF] shrink-0">
+                        <Building2 className="w-4 h-4" />
                       </div>
-                      <div className="flex justify-between items-center bg-slate-950/45 p-1.5 rounded border border-slate-850">
-                        <span>Condomínio Harmony</span>
-                        <span className="text-amber-500">1 Pendente</span>
+                      <div className="min-w-0 text-left">
+                        <p className="text-[10px] font-black text-white leading-none">Lello Administradora</p>
+                        <p className="text-[8px] text-slate-400 font-semibold mt-1">Gestão de Carteira • 12 Condomínios</p>
                       </div>
                     </div>
+                    <span className="text-[8px] bg-[#001CFF]/25 text-blue-400 border border-blue-500/30 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">
+                      Corporate
+                    </span>
                   </div>
                 </div>
 

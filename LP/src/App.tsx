@@ -6,7 +6,6 @@ import {
   ArrowRight, 
   Wrench, 
   Package, 
-  Clock, 
   ArrowUpRight, 
   ChevronDown, 
   User, 
@@ -224,276 +223,373 @@ export default function App() {
       </section>
 
       {/* 3. B. SEÇÃO DE DEMONSTRAÇÃO DO PRODUTO (MOCKUPS INTERATIVOS) */}
-      <section className="py-24 md:py-36 border-b border-slate-200/60 bg-white">
-        <div className="max-w-7xl mx-auto px-6 space-y-16">
-          <div className="text-center max-w-3xl mx-auto space-y-4">
-            <span className="text-[10px] font-bold text-[#001CFF] uppercase tracking-widest bg-[#001CFF]/10 border border-[#001CFF]/15 px-3 py-1 rounded-full">Experiência Integrada</span>
+      <section className="py-20 md:py-28 bg-white border-b border-slate-200/60">
+        <div className="max-w-7xl mx-auto px-6">
+          
+          {/* Header da Seção */}
+          <div className="text-center max-w-3xl mx-auto space-y-4 mb-16 md:mb-20">
+            <span className="inline-flex items-center gap-1.5 text-[10px] font-bold text-[#001CFF] uppercase tracking-widest bg-[#001CFF]/10 border border-[#001CFF]/15 px-3 py-1 rounded-full">
+              <Sparkles className="w-3.5 h-3.5" />
+              Experiência Integrada
+            </span>
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight text-slate-900 leading-tight">
-              Uma experiência sob medida para quem gerencia e para quem mora.
+              Sincronia perfeita entre quem mora e quem resolve.
             </h2>
-            <p className="text-slate-500 text-xs sm:text-sm font-semibold max-w-xl mx-auto">
-              Veja em tempo real como o Zelify funciona nos dois lados do ecossistema: o painel administrativo do gestor e o portal público do morador.
+            <p className="text-slate-550 text-xs sm:text-sm font-semibold max-w-xl mx-auto leading-relaxed">
+              De um lado, a simplicidade de um QR Code sem fricção para o morador. Do outro, um painel administrativo robusto e centralizado para o gestor.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          {/* Grid Principal dos Mockups */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-stretch">
             
-            {/* PAINEL DO GESTOR (DESKTOP WEB VIEW) - COLS 7 */}
-            <div className="lg:col-span-7 space-y-4">
-              <div className="flex items-center justify-between px-2">
-                <div className="flex items-center space-x-1.5">
-                  <span className="w-2.5 h-2.5 rounded-full bg-[#001CFF]"></span>
-                  <h3 className="text-xs font-black uppercase tracking-wider text-slate-900">1. O Painel do Gestor (Desktop Web)</h3>
+            {/* CARD 1: PAINEL DO GESTOR (DESKTOP WEB VIEW) */}
+            <div className="bg-slate-100/50 border border-slate-200/80 rounded-3xl p-6 sm:p-8 flex flex-col justify-between min-h-[660px] shadow-sm hover:shadow-md transition-all">
+              {/* Header Info */}
+              <div className="space-y-4 mb-6">
+                <div className="flex items-center justify-between flex-wrap gap-2">
+                  <div className="flex items-center space-x-2">
+                    <span className="w-2 h-2 rounded-full bg-[#001CFF] animate-pulse"></span>
+                    <span className="text-[9px] font-extrabold uppercase tracking-widest text-[#001CFF]">Painel Administrativo</span>
+                  </div>
+                  
+                  {/* Seletor Interativo de Tema */}
+                  <div className="bg-slate-200/60 p-0.5 rounded-lg border border-slate-250/50 flex items-center space-x-0.5 z-10">
+                    <button 
+                      onClick={() => setMockupTheme('dark')}
+                      className={`px-3 py-1 rounded-md text-[9px] font-bold uppercase tracking-wider transition-all cursor-pointer ${mockupTheme === 'dark' ? 'bg-slate-950 text-white shadow-sm' : 'text-slate-500 hover:text-slate-800'}`}
+                    >
+                      Dark
+                    </button>
+                    <button 
+                      onClick={() => setMockupTheme('light')}
+                      className={`px-3 py-1 rounded-md text-[9px] font-bold uppercase tracking-wider transition-all cursor-pointer ${mockupTheme === 'light' ? 'bg-white text-slate-950 shadow-sm border border-slate-200/80' : 'text-slate-500 hover:text-slate-800'}`}
+                    >
+                      Light
+                    </button>
+                  </div>
                 </div>
-                
-                {/* Seletor Interativo de Tema */}
-                <div className="bg-slate-100 p-1 rounded-lg border border-slate-200 flex items-center space-x-1">
-                  <button 
-                    onClick={() => setMockupTheme('dark')}
-                    className={`px-2.5 py-1 rounded text-[9px] font-bold uppercase tracking-wider transition-all cursor-pointer ${mockupTheme === 'dark' ? 'bg-slate-950 text-white shadow-sm' : 'text-slate-550 hover:text-slate-800'}`}
-                  >
-                    Dark Mode
-                  </button>
-                  <button 
-                    onClick={() => setMockupTheme('light')}
-                    className={`px-2.5 py-1 rounded text-[9px] font-bold uppercase tracking-wider transition-all cursor-pointer ${mockupTheme === 'light' ? 'bg-white text-slate-950 shadow-sm border border-slate-200' : 'text-slate-550 hover:text-slate-800'}`}
-                  >
-                    Light Mode
-                  </button>
+
+                <div className="space-y-1.5">
+                  <h3 className="text-lg font-black text-slate-900 uppercase tracking-tight text-left">1. O Painel do Gestor (Desktop Web)</h3>
+                  <p className="text-slate-500 text-xs sm:text-sm font-semibold leading-relaxed text-left">
+                    Mural Kanban inteligente, controle de ocorrências ativas, relatórios e métricas de desempenho em tempo real.
+                  </p>
                 </div>
               </div>
 
-              {/* Monitor/Navegador Mockup */}
-              <div className={`w-full border rounded-2xl shadow-2xl overflow-hidden transition-all duration-300 ${
+              {/* Monitor/Navegador Mockup (Com Sidebar Realista) */}
+              <div className={`flex-1 w-full border rounded-2xl shadow-xl overflow-hidden flex flex-col transition-all duration-300 ${
                 mockupTheme === 'dark' 
                   ? 'bg-zinc-950 border-zinc-800 text-zinc-300' 
                   : 'bg-white border-slate-200 text-slate-700'
               }`}>
                 {/* Top Browser Bar */}
-                <div className={`px-4 py-3 border-b flex items-center justify-between ${mockupTheme === 'dark' ? 'bg-zinc-900/60 border-zinc-800' : 'bg-slate-50 border-slate-200'}`}>
+                <div className={`px-4 py-3 border-b flex items-center justify-between shrink-0 ${mockupTheme === 'dark' ? 'bg-zinc-900/60 border-zinc-850' : 'bg-slate-55 border-slate-200/80'}`}>
                   <div className="flex items-center space-x-1.5">
                     <span className="w-2.5 h-2.5 rounded-full bg-red-400"></span>
                     <span className="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
                     <span className="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
                   </div>
-                  <div className={`px-12 py-1 rounded text-[9px] font-mono select-none ${mockupTheme === 'dark' ? 'bg-zinc-950 text-zinc-600 border border-zinc-850' : 'bg-white text-slate-400 border border-slate-200'}`}>
-                    app.zelify.com.br/dashboard
+                  <div className={`px-6 py-1 rounded-md text-[9px] font-mono select-none tracking-tight flex items-center justify-center space-x-1 w-64 max-w-full ${mockupTheme === 'dark' ? 'bg-zinc-950 text-zinc-600 border border-zinc-900' : 'bg-white text-slate-400 border border-slate-200'}`}>
+                    <span className="text-[#001CFF] font-bold">https://</span>
+                    <span>app.zelify.com.br/dashboard</span>
                   </div>
-                  <span className="w-4 h-4 rounded-full bg-slate-400/20"></span>
+                  <div className="w-6 h-6 rounded-full bg-slate-200/40 flex items-center justify-center text-[9px] font-bold text-slate-500">
+                    H
+                  </div>
                 </div>
 
-                {/* Dashboard Mockup Content */}
-                <div className="p-4 sm:p-6 space-y-6">
-                  {/* Row 1: Header */}
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b pb-4 border-slate-200/10">
-                    <div>
-                      <h4 className={`text-xs font-black uppercase tracking-wider ${mockupTheme === 'dark' ? 'text-white' : 'text-slate-900'}`}>Painel Operacional</h4>
-                      <p className="text-[10px] text-slate-500 font-semibold mt-0.5">Resumo de ocorrências e manutenção ativa</p>
+                {/* Dashboard Inner App Shell */}
+                <div className="flex-1 flex overflow-hidden min-h-[360px]">
+                  
+                  {/* APP SIDEBAR */}
+                  <div className={`w-16 border-r flex flex-col items-center py-4 justify-between shrink-0 ${
+                    mockupTheme === 'dark' ? 'bg-zinc-900/30 border-zinc-850' : 'bg-slate-55/40 border-slate-150'
+                  }`}>
+                    <div className="space-y-6 w-full flex flex-col items-center">
+                      {/* Mini Logo */}
+                      <div className="w-7 h-7 rounded-lg bg-[#001CFF] flex items-center justify-center text-white text-xs font-black shadow-md shadow-[#001CFF]/20">
+                        Z
+                      </div>
+                      
+                      {/* Navigation Icons */}
+                      <div className="space-y-3.5 w-full px-2">
+                        <div className={`w-full aspect-square rounded-lg flex flex-col items-center justify-center transition-all cursor-pointer ${
+                          mockupTheme === 'dark' ? 'bg-zinc-800 text-white' : 'bg-[#001CFF]/10 text-[#001CFF]'
+                        }`}>
+                          <Building2 className="w-4 h-4" />
+                          <span className="text-[6px] font-extrabold mt-0.5 uppercase tracking-wide">Painel</span>
+                        </div>
+                        <div className="w-full aspect-square rounded-lg flex flex-col items-center justify-center text-slate-400 hover:text-slate-655 dark:hover:text-zinc-200 cursor-pointer">
+                          <Wrench className="w-4 h-4" />
+                          <span className="text-[6px] font-extrabold mt-0.5 uppercase tracking-wide">Serviço</span>
+                        </div>
+                        <div className="w-full aspect-square rounded-lg flex flex-col items-center justify-center text-slate-400 hover:text-slate-655 dark:hover:text-zinc-200 cursor-pointer">
+                          <Package className="w-4 h-4" />
+                          <span className="text-[6px] font-extrabold mt-0.5 uppercase tracking-wide">Achados</span>
+                        </div>
+                      </div>
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <span className={`text-[9px] font-bold px-2 py-0.5 rounded border uppercase tracking-wider ${
-                        mockupTheme === 'dark' 
-                          ? 'bg-[#001CFF]/10 text-blue-400 border-[#001CFF]/20' 
-                          : 'bg-[#001CFF]/5 text-[#001CFF] border-[#001CFF]/15'
-                      }`}>
-                        Viver Bem Residencial
+
+                    {/* Bottom User Avatar */}
+                    <div className="w-7 h-7 rounded-full bg-slate-200/50 flex items-center justify-center text-slate-500">
+                      <User className="w-3.5 h-3.5" />
+                    </div>
+                  </div>
+
+                  {/* MAIN PANEL CONTENT */}
+                  <div className="flex-1 p-5 space-y-4 overflow-hidden flex flex-col text-left">
+                    {/* Top Operational Status */}
+                    <div className="flex justify-between items-center shrink-0">
+                      <div>
+                        <h4 className={`text-[8px] font-black uppercase tracking-widest ${mockupTheme === 'dark' ? 'text-zinc-400' : 'text-slate-400'}`}>Mural Operacional</h4>
+                        <p className={`text-xs font-black tracking-tight ${mockupTheme === 'dark' ? 'text-white' : 'text-slate-900'}`}>RESIDENCIAL HARMONY</p>
+                      </div>
+                      <span className="text-[8px] bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider flex items-center gap-1 shrink-0 select-none">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
+                        Estável
                       </span>
                     </div>
+
+                    {/* Top Stats Bar */}
+                    <div className="grid grid-cols-3 gap-3 shrink-0">
+                      <div className={`p-3 rounded-xl border flex flex-col justify-between shadow-sm transition-all ${mockupTheme === 'dark' ? 'bg-zinc-900/50 border-zinc-800' : 'bg-slate-50 border-slate-200/60'}`}>
+                        <div className="flex justify-between items-center text-[7px] font-bold text-slate-400 uppercase tracking-widest">
+                          <span>Pendentes</span>
+                          <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                        </div>
+                        <span className={`text-lg font-black tracking-tight mt-1 ${mockupTheme === 'dark' ? 'text-white' : 'text-slate-900'}`}>3</span>
+                      </div>
+                      <div className={`p-3 rounded-xl border flex flex-col justify-between shadow-sm transition-all ${mockupTheme === 'dark' ? 'bg-zinc-900/50 border-zinc-800' : 'bg-slate-50 border-slate-200/60'}`}>
+                        <div className="flex justify-between items-center text-[7px] font-bold text-[#001CFF] uppercase tracking-widest">
+                          <span>Em Ação</span>
+                          <span className="w-1.5 h-1.5 rounded-full bg-[#001CFF]"></span>
+                        </div>
+                        <span className={`text-lg font-black tracking-tight mt-1 ${mockupTheme === 'dark' ? 'text-white' : 'text-slate-900'}`}>2</span>
+                      </div>
+                      <div className={`p-3 rounded-xl border flex flex-col justify-between shadow-sm transition-all ${mockupTheme === 'dark' ? 'bg-zinc-900/50 border-zinc-800' : 'bg-slate-50 border-slate-200/60'}`}>
+                        <div className="flex justify-between items-center text-[7px] font-bold text-emerald-500 uppercase tracking-widest">
+                          <span>Concluídos</span>
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                        </div>
+                        <span className={`text-lg font-black tracking-tight mt-1 ${mockupTheme === 'dark' ? 'text-white' : 'text-slate-900'}`}>15</span>
+                      </div>
+                    </div>
+
+                    {/* Kanban Columns */}
+                    <div className="flex-1 grid grid-cols-3 gap-3 overflow-hidden min-h-0 pt-1">
+                      
+                      {/* Col 1: Aguardando */}
+                      <div className="flex flex-col space-y-2 overflow-hidden">
+                        <div className="flex items-center justify-between text-[8px] font-black uppercase text-slate-400 px-1">
+                          <span>Aguardando</span>
+                          <span className={`px-1.5 py-0.5 rounded text-[7px] font-extrabold ${mockupTheme === 'dark' ? 'bg-zinc-900' : 'bg-slate-200'}`}>2</span>
+                        </div>
+                        <div className="flex-1 overflow-y-auto space-y-2 pr-0.5">
+                          {/* Ticket 1 */}
+                          <div className={`p-2.5 rounded-xl border space-y-2 transition-all hover:scale-[1.02] ${
+                            mockupTheme === 'dark' ? 'bg-zinc-900/80 border-zinc-800 shadow-md' : 'bg-white border-slate-200 shadow-sm'
+                          }`}>
+                            <div className="flex justify-between items-center text-[6px]">
+                              <span className="font-extrabold uppercase bg-amber-500/10 text-amber-500 border border-amber-500/20 px-1.5 py-0.5 rounded">Manutenção</span>
+                              <span className="text-slate-400 font-bold uppercase">Garagem • 10m</span>
+                            </div>
+                            <p className={`text-[9px] font-black leading-snug tracking-tight ${mockupTheme === 'dark' ? 'text-zinc-200' : 'text-slate-900'}`}>Infiltração parede vaga 102</p>
+                            <p className="text-[7.5px] text-slate-400 font-semibold leading-none">Apto 102 Bloco A</p>
+                          </div>
+
+                          {/* Ticket 2 */}
+                          <div className={`p-2.5 rounded-xl border space-y-2 transition-all hover:scale-[1.02] ${
+                            mockupTheme === 'dark' ? 'bg-zinc-900/80 border-zinc-800 shadow-md' : 'bg-white border-slate-200 shadow-sm'
+                          }`}>
+                            <div className="flex justify-between items-center text-[6px]">
+                              <span className="font-extrabold uppercase bg-purple-500/10 text-purple-500 border border-purple-500/20 px-1.5 py-0.5 rounded">Zeladoria</span>
+                              <span className="text-slate-400 font-bold uppercase">Portaria • 1h</span>
+                            </div>
+                            <p className={`text-[9px] font-black leading-snug tracking-tight ${mockupTheme === 'dark' ? 'text-zinc-200' : 'text-slate-900'}`}>Portão pedestre batendo forte</p>
+                            <p className="text-[7.5px] text-slate-400 font-semibold leading-none">Portaria principal</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Col 2: Em Ação */}
+                      <div className="flex flex-col space-y-2 overflow-hidden">
+                        <div className="flex items-center justify-between text-[8px] font-black uppercase text-slate-400 px-1">
+                          <span>Em Ação</span>
+                          <span className={`px-1.5 py-0.5 rounded text-[7px] font-extrabold ${mockupTheme === 'dark' ? 'bg-zinc-900' : 'bg-slate-200'}`}>1</span>
+                        </div>
+                        <div className="flex-1 overflow-y-auto space-y-2 pr-0.5">
+                          {/* Ticket 3 */}
+                          <div className={`p-2.5 rounded-xl border space-y-2 transition-all hover:scale-[1.02] ${
+                            mockupTheme === 'dark' ? 'bg-[#001CFF]/5 border-[#001CFF]/20 shadow-md' : 'bg-white border-slate-200 shadow-sm'
+                          }`}>
+                            <div className="flex justify-between items-center text-[6px]">
+                              <span className="font-extrabold uppercase bg-[#001CFF]/15 text-[#001CFF] border border-[#001CFF]/25 px-1.5 py-0.5 rounded">Elétrica</span>
+                              <span className="text-slate-400 font-bold uppercase">Hall • 2h</span>
+                            </div>
+                            <p className={`text-[9px] font-black leading-snug tracking-tight ${mockupTheme === 'dark' ? 'text-zinc-200' : 'text-slate-900'}`}>Lâmpada piscando elevador 1</p>
+                            <p className="text-[7.5px] text-slate-400 font-semibold leading-none">Zelador Marcos associado</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Col 3: Resolvidos */}
+                      <div className="flex flex-col space-y-2 overflow-hidden">
+                        <div className="flex items-center justify-between text-[8px] font-black uppercase text-slate-400 px-1">
+                          <span>Concluídos</span>
+                          <span className={`px-1.5 py-0.5 rounded text-[7px] font-extrabold ${mockupTheme === 'dark' ? 'bg-zinc-900' : 'bg-slate-200'}`}>15</span>
+                        </div>
+                        <div className="flex-1 overflow-y-auto space-y-2 pr-0.5">
+                          {/* Ticket 4 */}
+                          <div className={`p-2.5 rounded-xl border space-y-2 opacity-70 transition-all hover:scale-[1.02] ${
+                            mockupTheme === 'dark' ? 'bg-zinc-900/40 border-zinc-850' : 'bg-slate-50/50 border-slate-200/40'
+                          }`}>
+                            <div className="flex justify-between items-center text-[6px]">
+                              <span className="font-extrabold uppercase bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 px-1.5 py-0.5 rounded">Resolvido</span>
+                              <span className="text-slate-400 font-bold uppercase">Academia • 1d</span>
+                            </div>
+                            <p className={`text-[9px] font-black leading-snug tracking-tight line-through ${mockupTheme === 'dark' ? 'text-zinc-450' : 'text-slate-500'}`}>Ar condicionado desligando</p>
+                            <p className="text-[7.5px] text-slate-400 font-semibold leading-none">Finalizado pelo técnico Marcos</p>
+                          </div>
+                        </div>
+                      </div>
+
+                    </div>
                   </div>
 
-                  {/* Row 2: Metrics Grid */}
-                  <div className="grid grid-cols-3 gap-3">
-                    <div className={`p-3.5 rounded-xl border flex flex-col justify-between ${mockupTheme === 'dark' ? 'bg-zinc-900/40 border-zinc-800' : 'bg-slate-50 border-slate-200'}`}>
-                      <div className="flex justify-between items-center">
-                        <span className="text-[8px] font-bold text-slate-500 uppercase tracking-wider">Pendentes</span>
-                        <Clock className="w-3.5 h-3.5 text-amber-500" />
-                      </div>
-                      <span className={`text-xl sm:text-2xl font-black mt-2 tracking-tight ${mockupTheme === 'dark' ? 'text-white' : 'text-slate-900'}`}>3</span>
-                    </div>
-                    <div className={`p-3.5 rounded-xl border flex flex-col justify-between ${mockupTheme === 'dark' ? 'bg-zinc-900/40 border-zinc-800' : 'bg-slate-50 border-slate-200'}`}>
-                      <div className="flex justify-between items-center">
-                        <span className="text-[8px] font-bold text-slate-500 uppercase tracking-wider">Em Andamento</span>
-                        <Wrench className="w-3.5 h-3.5 text-[#001CFF]" />
-                      </div>
-                      <span className={`text-xl sm:text-2xl font-black mt-2 tracking-tight ${mockupTheme === 'dark' ? 'text-white' : 'text-slate-900'}`}>2</span>
-                    </div>
-                    <div className={`p-3.5 rounded-xl border flex flex-col justify-between ${mockupTheme === 'dark' ? 'bg-zinc-900/40 border-zinc-800' : 'bg-slate-50 border-slate-200'}`}>
-                      <div className="flex justify-between items-center">
-                        <span className="text-[8px] font-bold text-slate-500 uppercase tracking-wider">Concluídos</span>
-                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
-                      </div>
-                      <span className={`text-xl sm:text-2xl font-black mt-2 tracking-tight ${mockupTheme === 'dark' ? 'text-white' : 'text-slate-900'}`}>15</span>
-                    </div>
-                  </div>
-
-                  {/* Row 3: Kanban Columns */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {/* Col 1 */}
-                    <div className="space-y-2.5">
-                      <div className="flex items-center space-x-1.5 pb-1 border-b border-slate-200/10">
-                        <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-                        <span className="text-[8px] font-bold uppercase tracking-widest text-slate-500">Aguardando (3)</span>
-                      </div>
-                      <div className={`p-3 rounded-lg border text-left space-y-2 ${mockupTheme === 'dark' ? 'bg-zinc-900 border-zinc-800/80' : 'bg-white border-slate-200 shadow-sm'}`}>
-                        <div className="flex justify-between items-start">
-                          <span className={`text-[8px] font-extrabold px-1.5 py-0.5 rounded border uppercase ${mockupTheme === 'dark' ? 'bg-zinc-950 text-amber-500 border-amber-500/20' : 'bg-amber-50 text-amber-600 border-amber-250'}`}>Manutenção</span>
-                          <span className="text-[7px] font-mono text-slate-500 font-bold">GARAGEM</span>
-                        </div>
-                        <p className={`text-[9px] font-bold ${mockupTheme === 'dark' ? 'text-zinc-200' : 'text-slate-900'}`}>Infiltração parede vaga 102</p>
-                        <p className="text-[8px] text-slate-500 font-semibold truncate">Apto 102 Bloco A • 10m atrás</p>
-                      </div>
-                      <div className={`p-3 rounded-lg border text-left space-y-2 ${mockupTheme === 'dark' ? 'bg-zinc-900 border-zinc-800/80' : 'bg-white border-slate-200 shadow-sm'}`}>
-                        <div className="flex justify-between items-start">
-                          <span className={`text-[8px] font-extrabold px-1.5 py-0.5 rounded border uppercase ${mockupTheme === 'dark' ? 'bg-zinc-950 text-amber-500 border-amber-500/20' : 'bg-amber-50 text-amber-600 border-amber-250'}`}>Zeladoria</span>
-                          <span className="text-[7px] font-mono text-slate-500 font-bold">PORTARIA</span>
-                        </div>
-                        <p className={`text-[9px] font-bold ${mockupTheme === 'dark' ? 'text-zinc-200' : 'text-slate-900'}`}>Portão pedestre batendo forte</p>
-                        <p className="text-[8px] text-slate-500 font-semibold truncate">Portaria principal • 1h atrás</p>
-                      </div>
-                    </div>
-
-                    {/* Col 2 */}
-                    <div className="space-y-2.5">
-                      <div className="flex items-center space-x-1.5 pb-1 border-b border-slate-200/10">
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#001CFF]"></span>
-                        <span className="text-[8px] font-bold uppercase tracking-widest text-slate-500">Em Andamento (2)</span>
-                      </div>
-                      <div className={`p-3 rounded-lg border text-left space-y-2 ${mockupTheme === 'dark' ? 'bg-zinc-900 border-zinc-800/80' : 'bg-white border-slate-200 shadow-sm'}`}>
-                        <div className="flex justify-between items-start">
-                          <span className={`text-[8px] font-extrabold px-1.5 py-0.5 rounded border uppercase ${mockupTheme === 'dark' ? 'bg-zinc-950 text-blue-400 border-blue-500/20' : 'bg-blue-50 text-[#001CFF] border-blue-200'}`}>Elétrica</span>
-                          <span className="text-[7px] font-mono text-slate-500 font-bold">HALL</span>
-                        </div>
-                        <p className={`text-[9px] font-bold ${mockupTheme === 'dark' ? 'text-zinc-200' : 'text-slate-900'}`}>Lâmpada piscando elevador 1</p>
-                        <p className="text-[8px] text-slate-500 font-semibold truncate">Zelador Marcos associado • 2h</p>
-                      </div>
-                    </div>
-
-                    {/* Col 3 */}
-                    <div className="space-y-2.5">
-                      <div className="flex items-center space-x-1.5 pb-1 border-b border-slate-200/10">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                        <span className="text-[8px] font-bold uppercase tracking-widest text-slate-500">Resolvidos (15)</span>
-                      </div>
-                      <div className={`p-3 rounded-lg border text-left space-y-2 opacity-60 ${mockupTheme === 'dark' ? 'bg-zinc-900 border-zinc-800/80' : 'bg-white border-slate-200 shadow-sm'}`}>
-                        <div className="flex justify-between items-start">
-                          <span className="text-[8px] font-extrabold px-1.5 py-0.5 rounded border uppercase bg-emerald-500/10 text-emerald-450 border-emerald-500/15">Concluído</span>
-                          <span className="text-[7px] font-mono text-slate-500 font-bold">ACADEMIA</span>
-                        </div>
-                        <p className={`text-[9px] font-bold ${mockupTheme === 'dark' ? 'text-zinc-200' : 'text-slate-900'}`}>Ar condicionado desligando sozinho</p>
-                        <p className="text-[8px] text-slate-500 font-semibold truncate">Finalizado pelo técnico Marcos • 1d</p>
-                      </div>
-                    </div>
-                  </div>
                 </div>
-
               </div>
             </div>
 
-            {/* PORTAL DO MORADOR (MOBILE smartphone VIEW) - COLS 5 */}
-            <div className="lg:col-span-5 space-y-4 flex flex-col items-center">
-              <div className="self-start px-2 flex items-center space-x-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#001CFF]"></span>
-                <h3 className="text-xs font-black uppercase tracking-wider text-slate-900">2. O Portal do Morador (Smartphone Mobile)</h3>
+            {/* CARD 2: PORTAL DO MORADOR (MOBILE SMARTPHONE VIEW) */}
+            <div className="bg-slate-100/50 border border-slate-200/80 rounded-3xl p-6 sm:p-8 flex flex-col justify-between min-h-[660px] shadow-sm hover:shadow-md transition-all text-center">
+              {/* Header Info */}
+              <div className="space-y-4 text-left mb-6">
+                <div className="flex items-center space-x-2">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                  <span className="text-[9px] font-extrabold uppercase tracking-widest text-emerald-600">Interface do Morador</span>
+                </div>
+                
+                <div className="space-y-1.5">
+                  <h3 className="text-lg font-black text-slate-900 uppercase tracking-tight">2. O Portal do Morador (Smartphone Mobile)</h3>
+                  <p className="text-slate-500 text-xs sm:text-sm font-semibold leading-relaxed">
+                    Sem downloads, logins ou senhas. O morador aponta a câmera, relata o problema em 20 segundos e anexa uma foto.
+                  </p>
+                </div>
               </div>
 
-              {/* iPhone Mockup Frame */}
-              <div className="relative w-full max-w-[280px] bg-slate-950 border-[6px] border-slate-800 rounded-[40px] shadow-2xl overflow-hidden aspect-[9/18.5]">
-                {/* Dynamic Island Notch */}
-                <div className="absolute top-2 left-1/2 transform -translate-x-1/2 w-20 h-4 bg-black rounded-full z-30 flex items-center justify-end px-1.5">
-                  <div className="w-1.5 h-1.5 bg-[#001CFF]/40 rounded-full"></div>
-                </div>
-
-                {/* Mobile screen container */}
-                <div className="h-full bg-slate-50 text-slate-900 flex flex-col justify-between relative pt-8 pb-3">
+              {/* iPhone Mockup Frame (Perfeitamente Centralizado e Dimensionado) */}
+              <div className="flex-1 flex items-center justify-center w-full">
+                <div className="relative w-[260px] h-[450px] bg-slate-950 border-[8px] border-slate-900 rounded-[48px] shadow-2xl flex flex-col overflow-hidden ring-1 ring-slate-900/5">
                   
-                  {/* App Header */}
-                  <div className="px-4 py-2 border-b border-slate-200 flex items-center justify-between bg-white z-10">
-                    <div>
-                      <p className="text-[7px] font-extrabold text-slate-400 uppercase tracking-widest leading-none">Relatar para</p>
-                      <h4 className="text-[10px] font-black text-slate-900 uppercase tracking-tight leading-none mt-1">Residencial Harmony</h4>
-                    </div>
-                    <div className="w-5 h-5 rounded-full bg-slate-100 flex items-center justify-center text-[8px] font-black text-[#001CFF] border border-[#001CFF]/15">
-                      H
-                    </div>
+                  {/* Dynamic Island Notch */}
+                  <div className="absolute top-2.5 left-1/2 -translate-x-1/2 w-20 h-4.5 bg-black rounded-full z-30 flex items-center justify-end px-2 space-x-1">
+                    <div className="w-1.5 h-1.5 bg-indigo-950/40 rounded-full border border-indigo-900/20"></div>
+                    <div className="w-1 h-1 bg-[#001CFF]/45 rounded-full"></div>
                   </div>
 
-                  {/* Open Modal: Relatar Problema */}
-                  <div className="flex-1 bg-slate-900/40 backdrop-blur-[2px] p-3 flex flex-col justify-end z-10 overflow-y-auto">
+                  {/* App Screen Inside Phone */}
+                  <div className="h-full bg-slate-50 text-slate-900 flex flex-col pt-7 pb-2 relative">
                     
-                    {/* Modal Box */}
-                    <div className="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-2xl space-y-3.5 text-left">
-                      <div className="flex justify-between items-center border-b border-slate-150 pb-2">
-                        <h5 className="text-[11px] font-black text-slate-900 uppercase tracking-wider flex items-center">
-                          <Wrench className="w-3.5 h-3.5 text-[#001CFF] mr-1.5" />
-                          Relatar Problema
-                        </h5>
-                        <span className="w-4 h-4 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 text-[9px] font-bold">✕</span>
+                    {/* Status Bar */}
+                    <div className="px-5 py-0.5 flex justify-between items-center text-[7px] font-extrabold text-slate-500 z-20 shrink-0 select-none">
+                      <span>9:41</span>
+                      <div className="flex items-center space-x-1">
+                        <span>📶</span>
+                        <span className="text-[8px] font-normal">LTE</span>
+                        <span>🔋</span>
                       </div>
-
-                      {/* Input Local */}
-                      <div className="space-y-1">
-                        <label className="block text-[8px] font-bold uppercase tracking-wider text-slate-500">Onde está o problema?</label>
-                        <input 
-                          type="text" 
-                          readOnly 
-                          value="Elevador de Serviço - Hall 3"
-                          className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-[9px] text-slate-800 font-semibold focus:outline-none"
-                        />
-                      </div>
-
-                      {/* Textarea Descricao */}
-                      <div className="space-y-1">
-                        <label className="block text-[8px] font-bold uppercase tracking-wider text-slate-500">Descreva o que ocorreu</label>
-                        <textarea 
-                          readOnly 
-                          value="O botão do 5º andar está afundado e não responde quando apertado."
-                          className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-[9px] text-slate-800 font-medium h-12 focus:outline-none resize-none"
-                        />
-                      </div>
-
-                      {/* Upload Foto Mock */}
-                      <div className="space-y-1">
-                        <label className="block text-[8px] font-bold uppercase tracking-wider text-slate-500">Foto do Problema</label>
-                        <div className="border border-dashed border-[#001CFF]/30 bg-[#001CFF]/5 p-2 rounded-lg flex items-center justify-between text-[8px]">
-                          <div className="flex items-center space-x-1.5">
-                            <div className="w-7 h-7 bg-white rounded border border-slate-200 flex items-center justify-center text-slate-400 text-[10px]">📷</div>
-                            <div>
-                              <p className="font-bold text-slate-800">botoeira_quebrada.jpg</p>
-                              <p className="text-[7px] text-slate-400">1.2 MB</p>
-                            </div>
-                          </div>
-                          <span className="text-emerald-500 font-extrabold text-[8px] uppercase tracking-wider">Carregado</span>
-                        </div>
-                      </div>
-
-                      {/* Submit Button */}
-                      <button 
-                        type="button"
-                        className="w-full bg-[#001CFF] text-white py-2 rounded-xl text-[9px] font-black uppercase tracking-widest shadow-lg shadow-[#001CFF]/15 active:scale-[0.98]"
-                      >
-                        Enviar Relato em 20s
-                      </button>
                     </div>
-                  </div>
 
-                  {/* Bottom Navigation Menu */}
-                  <div className="bg-white border-t border-slate-200/80 px-4 py-2 flex items-center justify-between z-10">
-                    <button className="flex flex-col items-center space-y-0.5 text-[#001CFF]">
-                      <Wrench className="w-4 h-4" />
-                      <span className="text-[6px] font-black uppercase tracking-wider">Manutenção</span>
-                    </button>
-                    <button className="flex flex-col items-center space-y-0.5 text-slate-450">
-                      <Package className="w-4 h-4" />
-                      <span className="text-[6px] font-extrabold uppercase tracking-wider">Achados</span>
-                    </button>
-                    <button className="flex flex-col items-center space-y-0.5 text-slate-450">
-                      <CheckCircle2 className="w-4 h-4" />
-                      <span className="text-[6px] font-extrabold uppercase tracking-wider">Resolvidos</span>
-                    </button>
-                  </div>
+                    {/* App Header */}
+                    <div className="px-4 py-2 border-b border-slate-200/60 bg-white flex items-center justify-between z-10 shrink-0 text-left">
+                      <div>
+                        <p className="text-[5.5px] font-bold text-slate-400 uppercase tracking-widest leading-none">Relatar para</p>
+                        <h4 className="text-[9px] font-black text-slate-900 uppercase tracking-tight mt-0.5 leading-none">Residencial Harmony</h4>
+                      </div>
+                      <div className="w-6 h-6 rounded-full bg-[#001CFF]/5 border border-[#001CFF]/10 flex items-center justify-center text-[9px] font-bold text-[#001CFF]">
+                        H
+                      </div>
+                    </div>
 
-                  {/* iPhone Indicator Bar */}
-                  <div className="w-24 h-1 bg-slate-350 rounded-full mx-auto mt-1 shrink-0 z-10"></div>
+                    {/* App Body - Form */}
+                    <div className="flex-1 p-3 space-y-2 bg-slate-50 overflow-y-auto text-left z-10 min-h-0">
+                      <div className="bg-white rounded-2xl p-3.5 border border-slate-200/80 shadow-sm space-y-3">
+                        
+                        {/* Title Form */}
+                        <div className="text-[9px] font-black uppercase text-slate-900 tracking-wider flex items-center justify-between border-b border-slate-100 pb-1.5">
+                          <span className="flex items-center gap-1">
+                            <Wrench className="w-3.5 h-3.5 text-[#001CFF]" />
+                            Relatar Problema
+                          </span>
+                          <span className="text-[6.5px] font-bold text-slate-400 uppercase tracking-widest bg-slate-100 px-1.5 py-0.5 rounded">Passo 2 de 3</span>
+                        </div>
+
+                        {/* Input Local */}
+                        <div className="space-y-1">
+                          <label className="text-[7px] font-extrabold uppercase tracking-wider text-slate-400">Onde está o problema?</label>
+                          <div className="relative">
+                            <input 
+                              type="text" 
+                              readOnly 
+                              value="Elevador de Serviço - Hall 3"
+                              className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-[8px] font-semibold text-slate-900 focus:outline-none pr-6"
+                            />
+                            <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[8px]">📍</span>
+                          </div>
+                        </div>
+
+                        {/* Input Descrição */}
+                        <div className="space-y-1">
+                          <label className="text-[7px] font-extrabold uppercase tracking-wider text-slate-400">Descreva o que ocorreu</label>
+                          <textarea 
+                            readOnly 
+                            value="O botão do 5º andar está afundado e não responde quando apertado."
+                            className="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-[8px] font-semibold text-slate-800 h-12 focus:outline-none resize-none leading-relaxed"
+                          />
+                        </div>
+
+                        {/* Foto Carregada */}
+                        <div className="space-y-1">
+                          <label className="text-[7px] font-extrabold uppercase tracking-wider text-slate-400">Foto do Problema</label>
+                          <div className="border border-dashed border-[#001CFF]/30 bg-[#001CFF]/5 p-2 rounded-lg flex items-center justify-between text-[7px] shadow-inner">
+                            <div className="flex items-center space-x-1.5">
+                              <span className="text-[9px]">📷</span>
+                              <span className="font-bold text-slate-700 truncate max-w-[120px]">botoeira_quebrada.jpg</span>
+                              <span className="text-[5.5px] text-slate-400 font-semibold">(1.2 MB)</span>
+                            </div>
+                            <span className="text-[6.5px] text-emerald-500 font-extrabold uppercase bg-emerald-500/10 border border-emerald-500/15 px-1.5 py-0.5 rounded tracking-widest">Carregado</span>
+                          </div>
+                        </div>
+
+                        {/* CTA Enviar */}
+                        <button className="w-full bg-[#001CFF] hover:bg-[#0014CC] text-white py-2 rounded-xl text-[8.5px] font-bold uppercase tracking-wider shadow-lg shadow-[#001CFF]/20 active:scale-[0.98] transition-all flex items-center justify-center space-x-1">
+                          <span>Enviar Relato em 20s</span>
+                          <span>⚡</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Bottom Tabs */}
+                    <div className="bg-white border-t border-slate-200/80 px-4 py-1.5 flex justify-around items-center z-10 shrink-0 text-[6.5px] shadow-sm">
+                      <span className="font-black text-[#001CFF] flex flex-col items-center cursor-pointer">
+                        <Wrench className="w-4 h-4" />
+                        <span className="mt-0.5">Manutenção</span>
+                      </span>
+                      <span className="font-extrabold text-slate-400 flex flex-col items-center cursor-pointer">
+                        <Package className="w-4 h-4" />
+                        <span className="mt-0.5">Achados</span>
+                      </span>
+                      <span className="font-extrabold text-slate-400 flex flex-col items-center cursor-pointer">
+                        <CheckCircle2 className="w-4 h-4" />
+                        <span className="mt-0.5">Resolvidos</span>
+                      </span>
+                    </div>
+                    
+                    {/* iPhone Indicator Bar */}
+                    <div className="w-20 h-1 bg-slate-350 rounded-full mx-auto mt-1 shrink-0 z-10"></div>
+                  </div>
                 </div>
               </div>
             </div>

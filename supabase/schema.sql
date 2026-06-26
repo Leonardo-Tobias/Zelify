@@ -69,6 +69,10 @@ CREATE POLICY "Permitir inserção pública de chamados" ON public.chamados
 CREATE POLICY "Gestores leem seu próprio perfil" ON public.usuarios_gestores
     FOR SELECT TO authenticated USING (user_id = auth.uid());
 
+-- Permitir inserção de gestores durante o cadastro/onboarding
+CREATE POLICY "Permitir inserção de gestores" ON public.usuarios_gestores
+    FOR INSERT WITH CHECK (true);
+
 -- Gestores podem ler e editar o condomínio ao qual pertencem
 CREATE POLICY "Gestores gerenciam seu condomínio" ON public.condominios
     FOR ALL TO authenticated USING (
@@ -78,6 +82,10 @@ CREATE POLICY "Gestores gerenciam seu condomínio" ON public.condominios
             AND usuarios_gestores.condominio_id = condominios.id
         )
     );
+
+-- Permitir inserção de condomínios durante o cadastro/onboarding
+CREATE POLICY "Permitir inserção de condomínios" ON public.condominios
+    FOR INSERT WITH CHECK (true);
 
 -- Gestores podem gerenciar todos os chamados pertencentes ao seu condomínio
 CREATE POLICY "Gestores gerenciam chamados de seu condomínio" ON public.chamados

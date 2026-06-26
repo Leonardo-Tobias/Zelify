@@ -157,60 +157,109 @@ export default function App() {
             <div className="absolute -inset-4 bg-gradient-to-tr from-[#001CFF]/5 to-transparent blur-3xl rounded-full opacity-60"></div>
             
             {/* Mockup Ilustrativo do Elevador Inox e Escaneamento */}
-            <div className="relative w-full max-w-[340px] bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl overflow-hidden aspect-[4/5] flex flex-col justify-between group hover:border-slate-700 transition-all duration-500">
-              {/* Textura Aço Inox (Efeito Gradient Metálico) */}
-              <div className="absolute inset-0 bg-gradient-to-b from-slate-800 via-slate-900 to-slate-950 opacity-90 z-0"></div>
-              <div className="absolute inset-x-0 top-0 h-full w-[1px] bg-gradient-to-b from-white/10 to-transparent left-1/3 z-0"></div>
-              <div className="absolute inset-x-0 top-0 h-full w-[1px] bg-gradient-to-b from-white/10 to-transparent left-2/3 z-0"></div>
+            <div className="relative w-full max-w-[360px] bg-gradient-to-b from-slate-900 via-slate-955 to-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl overflow-hidden aspect-[4/5] flex flex-col justify-between group hover:border-slate-700 transition-all duration-500">
+              
+              {/* Efeito de Reflexo Metálico Diagonal */}
+              <div className="absolute inset-0 bg-gradient-to-tr from-white/[0.01] via-white/[0.05] to-transparent pointer-events-none z-10"></div>
+              
+              {/* Textura Aço Inox (Linhas Verticais) */}
+              <div className="absolute inset-0 opacity-[0.03] bg-[linear-gradient(90deg,rgba(255,255,255,0.1)_50%,transparent_50%)] bg-[size:4px_100%] pointer-events-none"></div>
 
-              {/* Botões do Elevador Mock (Inox) */}
-              <div className="relative z-10 self-end w-14 bg-slate-900/60 border border-slate-700/50 rounded-xl p-2 flex flex-col items-center space-y-2.5 backdrop-blur-sm">
-                <div className="w-5 h-5 rounded-full border border-slate-600 flex items-center justify-center text-[7px] text-slate-400 font-bold">12</div>
-                <div className="w-5 h-5 rounded-full border border-slate-600 flex items-center justify-center text-[7px] text-slate-400 font-bold">11</div>
-                <div className="w-5 h-5 rounded-full border border-slate-600 bg-[#001CFF]/10 border-[#001CFF] flex items-center justify-center text-[7px] text-[#001CFF] font-black shadow-[0_0_6px_rgba(0,28,255,0.4)]">10</div>
-                <div className="w-5 h-5 rounded-full border border-slate-600 flex items-center justify-center text-[7px] text-slate-400 font-bold">9</div>
-                <div className="w-2 h-1 bg-amber-500 rounded-full animate-pulse"></div>
+              {/* Painel de Botões Inox Realista */}
+              <div className="absolute right-6 top-8 w-16 bg-gradient-to-b from-zinc-800 to-zinc-900 border border-zinc-700/60 rounded-2xl p-2.5 flex flex-col items-center space-y-4 shadow-xl z-0">
+                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_6px_#10b981]"></div>
+                
+                <div className="w-9 h-9 rounded-full bg-zinc-900 border border-zinc-700 flex items-center justify-center text-[10px] text-zinc-400 font-bold shadow-inner">12</div>
+                <div className="w-9 h-9 rounded-full bg-zinc-900 border border-zinc-700 flex items-center justify-center text-[10px] text-zinc-400 font-bold shadow-inner">11</div>
+                
+                {/* Botão Ativo com LED Azul */}
+                <div className="w-9 h-9 rounded-full bg-zinc-900 border-2 border-[#001CFF] flex items-center justify-center text-[10px] text-[#001CFF] font-black shadow-[0_0_12px_rgba(0,28,255,0.6)] animate-pulse">10</div>
+                
+                <div className="w-9 h-9 rounded-full bg-zinc-900 border border-zinc-700 flex items-center justify-center text-[10px] text-zinc-400 font-bold shadow-inner">9</div>
               </div>
 
-              {/* Adesivo QR Code do Zelify. */}
-              <div className="relative z-10 w-44 bg-white border border-slate-200 p-4 rounded-xl shadow-lg transform -rotate-3 hover:rotate-0 transition-transform duration-500 self-start mt-4">
-                <div className="flex items-center space-x-1.5 border-b border-slate-100 pb-2 mb-2">
-                  <div className="w-4 h-4 rounded bg-[#001CFF]/15 border border-[#001CFF]/20 flex items-center justify-center text-[#001CFF] text-[8px] font-black">Z</div>
-                  <span className="text-[9px] font-black uppercase text-slate-900 tracking-tight">Zelify<span className="text-[#001CFF]">.</span></span>
-                </div>
-                <div className="flex flex-col items-center space-y-1.5 py-1">
-                  <div className="bg-slate-100 p-2 rounded-lg border border-slate-200">
-                    <QrCode className="w-16 h-16 text-slate-900" />
+              {/* Adesivo QR Code Vinílico Premium */}
+              <div className="relative z-10 w-48 bg-white border border-slate-200 p-4.5 rounded-2xl shadow-[0_12px_24px_rgba(0,0,0,0.15)] transform -rotate-4 hover:rotate-0 transition-transform duration-500 self-start mt-6 flex flex-col items-center">
+                {/* Cabeçalho do Adesivo */}
+                <div className="flex items-center space-x-2 border-b border-slate-100 pb-2.5 mb-2.5 w-full">
+                  <div className="w-5 h-5 rounded bg-[#001CFF] flex items-center justify-center text-white text-[10px] font-black">
+                    Z
                   </div>
-                  <p className="text-[7px] font-extrabold text-slate-500 uppercase tracking-widest text-center">Aponte a câmera do celular</p>
-                  <div className="text-[8px] font-mono font-black text-[#001CFF] border border-[#001CFF]/20 bg-[#001CFF]/5 px-2 py-0.5 rounded tracking-widest">CÓDIGO: 4002</div>
+                  <span className="text-[10px] font-black uppercase text-slate-900 tracking-wider">
+                    Zelify<span className="text-[#001CFF]">.</span>
+                  </span>
+                </div>
+
+                {/* QR Code Container */}
+                <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-150 relative">
+                  {/* Corner Targets */}
+                  <div className="absolute top-0.5 left-0.5 w-1.5 h-1.5 border-t-2 border-l-2 border-[#001CFF]/40 rounded-tl"></div>
+                  <div className="absolute top-0.5 right-0.5 w-1.5 h-1.5 border-t-2 border-r-2 border-[#001CFF]/40 rounded-tr"></div>
+                  <div className="absolute bottom-0.5 left-0.5 w-1.5 h-1.5 border-b-2 border-l-2 border-[#001CFF]/40 rounded-bl"></div>
+                  <div className="absolute bottom-0.5 right-0.5 w-1.5 h-1.5 border-b-2 border-r-2 border-[#001CFF]/40 rounded-br"></div>
+                  
+                  <QrCode className="w-20 h-20 text-slate-900" />
+                </div>
+
+                {/* Info Text */}
+                <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest text-center mt-3 leading-none">
+                  Aponte a câmera
+                </p>
+                <p className="text-[7px] text-slate-500 font-semibold text-center mt-1 uppercase tracking-wider">
+                  para relatar problemas
+                </p>
+
+                {/* ID Tag */}
+                <div className="text-[8.5px] font-mono font-black text-[#001CFF] border border-[#001CFF]/20 bg-[#001CFF]/5 px-3 py-1 rounded-lg mt-3 tracking-widest select-none uppercase">
+                  CÓDIGO: 4002
                 </div>
               </div>
 
-              {/* Overlay Smartphone Simulando Escaneamento */}
-              <div className="absolute bottom-4 right-4 z-20 w-[160px] bg-slate-950/95 border border-white/[0.08] rounded-2xl p-2 shadow-2xl transform rotate-6 hover:rotate-3 transition-transform duration-500 backdrop-blur-md">
-                {/* Tela do Celular escaneando */}
-                <div className="relative w-full aspect-[9/16] bg-slate-900 rounded-lg overflow-hidden flex flex-col justify-between border border-white/[0.04]">
-                  {/* Visor da Câmera Mock */}
-                  <div className="absolute inset-0 bg-slate-950 flex flex-col items-center justify-center z-0">
-                    <div className="w-10 h-10 border border-white/20 rounded flex items-center justify-center opacity-60">
-                      <QrCode className="w-6 h-6 text-white" />
+              {/* Smartphone Sem Bezel de Alta Fidelidade */}
+              <div className="absolute bottom-6 right-6 z-20 w-[170px] bg-slate-950 border-[5px] border-zinc-800 rounded-[30px] shadow-[0_20px_40px_rgba(0,0,0,0.4)] transform rotate-8 hover:rotate-3 transition-transform duration-500 overflow-hidden aspect-[9/16]">
+                {/* Dynamic Island */}
+                <div className="absolute top-1.5 left-1/2 -translate-x-1/2 w-12 h-3.5 bg-black rounded-full z-30 flex items-center justify-end px-1.5">
+                  <div className="w-1 h-1 bg-[#001CFF]/40 rounded-full"></div>
+                </div>
+
+                {/* Camera Viewfinder (Scanning Effect) */}
+                <div className="relative h-full bg-slate-950 flex flex-col justify-between p-2 pt-6">
+                  {/* Blur Simulado atrás da câmera */}
+                  <div className="absolute inset-0 bg-radial-gradient from-transparent to-slate-950/85 z-0"></div>
+
+                  {/* QR Code detectado no Viewfinder com Brackets */}
+                  <div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none opacity-40">
+                    <div className="relative p-3 border-2 border-[#001CFF]/50 rounded-xl">
+                      <QrCode className="w-12 h-12 text-white" />
+                      {/* Corner guides */}
+                      <div className="absolute -top-1 -left-1 w-2.5 h-2.5 border-t-2 border-l-2 border-[#001CFF]"></div>
+                      <div className="absolute -top-1 -right-1 w-2.5 h-2.5 border-t-2 border-r-2 border-[#001CFF]"></div>
+                      <div className="absolute -bottom-1 -left-1 w-2.5 h-2.5 border-b-2 border-l-2 border-[#001CFF]"></div>
+                      <div className="absolute -bottom-1 -right-1 w-2.5 h-2.5 border-b-2 border-r-2 border-[#001CFF]"></div>
                     </div>
                   </div>
 
-                  {/* Banner de Notificação detectando link */}
-                  <div className="relative z-10 m-1.5 p-1 bg-white/95 rounded shadow-lg text-[7px] flex items-center space-x-1.5 animate-bounce">
-                    <QrCode className="w-3.5 h-3.5 text-[#001CFF]" />
-                    <div className="min-w-0">
-                      <p className="font-extrabold text-slate-900 leading-none">Abrir zelify.app</p>
-                      <p className="text-[6px] text-[#001CFF] font-medium leading-none mt-0.5 truncate">/residenciaharmony</p>
+                  {/* Linha de Scanner Laser Animada */}
+                  <div className="absolute inset-x-0 top-1/3 h-[2px] bg-gradient-to-r from-transparent via-[#001CFF] to-transparent shadow-[0_0_8px_#001CFF] z-10 animate-pulse"></div>
+
+                  {/* Glassmorphic iOS Notification Banner */}
+                  <div className="relative z-20 w-full bg-white/90 backdrop-blur-md border border-white/20 rounded-xl p-2 shadow-lg flex items-center justify-between transition-all">
+                    <div className="flex items-center space-x-2 min-w-0">
+                      <div className="w-5 h-5 rounded-md bg-[#001CFF]/10 flex items-center justify-center text-[#001CFF]">
+                        <QrCode className="w-3.5 h-3.5" />
+                      </div>
+                      <div className="min-w-0 text-left">
+                        <p className="text-[7.5px] font-black text-slate-900 leading-none">Abrir zelify.app</p>
+                        <p className="text-[6.5px] text-[#001CFF] font-bold leading-none mt-1 truncate">/residenciaharmony</p>
+                      </div>
                     </div>
+                    <ArrowUpRight className="w-3 h-3 text-[#001CFF] shrink-0" />
                   </div>
 
-                  {/* Botão de obturador */}
-                  <div className="relative z-10 pb-2 flex justify-center w-full">
-                    <div className="w-5 h-5 rounded-full border border-white flex items-center justify-center">
-                      <div className="w-3.5 h-3.5 bg-white rounded-full"></div>
+                  {/* iOS Shutter Button (Representativo) */}
+                  <div className="relative z-20 pb-1 flex justify-center w-full">
+                    <div className="w-7 h-7 rounded-full border-2 border-white flex items-center justify-center p-0.5">
+                      <div className="w-full h-full bg-white rounded-full"></div>
                     </div>
                   </div>
                 </div>

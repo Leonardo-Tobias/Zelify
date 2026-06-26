@@ -573,19 +573,28 @@ export const db = {
       }
 
       // 3. Inserir o gestor vinculado
-      const { data: gestorData, error: gestorError } = await supabase
+      const gestorId = crypto.randomUUID();
+      const { error: gestorError } = await supabase
         .from('usuarios_gestores')
         .insert({
+          id: gestorId,
           user_id: authData.user.id,
           condominio_id: condoData.id,
           nome: dados.nome,
           papel: 'sindico'
-        })
-        .select()
-        .single();
-      if (gestorError || !gestorData) {
-        throw new Error(gestorError?.message || 'Falha ao registrar o perfil do gestor.');
+        });
+      if (gestorError) {
+        throw new Error(gestorError.message || 'Falha ao registrar o perfil do gestor.');
       }
+
+      const gestorData: UsuarioGestor = {
+        id: gestorId,
+        user_id: authData.user.id,
+        condominio_id: condoData.id,
+        nome: dados.nome,
+        papel: 'sindico',
+        created_at: new Date().toISOString()
+      };
 
       return {
         gestor: gestorData,

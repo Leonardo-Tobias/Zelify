@@ -1,0 +1,527 @@
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
+
+export function logClient(msg: string) {
+  if (typeof window !== 'undefined') {
+    const w = window as any;
+    w.clientLogs = w.clientLogs || [];
+    w.clientLogs.push(`[${new Date().toLocaleTimeString('pt-BR')}] ${msg}`);
+  }
+}
+
+// --- Interfaces de Tipos ---
+
+export interface Condominio {
+  id: string;
+  nome: string;
+  slug: string;
+  codigo_acesso: string;
+  created_at: string;
+}
+
+export interface UsuarioGestor {
+  id: string;
+  user_id: string;
+  condominio_id: string;
+  nome: string;
+  papel: 'sindico' | 'zelador' | 'admin';
+  created_at: string;
+}
+
+export interface Chamado {
+  id: string;
+  condominio_id: string;
+  tipo: 'manutencao' | 'achado_perdido';
+  local: string;
+  bloco: string;
+  apartamento: string;
+  descricao: string;
+  foto_url?: string;
+  status: 'pendente' | 'em_execucao' | 'resolvido' | 'encontrado' | 'aguardando_retirada' | 'entregue';
+  created_at: string;
+  updated_at: string;
+}
+
+// --- Detecção do Supabase ---
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+export const isSupabaseConfigured = !!(supabaseUrl && supabaseAnonKey);
+
+let supabase: SupabaseClient | null = null;
+if (isSupabaseConfigured) {
+  supabase = createClient(supabaseUrl!, supabaseAnonKey!);
+}
+
+// --- Dados Mock Iniciais (Semente) ---
+
+const MOCK_CONDOMINIOS: Condominio[] = [
+  {
+    id: 'condo-id-1',
+    nome: 'Residencial Viver Bem',
+    slug: 'viverbem',
+    codigo_acesso: '1234',
+    created_at: new Date().toISOString()
+  },
+  {
+    id: 'condo-id-2',
+    nome: 'Residencial Harmony',
+    slug: 'harmony',
+    codigo_acesso: '0000',
+    created_at: new Date().toISOString()
+  }
+];
+
+const MOCK_GESTORES: UsuarioGestor[] = [
+  {
+    id: 'gestor-id-1',
+    user_id: 'sindico-auth-id',
+    condominio_id: 'condo-id-1',
+    nome: 'Carlos Santos (Síndico)',
+    papel: 'sindico',
+    created_at: new Date().toISOString()
+  },
+  {
+    id: 'gestor-id-2',
+    user_id: 'zelador-auth-id',
+    condominio_id: 'condo-id-1',
+    nome: 'Marcos Silva (Zelador)',
+    papel: 'zelador',
+    created_at: new Date().toISOString()
+  }
+];
+
+const MOCK_CHAMADOS: Chamado[] = [
+  {
+    id: 'chamado-1',
+    condominio_id: 'condo-id-1',
+    tipo: 'manutencao',
+    local: 'Elevador',
+    bloco: 'A',
+    apartamento: '102',
+    descricao: 'O elevador de serviço está fazendo um barulho metálico muito forte ao passar pelo 4º andar.',
+    status: 'pendente',
+    created_at: new Date(Date.now() - 1000 * 60 * 120).toISOString(), // 2 horas atrás
+    updated_at: new Date(Date.now() - 1000 * 60 * 120).toISOString()
+  },
+  {
+    id: 'chamado-2',
+    condominio_id: 'condo-id-1',
+    tipo: 'manutencao',
+    local: 'Garagem',
+    bloco: 'B',
+    apartamento: '45',
+    descricao: 'Infiltração no teto da vaga 12 da garagem subterrânea, gotejando água com calcário sobre a pintura dos carros.',
+    status: 'em_execucao',
+    created_at: new Date(Date.now() - 1000 * 60 * 600).toISOString(), // 10 horas atrás
+    updated_at: new Date(Date.now() - 1000 * 60 * 300).toISOString()
+  },
+  {
+    id: 'chamado-3',
+    condominio_id: 'condo-id-1',
+    tipo: 'manutencao',
+    local: 'Piscina',
+    bloco: 'A',
+    apartamento: '305',
+    descricao: 'A lâmpada subaquática da piscina infantil soltou do nicho de fixação. Risco de segurança elétrica.',
+    status: 'resolvido',
+    created_at: new Date(Date.now() - 1000 * 60 * 1440).toISOString(), // 1 dia atrás
+    updated_at: new Date(Date.now() - 1000 * 60 * 720).toISOString()
+  },
+  {
+    id: 'chamado-4',
+    condominio_id: 'condo-id-1',
+    tipo: 'achado_perdido',
+    local: 'Playground',
+    bloco: 'Portaria',
+    apartamento: '00',
+    descricao: 'Ursinho de pelúcia marrom (chaveiro) encontrado perto dos balanços do playground infantil.',
+    status: 'encontrado',
+    created_at: new Date(Date.now() - 1000 * 60 * 180).toISOString(),
+    updated_at: new Date(Date.now() - 1000 * 60 * 180).toISOString()
+  },
+  {
+    id: 'chamado-5',
+    condominio_id: 'condo-id-1',
+    tipo: 'achado_perdido',
+    local: 'Hall',
+    bloco: 'Portaria',
+    apartamento: '00',
+    descricao: 'Chave de carro com chaveiro azul encontrada nos sofás da recepção social.',
+    status: 'aguardando_retirada',
+    created_at: new Date(Date.now() - 1000 * 60 * 1000).toISOString(),
+    updated_at: new Date(Date.now() - 1000 * 60 * 500).toISOString()
+  },
+  {
+    id: 'chamado-6',
+    condominio_id: 'condo-id-1',
+    tipo: 'achado_perdido',
+    local: 'Corredor',
+    bloco: 'B',
+    apartamento: '12',
+    descricao: 'Óculos de grau com armação metálica fina encontrado no corredor do Bloco B, 2º andar.',
+    status: 'entregue',
+    created_at: new Date(Date.now() - 1000 * 60 * 2000).toISOString(),
+    updated_at: new Date(Date.now() - 1000 * 60 * 1500).toISOString()
+  }
+];
+
+// --- Classe para Acesso Local (Mock) ---
+
+class LocalDB {
+  private isBrowser() {
+    return typeof window !== 'undefined';
+  }
+
+  private getStorageItem<T>(key: string, defaultValue: T): T {
+    if (!this.isBrowser()) return defaultValue;
+    const value = localStorage.getItem(key);
+    if (!value) {
+      localStorage.setItem(key, JSON.stringify(defaultValue));
+      return defaultValue;
+    }
+    try {
+      return JSON.parse(value);
+    } catch {
+      return defaultValue;
+    }
+  }
+
+  private setStorageItem<T>(key: string, value: T): void {
+    if (this.isBrowser()) {
+      localStorage.setItem(key, JSON.stringify(value));
+    }
+  }
+
+  // Obter condomínios
+  getCondominios(): Condominio[] {
+    return this.getStorageItem('zelify_condominios', MOCK_CONDOMINIOS);
+  }
+
+  // Obter gestores
+  getGestores(): UsuarioGestor[] {
+    return this.getStorageItem('zelify_gestores', MOCK_GESTORES);
+  }
+
+  // Obter chamados
+  getChamadosRaw(): Chamado[] {
+    return this.getStorageItem('zelify_chamados', MOCK_CHAMADOS);
+  }
+
+  // Salvar condomínios
+  saveCondominios(data: Condominio[]): void {
+    this.setStorageItem('zelify_condominios', data);
+  }
+
+  // Salvar chamados
+  saveChamados(data: Chamado[]): void {
+    this.setStorageItem('zelify_chamados', data);
+  }
+}
+
+const localDB = new LocalDB();
+
+// --- Implementação Unificada das Operações ---
+
+export const db = {
+  /**
+   * Busca um condomínio pelo slug correspondente.
+   */
+  async getCondominioBySlug(slug: string): Promise<Condominio | null> {
+    logClient(`getCondominioBySlug: Iniciado para slug="${slug}"`);
+    if (supabase) {
+      logClient(`getCondominioBySlug: Usando Supabase`);
+      try {
+        const { data, error } = await supabase
+          .from('condominios')
+          .select('*')
+          .eq('slug', slug)
+          .maybeSingle();
+        if (error) {
+          logClient(`getCondominioBySlug: Erro Supabase = ${error.message}`);
+          console.error('Erro getCondominioBySlug:', error);
+        }
+        logClient(`getCondominioBySlug: Sucesso Supabase = ${JSON.stringify(data)}`);
+        return data;
+      } catch (err) {
+        logClient(`getCondominioBySlug: Crash Supabase = ${err instanceof Error ? err.message : String(err)}`);
+        throw err;
+      }
+    } else {
+      logClient(`getCondominioBySlug: Usando LocalDB (Mock)`);
+      try {
+        const condominios = localDB.getCondominios();
+        logClient(`getCondominioBySlug: Condominios carregados do localStorage = ${condominios.length} itens`);
+        const result = condominios.find(c => c.slug.toLowerCase() === slug.toLowerCase()) || null;
+        logClient(`getCondominioBySlug: Encontrado = ${JSON.stringify(result)}`);
+        return result;
+      } catch (err) {
+        logClient(`getCondominioBySlug: Crash LocalDB = ${err instanceof Error ? err.message : String(err)}`);
+        throw err;
+      }
+    }
+  },
+
+  /**
+   * Valida o código de acesso de um condomínio.
+   */
+  async validateAcesso(condominioId: string, codigo: string): Promise<boolean> {
+    if (supabase) {
+      const { data, error } = await supabase
+        .from('condominios')
+        .select('codigo_acesso')
+        .eq('id', condominioId)
+        .single();
+      if (error) return false;
+      return data.codigo_acesso === codigo;
+    } else {
+      const condominios = localDB.getCondominios();
+      const condo = condominios.find(c => c.id === condominioId);
+      return condo?.codigo_acesso === codigo;
+    }
+  },
+
+  /**
+   * Retorna os chamados de um condomínio, opcionalmente filtrados por tipo.
+   */
+  async getChamados(condominioId: string, tipo?: 'manutencao' | 'achado_perdido'): Promise<Chamado[]> {
+    if (supabase) {
+      let query = supabase
+        .from('chamados')
+        .select('*')
+        .eq('condominio_id', condominioId);
+      
+      if (tipo) {
+        query = query.eq('tipo', tipo);
+      }
+      
+      const { data, error } = await query.order('created_at', { ascending: false });
+      if (error) {
+        console.error('Erro ao buscar chamados:', error);
+        return [];
+      }
+      return data || [];
+    } else {
+      let chamados = localDB.getChamadosRaw();
+      chamados = chamados.filter(c => c.condominio_id === condominioId);
+      if (tipo) {
+        chamados = chamados.filter(c => c.tipo === tipo);
+      }
+      // Ordenar decrescente por data de criação
+      return chamados.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    }
+  },
+
+  /**
+   * Cria um chamado no condomínio.
+   */
+  async createChamado(chamado: Omit<Chamado, 'id' | 'created_at' | 'updated_at'>): Promise<Chamado> {
+    const timestamp = new Date().toISOString();
+    const id = 'chamado-' + Math.random().toString(36).substring(2, 9);
+    
+    if (supabase) {
+      const { data, error } = await supabase
+        .from('chamados')
+        .insert({
+          ...chamado,
+          created_at: timestamp,
+          updated_at: timestamp
+        })
+        .select()
+        .single();
+      if (error) throw error;
+      return data;
+    } else {
+      const novoChamado: Chamado = {
+        ...chamado,
+        id,
+        created_at: timestamp,
+        updated_at: timestamp
+      };
+      const chamados = localDB.getChamadosRaw();
+      chamados.push(novoChamado);
+      localDB.saveChamados(chamados);
+      return novoChamado;
+    }
+  },
+
+  /**
+   * Altera o status de um chamado (Kanban ou Achados e Perdidos).
+   */
+  async updateChamadoStatus(
+    id: string, 
+    status: Chamado['status']
+  ): Promise<Chamado | null> {
+    const timestamp = new Date().toISOString();
+    
+    if (supabase) {
+      const { data, error } = await supabase
+        .from('chamados')
+        .update({
+          status,
+          updated_at: timestamp
+        })
+        .eq('id', id)
+        .select()
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    } else {
+      const chamados = localDB.getChamadosRaw();
+      const index = chamados.findIndex(c => c.id === id);
+      if (index === -1) return null;
+      
+      chamados[index] = {
+        ...chamados[index],
+        status,
+        updated_at: timestamp
+      };
+      localDB.saveChamados(chamados);
+      return chamados[index];
+    }
+  },
+
+  /**
+   * Atualiza as configurações de slug, nome e código do condomínio.
+   */
+  async updateCondominioSettings(
+    id: string,
+    nome: string,
+    slug: string,
+    codigoAcesso: string
+  ): Promise<Condominio | null> {
+    if (supabase) {
+      const { data, error } = await supabase
+        .from('condominios')
+        .update({
+          nome,
+          slug,
+          codigo_acesso: codigoAcesso
+        })
+        .eq('id', id)
+        .select()
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    } else {
+      const condominios = localDB.getCondominios();
+      const index = condominios.findIndex(c => c.id === id);
+      if (index === -1) return null;
+      
+      condominios[index] = {
+        ...condominios[index],
+        nome,
+        slug,
+        codigo_acesso: codigoAcesso
+      };
+      localDB.saveCondominios(condominios);
+      return condominios[index];
+    }
+  },
+
+  /**
+   * Efetua o login do Gestor.
+   * Retorna os dados do gestor logado e do condomínio associado.
+   */
+  async loginGestor(email: string, password: string): Promise<{ gestor: UsuarioGestor; condominio: Condominio } | null> {
+    if (supabase) {
+      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
+      if (authError || !authData.user) return null;
+      
+      const { data: gestorData, error: gestorError } = await supabase
+        .from('usuarios_gestores')
+        .select('*, condominios(*)')
+        .eq('user_id', authData.user.id)
+        .single();
+      
+      if (gestorError || !gestorData) return null;
+      
+      const { condominios: condo, ...gestor } = gestorData as any;
+      return {
+        gestor,
+        condominio: condo
+      };
+    } else {
+      // Simulação no Modo Mock
+      // Síndico: sindico@viverbem.com / 123456
+      // Zelador: zelador@viverbem.com / 123456
+      if (password !== '123456') return null;
+      
+      const gestores = localDB.getGestores();
+      let gestor: UsuarioGestor | undefined;
+      
+      if (email === 'sindico@viverbem.com') {
+        gestor = gestores.find(g => g.papel === 'sindico');
+      } else if (email === 'zelador@viverbem.com') {
+        gestor = gestores.find(g => g.papel === 'zelador');
+      }
+      
+      if (!gestor) return null;
+      
+      const condominios = localDB.getCondominios();
+      const condo = condominios.find(c => c.id === gestor!.condominio_id);
+      if (!condo) return null;
+      
+      return {
+        gestor,
+        condominio: condo
+      };
+    }
+  },
+
+  /**
+   * Upload de imagem para o Supabase Storage.
+   * Em modo Mock, apenas retorna a string base64 enviada.
+   */
+  async uploadImagem(file: File | string, condominioId: string): Promise<string> {
+    if (typeof file === 'string') {
+      // Já é uma string Base64 (usada para o modo Mock ou imagens pré-processadas)
+      if (!supabase) {
+        return file; // Retorna o base64 para salvar direto no banco (localStorage)
+      }
+      
+      // Se for Supabase e vier como base64 string, converte para blob primeiro
+      try {
+        const res = await fetch(file);
+        const blob = await res.blob();
+        const fileObj = new File([blob], `upload-${Date.now()}.jpg`, { type: 'image/jpeg' });
+        return await uploadFileToSupabase(fileObj, condominioId);
+      } catch (err) {
+        console.error('Falha ao converter base64 para upload:', err);
+        return file;
+      }
+    } else {
+      if (!supabase) {
+        // Se for modo Mock e for um arquivo cru, não deve acontecer, mas previne
+        return '';
+      }
+      return await uploadFileToSupabase(file, condominioId);
+    }
+  }
+};
+
+async function uploadFileToSupabase(file: File, condominioId: string): Promise<string> {
+  const fileExt = file.name.split('.').pop() || 'jpg';
+  const fileName = `${condominioId}/${Date.now()}-${Math.random().toString(36).substring(2, 9)}.${fileExt}`;
+  
+  const { data, error } = await supabase!
+    .storage
+    .from('chamados')
+    .upload(fileName, file, {
+      cacheControl: '3600',
+      upsert: false
+    });
+    
+  if (error) throw error;
+  
+  // Obter URL pública do arquivo
+  const { data: publicUrlData } = supabase!
+    .storage
+    .from('chamados')
+    .getPublicUrl(data.path);
+    
+  return publicUrlData.publicUrl;
+}

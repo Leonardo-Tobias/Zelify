@@ -86,6 +86,9 @@ export default function MoradorPortal() {
   // Histórico de chamados relatados nesta sessão
   const [meusChamadosIds, setMeusChamadosIds] = useState<string[]>([]);
 
+  // Limite de chamados no mês
+  const [monthlyCount, setMonthlyCount] = useState(0);
+
   // Modais de Criação e Visualização
   const [showManutencaoModal, setShowManutencaoModal] = useState(false);
   const [showAchadoModal, setShowAchadoModal] = useState(false);
@@ -124,6 +127,12 @@ export default function MoradorPortal() {
         setCondominio(condo);
         
         if (condo) {
+          // Carregar contagem mensal se for plano grátis
+          if (condo.plan_type === 'free') {
+            const count = await db.getMonthlyChamadosCount(condo.id);
+            setMonthlyCount(count);
+          }
+
           // Verificar se já está autenticado para este condomínio no localStorage
           const savedAuth = localStorage.getItem(`zelify_auth_${condo.id}`);
           if (savedAuth) {
@@ -387,6 +396,26 @@ export default function MoradorPortal() {
     );
   }
 
+  if (condominio.subscription_status === 'past_due') {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-zinc-950 p-6 text-center antialiased text-zinc-300 relative overflow-hidden">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[350px] h-[350px] bg-red-500/5 blur-[120px] rounded-full pointer-events-none z-0"></div>
+        <div className="w-full max-w-sm bg-[#0c0c0e]/60 border border-white/[0.05] rounded-2xl p-6 shadow-2xl backdrop-blur-md relative z-10 text-center flex flex-col items-center">
+          <div className="w-16 h-16 bg-red-500/10 border border-red-500/20 text-red-400 rounded-full flex items-center justify-center mb-6">
+            <AlertCircle className="w-8 h-8" />
+          </div>
+          <h1 className="text-lg font-bold text-white mb-2">Portal Suspenso</h1>
+          <p className="text-zinc-400 text-xs max-w-sm leading-relaxed">
+            O portal de moradores deste condomínio foi temporariamente suspenso devido a pendências de faturamento.
+          </p>
+          <p className="text-zinc-550 text-[10px] mt-4 font-semibold">
+            Se você é o síndico ou administrador, acesse o painel de gestão para regularizar a assinatura.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   // --- 1. TELA DE VALIDAÇÃO (SE NÃO ESTIVER VALIDADO) ---
   if (!validated) {
     return (
@@ -492,6 +521,8 @@ export default function MoradorPortal() {
   const achadosMural = chamados.filter(c => c.tipo === 'achado_perdido' && c.status !== 'entregue');
   
   const resolvidosRecentes = chamados.filter(c => c.tipo === 'manutencao' && c.status === 'resolvido');
+
+  const isLimitReached = condominio.plan_type === 'free' && monthlyCount >= 15;
 
   return (
     <div className="min-h-screen bg-zinc-950 pb-24 font-sans antialiased text-zinc-300 relative">
@@ -889,20 +920,38 @@ export default function MoradorPortal() {
                 </div>
 
                 <div className="pt-2">
-                  <button
-                    type="submit"
-                    disabled={submittingProblema || compressingImage}
-                    className="w-full bg-[#0033FF] hover:bg-[#0033FF]/90 text-white text-sm font-semibold py-2.5 rounded-lg flex items-center justify-center transition-all shadow-[0_4px_15px_rgba(0,51,255,0.2)] disabled:opacity-50 cursor-pointer"
-                  >
-                    {submittingProblema ? (
-                      <>
-                        <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                        Registrando chamado...
-                      </>
-                    ) : (
-                      'Enviar Chamado'
-                    )}
-                  </button>
+                  {isLimitReached ? (
+                    <div className="space-y-3">
+                      <div className="p-3.5 bg-red-500/10 border border-red-500/20 text-red-405 rounded-lg text-xs font-semibold leading-relaxed flex items-start space-x-2 animate-in fade-in duration-200 text-left">
+                        <AlertCircle className="w-4 h-4 shrink-0 text-red-400 mt-0.5" />
+                        <span>
+                          Limite de alertas mensais atingido para este condomínio. A administração do prédio já foi notificada para realizar a atualização do plano. Se você for o síndico, acesse o seu painel do Zelify para liberar novos chamados.
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        disabled
+                        className="w-full bg-zinc-900 border border-zinc-800 text-zinc-500 text-sm font-semibold py-2.5 rounded-lg flex items-center justify-center cursor-not-allowed"
+                      >
+                        Envio Bloqueado
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      type="submit"
+                      disabled={submittingProblema || compressingImage}
+                      className="w-full bg-[#0033FF] hover:bg-[#0033FF]/90 text-white text-sm font-semibold py-2.5 rounded-lg flex items-center justify-center transition-all shadow-[0_4px_15px_rgba(0,51,255,0.2)] disabled:opacity-50 cursor-pointer"
+                    >
+                      {submittingProblema ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                          Registrando chamado...
+                        </>
+                      ) : (
+                        'Enviar Chamado'
+                      )}
+                    </button>
+                  )}
                 </div>
               </form>
             )}
@@ -1004,20 +1053,38 @@ export default function MoradorPortal() {
                 </div>
 
                 <div className="pt-2">
-                  <button
-                    type="submit"
-                    disabled={submittingAchado || compressingImage}
-                    className="w-full bg-[#0033FF] hover:bg-[#0033FF]/90 text-white text-sm font-semibold py-2.5 rounded-lg flex items-center justify-center transition-all shadow-[0_4px_15px_rgba(0,51,255,0.2)] disabled:opacity-50 cursor-pointer"
-                  >
-                    {submittingAchado ? (
-                      <>
-                        <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                        Cadastrando objeto...
-                      </>
-                    ) : (
-                      'Publicar Objeto Achado'
-                    )}
-                  </button>
+                  {isLimitReached ? (
+                    <div className="space-y-3">
+                      <div className="p-3.5 bg-red-500/10 border border-red-500/20 text-red-405 rounded-lg text-xs font-semibold leading-relaxed flex items-start space-x-2 animate-in fade-in duration-200 text-left">
+                        <AlertCircle className="w-4 h-4 shrink-0 text-red-400 mt-0.5" />
+                        <span>
+                          Limite de alertas mensais atingido para este condomínio. A administração do prédio já foi notificada para realizar a atualização do plano. Se você for o síndico, acesse o seu painel do Zelify para liberar novos chamados.
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        disabled
+                        className="w-full bg-zinc-900 border border-zinc-800 text-zinc-500 text-sm font-semibold py-2.5 rounded-lg flex items-center justify-center cursor-not-allowed"
+                      >
+                        Envio Bloqueado
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      type="submit"
+                      disabled={submittingAchado || compressingImage}
+                      className="w-full bg-[#0033FF] hover:bg-[#0033FF]/90 text-white text-sm font-semibold py-2.5 rounded-lg flex items-center justify-center transition-all shadow-[0_4px_15px_rgba(0,51,255,0.2)] disabled:opacity-50 cursor-pointer"
+                    >
+                      {submittingAchado ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                          Cadastrando objeto...
+                        </>
+                      ) : (
+                        'Publicar Objeto Achado'
+                      )}
+                    </button>
+                  )}
                 </div>
               </form>
             )}

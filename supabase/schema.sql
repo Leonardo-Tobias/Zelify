@@ -6,6 +6,10 @@ CREATE TABLE IF NOT EXISTS public.condominios (
     nome TEXT NOT NULL,
     slug TEXT UNIQUE NOT NULL,
     codigo_acesso TEXT NOT NULL, -- Armazenado como texto de 4 dígitos (ex: '1234')
+    plan_type TEXT DEFAULT 'free' CHECK (plan_type IN ('free', 'pro', 'corporate')) NOT NULL,
+    subscription_status TEXT DEFAULT 'active' CHECK (subscription_status IN ('active', 'past_due', 'canceled')) NOT NULL,
+    asaas_customer_id TEXT,
+    current_period_end TIMESTAMPTZ,
     created_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 

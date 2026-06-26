@@ -15,6 +15,10 @@ export interface Condominio {
   nome: string;
   slug: string;
   codigo_acesso: string;
+  plan_type: 'free' | 'pro' | 'corporate';
+  subscription_status: 'active' | 'past_due' | 'canceled';
+  asaas_customer_id?: string | null;
+  current_period_end?: string | null;
   created_at: string;
 }
 
@@ -61,6 +65,10 @@ const MOCK_CONDOMINIOS: Condominio[] = [
     nome: 'Residencial Viver Bem',
     slug: 'viverbem',
     codigo_acesso: '1234',
+    plan_type: 'free',
+    subscription_status: 'active',
+    asaas_customer_id: null,
+    current_period_end: null,
     created_at: new Date().toISOString()
   },
   {
@@ -68,6 +76,10 @@ const MOCK_CONDOMINIOS: Condominio[] = [
     nome: 'Residencial Harmony',
     slug: 'harmony',
     codigo_acesso: '0000',
+    plan_type: 'free',
+    subscription_status: 'active',
+    asaas_customer_id: null,
+    current_period_end: null,
     created_at: new Date().toISOString()
   }
 ];
@@ -595,6 +607,10 @@ export const db = {
         nome: dados.condominioNome,
         slug: dados.condominioSlug.trim().toLowerCase(),
         codigo_acesso: dados.codigoAcesso,
+        plan_type: 'free',
+        subscription_status: 'active',
+        asaas_customer_id: null,
+        current_period_end: null,
         created_at: new Date().toISOString()
       };
       const condominios = localDB.getCondominios();
@@ -658,6 +674,115 @@ export const db = {
         return '';
       }
       return await uploadFileToSupabase(file, condominioId);
+    }
+  },
+
+  /**
+   * Obtém a quantidade de chamados criados no mês atual para um condomínio.
+   */
+  async getMonthlyChamadosCount(condominioId: string): Promise<number> {
+    const startOfMonth = new Date();
+    startOfMonth.setDate(1);
+    startOfMonth.setHours(0, 0, 0, 0);
+
+    if (supabase) {
+      const { count, error } = await supabase
+        .from('chamados')
+        .select('*', { count: 'exact', head: true })
+        .eq('condominio_id', condominioId)
+        .gte('created_at', startOfMonth.toISOString());
+      
+      if (error) {
+        console.error('Erro ao contar chamados do mês:', error);
+        return 0;
+      }
+      return count || 0;
+    } else {
+      const chamados = localDB.getChamadosRaw();
+      return chamados.filter(c => 
+        c.condominio_id === condominioId && 
+        new Date(c.created_at) >= startOfMonth
+      ).length;
+    }
+  },
+
+  /**
+   * Atualiza o plano e status de assinatura do condomínio.
+   */
+  async updateCondominioPlan(
+    id: string,
+    planType: 'free' | 'pro' | 'corporate',
+    subscriptionStatus: 'active' | 'past_due' | 'canceled'
+  ): Promise<Condominio | null> {
+    // Definir fim do período como 30 dias a partir de hoje
+    const periodEnd = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+    
+    if (supabase) {
+      const { data, error } = await supabase
+        .from('condominios')
+        .update({
+          plan_type: planType,
+          subscription_status: subscriptionStatus,
+          current_period_end: periodEnd
+        })
+        .eq('id', id)
+        .select()
+        .maybeSingle();
+      
+      if (error) throw error;
+      return data;
+    } else {
+      const condominios = localDB.getCondominios();
+      const index = condominios.findIndex(c => c.id === id);
+      if (index === -1) return null;
+      
+      condominios[index] = {
+        ...condominios[index],
+        plan_type: planType,
+        subscription_status: subscriptionStatus,
+        current_period_end: periodEnd
+      };
+      localDB.saveCondominios(condominios);
+      return condominios[index];
+    }
+  },
+
+  /**
+   * Obtém todos os condomínios aos quais o gestor tem acesso (para administradoras).
+   */
+  async getCondominiosByGestorUser(userId: string): Promise<Condominio[]> {
+    if (supabase) {
+      const { data: gestorRows, error: gestorError } = await supabase
+        .from('usuarios_gestores')
+        .select('condominio_id')
+        .eq('user_id', userId);
+      
+      if (gestorError || !gestorRows) {
+        console.error('Erro ao buscar vinculos do gestor:', gestorError);
+        return [];
+      }
+      
+      const condoIds = gestorRows.map(r => r.condominio_id);
+      if (condoIds.length === 0) return [];
+      
+      const { data: condos, error: condoError } = await supabase
+        .from('condominios')
+        .select('*')
+        .in('id', condoIds);
+      
+      if (condoError || !condos) {
+        console.error('Erro ao buscar condominios por IDs:', condoError);
+        return [];
+      }
+      return condos;
+    } else {
+      // No modo Mock, buscamos todos os gestores vinculados a esse user_id
+      const gestores = localDB.getGestores();
+      const userGestores = gestores.filter(g => g.user_id === userId);
+      const condoIds = userGestores.map(g => g.condominio_id);
+      
+      const condominios = localDB.getCondominios();
+      return condominios.filter(c => condoIds.includes(c.id));
     }
   }
 };

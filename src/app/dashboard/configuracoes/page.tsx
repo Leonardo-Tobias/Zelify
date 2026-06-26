@@ -15,7 +15,14 @@ import {
   Compass,
   QrCode,
   Printer,
-  Download
+  Download,
+  CreditCard,
+  Layers,
+  Calculator,
+  Sparkles,
+  CheckCircle2,
+  Lock,
+  RefreshCw
 } from 'lucide-react';
 import { db, Condominio } from '@/lib/db';
 
@@ -23,6 +30,9 @@ export default function ConfiguracoesPage() {
   const router = useRouter();
   const [condominio, setCondominio] = useState<Condominio | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // Navegação por abas
+  const [activeTab, setActiveTab] = useState<'geral' | 'faturamento'>('geral');
 
   // Estados do formulário
   const [nome, setNome] = useState('');
@@ -39,6 +49,22 @@ export default function ConfiguracoesPage() {
   const [posterInstructions, setPosterInstructions] = useState('Escaneie o QR Code abaixo com seu celular para abrir o Portal do Morador, relatar problemas de manutenção ou cadastrar achados e perdidos.');
   const [posterTheme, setPosterTheme] = useState<'blue' | 'zinc' | 'emerald'>('blue');
 
+  // Estados de Faturamento
+  const [monthlyChamadosCount, setMonthlyChamadosCount] = useState(0);
+  const [numCondos, setNumCondos] = useState(5); // Simulador corporativo
+  const [showCheckoutModal, setShowCheckoutModal] = useState(false);
+  const [selectedUpgrade, setSelectedUpgrade] = useState<'pro' | 'corporate'>('pro');
+  const [checkoutTab, setCheckoutTab] = useState<'pix' | 'card'>('pix');
+  const [copiedPix, setCopiedPix] = useState(false);
+
+  // Formulário do cartão
+  const [cardNumber, setCardNumber] = useState('');
+  const [cardName, setCardName] = useState('');
+  const [cardExpiry, setCardExpiry] = useState('');
+  const [cardCvv, setCardCvv] = useState('');
+  const [checkoutError, setCheckoutError] = useState('');
+  const [processingCheckout, setProcessingCheckout] = useState(false);
+
   useEffect(() => {
     const savedCondo = localStorage.getItem('zelify_condominio_gestao');
     if (!savedCondo) {
@@ -53,6 +79,21 @@ export default function ConfiguracoesPage() {
     setCodigoAcesso(condo.codigo_acesso);
     setLoading(false);
   }, [router]);
+
+  // Carrega contagem de chamados do mês se estiver no plano grátis
+  useEffect(() => {
+    if (!condominio) return;
+    
+    async function loadMonthlyCount() {
+      try {
+        const count = await db.getMonthlyChamadosCount(condominio!.id);
+        setMonthlyChamadosCount(count);
+      } catch (err) {
+        console.error('Erro ao contar chamados mensais:', err);
+      }
+    }
+    loadMonthlyCount();
+  }, [condominio]);
 
   // Limpar e formatar o slug (letras, números, hífen, sem espaços ou acentos)
   const formatSlug = (val: string) => {
@@ -140,6 +181,76 @@ export default function ConfiguracoesPage() {
     }
   };
 
+  const handleCheckout = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setCheckoutError('');
+    
+    if (checkoutTab === 'card') {
+      if (!cardNumber || !cardName || !cardExpiry || !cardCvv) {
+        setCheckoutError('Por favor, preencha todos os campos do cartão.');
+        return;
+      }
+      if (cardNumber.replace(/\s/g, '').length < 16) {
+        setCheckoutError('Número de cartão de crédito inválido.');
+        return;
+      }
+      if (cardExpiry.length < 5) {
+        setCheckoutError('Validade incorreta. Use o formato MM/AA.');
+        return;
+      }
+      if (cardCvv.length < 3) {
+        setCheckoutError('Código CVV inválido.');
+        return;
+      }
+    }
+    
+    setProcessingCheckout(true);
+    try {
+      // Simula tempo de resposta da API Asaas (2 segundos)
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      const updated = await db.updateCondominioPlan(
+        condominio!.id,
+        selectedUpgrade,
+        'active'
+      );
+      
+      if (updated) {
+        setCondominio(updated);
+        // Atualiza local storage
+        localStorage.setItem('zelify_condominio_gestao', JSON.stringify(updated));
+        
+        // Disparar evento para atualizar outros componentes
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new Event('storage'));
+        }
+        
+        setShowCheckoutModal(false);
+        // Limpar campos
+        setCardNumber('');
+        setCardName('');
+        setCardExpiry('');
+        setCardCvv('');
+        
+        alert(`Assinatura ativada com sucesso! Seu condomínio agora está no plano ${selectedUpgrade === 'pro' ? 'Zelify Pro' : 'Corporativo'}.`);
+      } else {
+        setCheckoutError('Não foi possível processar a assinatura.');
+      }
+    } catch (err) {
+      console.error(err);
+      setCheckoutError('Erro de processamento da transação. Tente novamente.');
+    } finally {
+      setProcessingCheckout(false);
+    }
+  };
+
+  const handleCopyPix = () => {
+    const fakePixKey = '00020126580014br.gov.bcb.pix0136kpgmpwthrnlrikkplrul5204000053039865405149.005802BR5914Zelify%20Condominio6009Sao%20Paulo62070503***6304ABCD';
+    navigator.clipboard.writeText(fakePixKey);
+    setCopiedPix(true);
+    setTimeout(() => setCopiedPix(false), 2000);
+  };
+
   if (loading) {
     return (
       <div className="h-full flex items-center justify-center py-20 text-zinc-500">
@@ -161,7 +272,34 @@ export default function ConfiguracoesPage() {
         <p className="text-xs text-zinc-500 font-medium">Personalize a identidade e acesso dos moradores</p>
       </div>
 
-      <div className="grid grid-cols-1 gap-6">
+      {/* SUB-ABAS DE NAVEGAÇÃO */}
+      <div className="flex border-b border-zinc-250 dark:border-zinc-800/80 gap-6">
+        <button
+          type="button"
+          onClick={() => setActiveTab('geral')}
+          className={`pb-3 text-xs font-bold uppercase tracking-wider transition-all border-b-2 cursor-pointer ${
+            activeTab === 'geral'
+              ? 'border-[#0033FF] text-[#0033FF] dark:text-[#3b82f6]'
+              : 'border-transparent text-zinc-550 dark:text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-300'
+          }`}
+        >
+          Geral
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab('faturamento')}
+          className={`pb-3 text-xs font-bold uppercase tracking-wider transition-all border-b-2 cursor-pointer ${
+            activeTab === 'faturamento'
+              ? 'border-[#0033FF] text-[#0033FF] dark:text-[#3b82f6]'
+              : 'border-transparent text-zinc-550 dark:text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-300'
+          }`}
+        >
+          Plano & Faturamento
+        </button>
+      </div>
+
+      {activeTab === 'geral' ? (
+        <div className="grid grid-cols-1 gap-6">
         
         {/* BOX DO LINK PÚBLICO */}
         <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-6 rounded-xl space-y-4 shadow-sm">
@@ -501,8 +639,491 @@ export default function ConfiguracoesPage() {
             </div>
           </form>
         </div>
-
       </div>
+      ) : (
+        <div className="space-y-6 animate-in fade-in duration-200">
+          {/* CARD DE STATUS DO PLANO ATUAL */}
+          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-6 rounded-xl space-y-4 shadow-sm relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-[200px] h-[200px] bg-[#0033FF]/5 blur-[60px] rounded-full pointer-events-none"></div>
+            
+            <div className="flex items-center justify-between flex-wrap gap-3">
+              <div className="space-y-1">
+                <div className="flex items-center space-x-2 text-[10px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-widest">
+                  <Layers className="w-3.5 h-3.5 text-[#0033FF]" />
+                  <span>Plano Atual</span>
+                </div>
+                <h3 className="text-lg font-black text-zinc-900 dark:text-white uppercase tracking-wider">
+                  {condominio?.plan_type === 'free' ? 'Zelify Starter (Grátis)' : 
+                   condominio?.plan_type === 'pro' ? 'Zelify Pro' : 'Zelify Corporativo'}
+                </h3>
+              </div>
+              <div className="flex gap-2">
+                <span className={`text-[10px] font-bold px-2 py-0.5 rounded border uppercase tracking-wider ${
+                  condominio?.subscription_status === 'active' 
+                    ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/15' 
+                    : 'bg-red-500/10 text-red-500 border-red-500/15 animate-pulse'
+                }`}>
+                  {condominio?.subscription_status === 'active' ? 'Assinatura Ativa' : 'Pendente (Bloqueado)'}
+                </span>
+              </div>
+            </div>
+
+            <div className="text-xs text-zinc-500 font-medium">
+              {condominio?.plan_type === 'free' ? (
+                <span>Seu condomínio possui limites mensais. Faça o upgrade para ter acesso ilimitado.</span>
+              ) : (
+                <span>
+                  Renovação programada para:{' '}
+                  <span className="font-bold text-zinc-700 dark:text-zinc-350 font-mono">
+                    {condominio?.current_period_end 
+                      ? new Date(condominio.current_period_end).toLocaleDateString('pt-BR') 
+                      : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString('pt-BR')}
+                  </span>
+                </span>
+              )}
+            </div>
+
+            {/* TRACKER DE LIMITES PARA PLANO GRÁTIS */}
+            {condominio?.plan_type === 'free' && (
+              <div className="pt-4 border-t border-zinc-150 dark:border-zinc-800/65 space-y-2">
+                <div className="flex justify-between items-center text-xs font-semibold">
+                  <span className="text-zinc-550 dark:text-zinc-500">Uso de Chamados (Mês Corrente):</span>
+                  <span className="text-zinc-800 dark:text-zinc-200 font-bold font-mono">
+                    {monthlyChamadosCount} / 15
+                  </span>
+                </div>
+                <div className="w-full bg-zinc-100 dark:bg-zinc-950 rounded-full h-2 overflow-hidden border border-zinc-200 dark:border-zinc-800/80">
+                  <div 
+                    className={`h-full transition-all duration-500 ${
+                      monthlyChamadosCount >= 15 ? 'bg-red-500' : 
+                      monthlyChamadosCount >= 12 ? 'bg-amber-550' : 'bg-[#0033FF]'
+                    }`}
+                    style={{ width: `${Math.min((monthlyChamadosCount / 15) * 100, 100)}%` }}
+                  ></div>
+                </div>
+                <p className="text-[10px] text-zinc-500 dark:text-zinc-400 leading-relaxed font-semibold">
+                  No plano Starter, seu condomínio está limitado a 15 chamados por mês (Manutenções e Achados). Ao atingir o limite, os moradores não conseguirão enviar novos chamados até o próximo mês ou até que seja feito o upgrade para o plano Pro.
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* LISTA DE OPÇÕES DE PLANOS */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+            {/* PLANO PRO */}
+            <div className={`bg-white dark:bg-zinc-900 border p-6 rounded-2xl flex flex-col justify-between shadow-sm dark:shadow-xl transition-all relative ${
+              condominio?.plan_type === 'pro' 
+                ? 'border-[#0033FF]' 
+                : 'border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700'
+            }`}>
+              {condominio?.plan_type === 'pro' && (
+                <div className="absolute top-3 right-3 text-[8px] bg-[#0033FF]/10 text-[#0033FF] border border-[#0033FF]/20 px-2 py-0.5 rounded-full font-black uppercase tracking-wider">
+                  Plano Ativo
+                </div>
+              )}
+              
+              <div className="space-y-4">
+                <div className="space-y-1">
+                  <span className="text-[9px] font-bold text-zinc-550 dark:text-zinc-500 uppercase tracking-widest">Para Síndicos</span>
+                  <h4 className="text-base font-black text-zinc-900 dark:text-white uppercase tracking-wider flex items-center">
+                    Zelify Pro
+                    <Sparkles className="w-4 h-4 text-[#0033FF] ml-1.5" />
+                  </h4>
+                </div>
+                
+                <div className="flex items-baseline">
+                  <span className="text-2xl font-black text-zinc-900 dark:text-white tracking-tight font-mono">R$ 149,00</span>
+                  <span className="text-zinc-500 text-xs font-semibold ml-1">/mês</span>
+                </div>
+
+                <hr className="border-zinc-200 dark:border-zinc-800" />
+
+                <ul className="space-y-2.5 text-xs font-semibold text-zinc-500 dark:text-zinc-400">
+                  <li className="flex items-center text-zinc-750 dark:text-zinc-300">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-500 mr-2 shrink-0" />
+                    Chamados de Manutenção Ilimitados
+                  </li>
+                  <li className="flex items-center text-zinc-750 dark:text-zinc-300">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-500 mr-2 shrink-0" />
+                    Achados e Perdidos Ilimitados
+                  </li>
+                  <li className="flex items-center text-zinc-750 dark:text-zinc-300">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-500 mr-2 shrink-0" />
+                    Mural Kanban Completo
+                  </li>
+                  <li className="flex items-center text-zinc-750 dark:text-zinc-300">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-500 mr-2 shrink-0" />
+                    Relatórios Operacionais Mensais
+                  </li>
+                  <li className="flex items-center text-zinc-750 dark:text-zinc-300">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-500 mr-2 shrink-0" />
+                    QR Code Oficial em Alta Resolução
+                  </li>
+                </ul>
+              </div>
+
+              <div className="pt-6">
+                <button
+                  type="button"
+                  disabled={condominio?.plan_type === 'pro'}
+                  onClick={() => {
+                    setSelectedUpgrade('pro');
+                    setShowCheckoutModal(true);
+                  }}
+                  className={`w-full text-xs font-bold py-2.5 rounded-lg transition-all text-center flex items-center justify-center space-x-1.5 ${
+                    condominio?.plan_type === 'pro'
+                      ? 'bg-zinc-100 dark:bg-zinc-950 text-zinc-400 border border-zinc-200 dark:border-zinc-800 cursor-not-allowed'
+                      : 'bg-[#0033FF] hover:bg-[#0033FF]/90 text-white shadow-[0_4px_15px_rgba(0,51,255,0.2)] active:scale-[0.98] cursor-pointer'
+                  }`}
+                >
+                  <CreditCard className="w-3.5 h-3.5" />
+                  <span>{condominio?.plan_type === 'pro' ? 'Plano Ativo' : 'Assinar Plano Pro'}</span>
+                </button>
+              </div>
+            </div>
+
+            {/* PLANO CORPORATIVO (SIMULADOR) */}
+            <div className={`bg-white dark:bg-zinc-900 border p-6 rounded-2xl flex flex-col justify-between shadow-sm dark:shadow-xl transition-all relative ${
+              condominio?.plan_type === 'corporate' 
+                ? 'border-[#0033FF]' 
+                : 'border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700'
+            }`}>
+              {condominio?.plan_type === 'corporate' && (
+                <div className="absolute top-3 right-3 text-[8px] bg-[#0033FF]/10 text-[#0033FF] border border-[#0033FF]/20 px-2 py-0.5 rounded-full font-black uppercase tracking-wider">
+                  Plano Ativo
+                </div>
+              )}
+              
+              <div className="space-y-4">
+                <div className="space-y-1">
+                  <span className="text-[9px] font-bold text-zinc-555 dark:text-zinc-500 uppercase tracking-widest">Para Administradoras</span>
+                  <h4 className="text-base font-black text-zinc-900 dark:text-white uppercase tracking-wider flex items-center">
+                    Zelify Corporate
+                    <Building className="w-4 h-4 text-[#0033FF] ml-1.5" />
+                  </h4>
+                </div>
+
+                {/* SIMULADOR DE PLANO */}
+                <div className="bg-zinc-50 dark:bg-zinc-950 p-3.5 rounded-xl border border-zinc-200 dark:border-zinc-800 space-y-3">
+                  <div className="flex justify-between items-center">
+                    <label htmlFor="condosQty" className="text-[9px] font-bold uppercase tracking-wider text-zinc-555 dark:text-zinc-500">
+                      Nº de Condomínios
+                    </label>
+                    <input
+                      id="condosQty"
+                      type="number"
+                      min={1}
+                      max={500}
+                      value={numCondos}
+                      onChange={(e) => setNumCondos(Math.max(1, parseInt(e.target.value) || 1))}
+                      className="w-16 px-2 py-1 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded text-center text-xs font-bold text-zinc-900 dark:text-white focus:outline-none focus:border-[#0033FF]/50"
+                    />
+                  </div>
+
+                  <div className="flex justify-between items-center text-[10px] text-zinc-500 font-semibold border-t border-zinc-200 dark:border-zinc-800/60 pt-2">
+                    <span>Preço / Prédio:</span>
+                    <span className="font-bold text-zinc-800 dark:text-zinc-200 font-mono">
+                      R$ {numCondos <= 15 ? '59,00' : numCondos <= 50 ? '49,00' : '39,00'}
+                    </span>
+                  </div>
+
+                  <div className="flex justify-between items-baseline border-t border-zinc-200 dark:border-zinc-800/60 pt-2">
+                    <span className="text-xs font-bold text-zinc-700 dark:text-zinc-350">Mensalidade Total:</span>
+                    <div className="flex items-baseline">
+                      <span className="text-lg font-black text-[#0033FF] font-mono">
+                        R$ {(numCondos * (numCondos <= 15 ? 59 : numCondos <= 50 ? 49 : 39)).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                      </span>
+                      <span className="text-zinc-500 text-[10px] font-semibold ml-0.5">/mês</span>
+                    </div>
+                  </div>
+                </div>
+
+                <hr className="border-zinc-200 dark:border-zinc-800" />
+
+                <ul className="space-y-2.5 text-xs font-semibold text-zinc-500 dark:text-zinc-400">
+                  <li className="flex items-center text-zinc-750 dark:text-zinc-300">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-500 mr-2 shrink-0" />
+                    Painel Multi-Condomínios Unificado
+                  </li>
+                  <li className="flex items-center text-zinc-750 dark:text-zinc-300">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-500 mr-2 shrink-0" />
+                    Controle de Manutenção Consolidado
+                  </li>
+                  <li className="flex items-center text-zinc-750 dark:text-zinc-300">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-500 mr-2 shrink-0" />
+                    Relatórios em PDF por Lote
+                  </li>
+                  <li className="flex items-center text-zinc-750 dark:text-zinc-300">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-500 mr-2 shrink-0" />
+                    Rodapé Customizado com sua Marca
+                  </li>
+                </ul>
+              </div>
+
+              <div className="pt-6">
+                <button
+                  type="button"
+                  disabled={condominio?.plan_type === 'corporate'}
+                  onClick={() => {
+                    setSelectedUpgrade('corporate');
+                    setShowCheckoutModal(true);
+                  }}
+                  className={`w-full text-xs font-bold py-2.5 rounded-lg transition-all text-center flex items-center justify-center space-x-1.5 border border-zinc-200 dark:border-zinc-800 ${
+                    condominio?.plan_type === 'corporate'
+                      ? 'bg-zinc-100 dark:bg-zinc-950 text-zinc-400 border-zinc-200 dark:border-zinc-800 cursor-not-allowed'
+                      : 'border-[#0033FF] text-[#0033FF] hover:bg-[#0033FF]/5 active:scale-[0.98] cursor-pointer'
+                  }`}
+                >
+                  <Calculator className="w-3.5 h-3.5" />
+                  <span>{condominio?.plan_type === 'corporate' ? 'Plano Ativo' : 'Assinar Plano Lote'}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL DE CHECKOUT SIMULADO */}
+      {showCheckoutModal && (
+        <div className="fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-[#0c0c0e] border border-zinc-800 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl relative">
+            {/* Linha superior azul */}
+            <div className="h-1 bg-[#0033FF]"></div>
+            
+            {/* Header do checkout */}
+            <div className="p-6 pb-4 border-b border-zinc-800/80 flex justify-between items-center">
+              <div>
+                <h3 className="text-sm font-bold text-white uppercase tracking-wider">Finalizar Assinatura</h3>
+                <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider mt-0.5">
+                  Simulação de pagamento Zelify
+                </p>
+              </div>
+              <button 
+                type="button"
+                onClick={() => setShowCheckoutModal(false)}
+                className="text-zinc-500 hover:text-white text-xs font-bold px-2.5 py-1 bg-zinc-900 border border-zinc-800 rounded-md transition-colors cursor-pointer"
+              >
+                Fechar
+              </button>
+            </div>
+
+            <form onSubmit={handleCheckout} className="p-6 space-y-4">
+              {checkoutError && (
+                <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-400 rounded-lg text-xs font-semibold flex items-center space-x-2">
+                  <AlertCircle className="w-4 h-4 shrink-0 text-red-400" />
+                  <span>{checkoutError}</span>
+                </div>
+              )}
+
+              {/* Detalhes do resumo */}
+              <div className="bg-zinc-950 p-3 rounded-lg border border-zinc-900 flex justify-between items-center text-xs">
+                <div>
+                  <p className="font-bold text-white uppercase">
+                    {selectedUpgrade === 'pro' ? 'Plano Zelify Pro' : 'Plano Zelify Corporate'}
+                  </p>
+                  <p className="text-[10px] text-zinc-550 mt-0.5">Renovação mensal automática</p>
+                </div>
+                <div className="text-right font-black text-[#0033FF] text-sm font-mono">
+                  {selectedUpgrade === 'pro' ? 'R$ 149,00' : 
+                   `R$ ${(numCondos * (numCondos <= 15 ? 59 : numCondos <= 50 ? 49 : 39)).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
+                </div>
+              </div>
+
+              {/* Abas de Pagamento */}
+              <div className="flex gap-2 p-1 bg-zinc-950 rounded-lg border border-zinc-900 text-xs">
+                <button
+                  type="button"
+                  onClick={() => { setCheckoutTab('pix'); setCheckoutError(''); }}
+                  className={`flex-1 py-1.5 rounded-md font-bold text-center transition-all cursor-pointer ${
+                    checkoutTab === 'pix' 
+                      ? 'bg-zinc-900 text-white shadow-sm' 
+                      : 'text-zinc-500 hover:text-zinc-300'
+                  }`}
+                >
+                  PIX
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setCheckoutTab('card'); setCheckoutError(''); }}
+                  className={`flex-1 py-1.5 rounded-md font-bold text-center transition-all cursor-pointer ${
+                    checkoutTab === 'card' 
+                      ? 'bg-zinc-900 text-white shadow-sm' 
+                      : 'text-zinc-500 hover:text-zinc-300'
+                  }`}
+                >
+                  Cartão de Crédito
+                </button>
+              </div>
+
+              {/* CONTEÚDO PIX */}
+              {checkoutTab === 'pix' ? (
+                <div className="space-y-4 flex flex-col items-center py-2">
+                  {/* SVG QR Code */}
+                  <div className="bg-white p-3 rounded-xl border border-zinc-200 shadow-inner">
+                    <svg className="w-32 h-32 text-zinc-950" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                      <rect width="100" height="100" fill="white" />
+                      <rect x="5" y="5" width="25" height="25" fill="black" />
+                      <rect x="8" y="8" width="19" height="19" fill="white" />
+                      <rect x="12" y="12" width="11" height="11" fill="black" />
+
+                      <rect x="70" y="5" width="25" height="25" fill="black" />
+                      <rect x="73" y="8" width="19" height="19" fill="white" />
+                      <rect x="77" y="12" width="11" height="11" fill="black" />
+
+                      <rect x="5" y="70" width="25" height="25" fill="black" />
+                      <rect x="8" y="73" width="19" height="19" fill="white" />
+                      <rect x="12" y="77" width="11" height="11" fill="black" />
+
+                      <rect x="35" y="5" width="10" height="5" fill="black" />
+                      <rect x="50" y="5" width="5" height="10" fill="black" />
+                      <rect x="60" y="10" width="5" height="5" fill="black" />
+                      <rect x="35" y="20" width="5" height="5" fill="black" />
+                      <rect x="45" y="20" width="10" height="5" fill="black" />
+                      <rect x="60" y="20" width="5" height="10" fill="black" />
+                      <rect x="35" y="35" width="15" height="5" fill="black" />
+                      <rect x="55" y="30" width="5" height="15" fill="black" />
+                      <rect x="70" y="35" width="10" height="5" fill="black" />
+                      <rect x="5" y="45" width="10" height="5" fill="black" />
+                      <rect x="20" y="45" width="5" height="10" fill="black" />
+                      <rect x="30" y="50" width="15" height="5" fill="black" />
+                      <rect x="50" y="45" width="5" height="15" fill="black" />
+                      <rect x="65" y="50" width="10" height="5" fill="black" />
+                      <rect x="80" y="45" width="15" height="5" fill="black" />
+                      <rect x="35" y="60" width="5" height="10" fill="black" />
+                      <rect x="45" y="65" width="15" height="5" fill="black" />
+                      <rect x="65" y="60" width="5" height="5" fill="black" />
+                      <rect x="35" y="75" width="10" height="5" fill="black" />
+                      <rect x="50" y="75" width="5" height="15" fill="black" />
+                      <rect x="60" y="80" width="15" height="5" fill="black" />
+                      <rect x="80" y="70" width="5" height="15" fill="black" />
+                      <rect x="90" y="80" width="5" height="10" fill="black" />
+                      <rect x="35" y="90" width="10" height="5" fill="black" />
+                      <rect x="55" y="90" width="15" height="5" fill="black" />
+                      <rect x="75" y="90" width="5" height="5" fill="black" />
+                    </svg>
+                  </div>
+                  <p className="text-[10px] text-zinc-550 dark:text-zinc-500 font-bold uppercase tracking-wider text-center">
+                    Aponte a câmera do celular ou copie o código Pix abaixo
+                  </p>
+                  
+                  <button
+                    type="button"
+                    onClick={handleCopyPix}
+                    className="w-full py-2 bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-bold rounded-lg border border-zinc-800 flex items-center justify-center space-x-1.5 transition-colors cursor-pointer"
+                  >
+                    {copiedPix ? (
+                      <>
+                        <Check className="w-3.5 h-3.5 text-emerald-500" />
+                        <span>Código Pix Copiado!</span>
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="w-3.5 h-3.5" />
+                        <span>Copiar Código Pix (Copia e Cola)</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              ) : (
+                /* CONTEÚDO CARTÃO DE CRÉDITO */
+                <div className="space-y-3 pt-1">
+                  <div>
+                    <label className="block text-[9px] font-bold uppercase tracking-wider text-zinc-500 mb-1">
+                      Nome no Cartão
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="Ex: CARLOS S SANTOS"
+                      value={cardName}
+                      onChange={(e) => setCardName(e.target.value.toUpperCase())}
+                      className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-white placeholder-zinc-705 focus:outline-none focus:border-[#0033FF]/50 font-semibold"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[9px] font-bold uppercase tracking-wider text-zinc-500 mb-1">
+                      Número do Cartão
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      maxLength={19}
+                      placeholder="0000 0000 0000 0000"
+                      value={cardNumber}
+                      onChange={(e) => {
+                        const v = e.target.value.replace(/\D/g, '').replace(/(\d{4})/g, '$1 ').trim();
+                        setCardNumber(v);
+                      }}
+                      className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-white placeholder-zinc-705 focus:outline-none focus:border-[#0033FF]/50 font-semibold font-mono"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-[9px] font-bold uppercase tracking-wider text-zinc-500 mb-1">
+                        Validade (MM/AA)
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        maxLength={5}
+                        placeholder="MM/AA"
+                        value={cardExpiry}
+                        onChange={(e) => {
+                          let v = e.target.value.replace(/\D/g, '');
+                          if (v.length > 2) {
+                            v = `${v.substring(0, 2)}/${v.substring(2, 4)}`;
+                          }
+                          setCardExpiry(v);
+                        }}
+                        className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-white placeholder-zinc-705 focus:outline-none focus:border-[#0033FF]/50 font-semibold font-mono"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[9px] font-bold uppercase tracking-wider text-zinc-500 mb-1">
+                        CVV
+                      </label>
+                      <input
+                        type="password"
+                        required
+                        maxLength={3}
+                        placeholder="000"
+                        value={cardCvv}
+                        onChange={(e) => setCardCvv(e.target.value.replace(/\D/g, ''))}
+                        className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-white placeholder-zinc-705 focus:outline-none focus:border-[#0033FF]/50 font-semibold font-mono text-center tracking-widest"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Botão de Finalizar */}
+              <div className="pt-4 border-t border-zinc-800 flex justify-end">
+                <button
+                  type="submit"
+                  disabled={processingCheckout}
+                  className="w-full bg-[#0033FF] hover:bg-[#0033FF]/90 text-white text-xs font-bold py-2.5 rounded-lg flex items-center justify-center space-x-1.5 transition-all shadow-[0_4px_15px_rgba(0,51,255,0.2)] active:scale-[0.98] disabled:opacity-50 cursor-pointer"
+                >
+                  {processingCheckout ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin mr-1.5 text-zinc-200" />
+                      <span>Processando via Asaas...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Lock className="w-3.5 h-3.5" />
+                      <span>
+                        {checkoutTab === 'pix' ? 'Confirmar Pix Pago' : 'Finalizar Assinatura'}
+                      </span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* ELEMENTO DO POSTER IMPRESSO (OCULTO EM TELA, EXIBIDO NO PRINT A4) */}
       <div 

@@ -140,6 +140,20 @@ export default function LoginPage() {
           </form>
         </div>
 
+        {/* DIRECIONAMENTO PARA CADASTRO */}
+        <div className="text-center">
+          <p className="text-xs text-zinc-500">
+            Não tem uma conta?{' '}
+            <button
+              type="button"
+              onClick={() => router.push('/cadastro')}
+              className="text-[#0033FF] hover:underline font-bold transition-all bg-transparent border-0 cursor-pointer"
+            >
+              Cadastre seu Condomínio
+            </button>
+          </p>
+        </div>
+
         {/* NOTA DO MODO MOCK */}
         {!isSupabaseConfigured && (
           <div className="bg-[#0f0f13]/40 border border-zinc-800/60 rounded-xl p-4 text-[11px] text-zinc-400 space-y-2">

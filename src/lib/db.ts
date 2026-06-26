@@ -168,6 +168,12 @@ const MOCK_CHAMADOS: Chamado[] = [
 
 // --- Classe para Acesso Local (Mock) ---
 
+export interface MockAuthCredential {
+  email: string;
+  password: string;
+  gestor_id: string;
+}
+
 class LocalDB {
   private isBrowser() {
     return typeof window !== 'undefined';
@@ -208,14 +214,29 @@ class LocalDB {
     return this.getStorageItem('zelify_chamados', MOCK_CHAMADOS);
   }
 
+  // Obter credenciais de login mock
+  getAuthCredentials(): MockAuthCredential[] {
+    return this.getStorageItem('zelify_auth_credentials', []);
+  }
+
   // Salvar condomínios
   saveCondominios(data: Condominio[]): void {
     this.setStorageItem('zelify_condominios', data);
   }
 
+  // Salvar gestores
+  saveGestores(data: UsuarioGestor[]): void {
+    this.setStorageItem('zelify_gestores', data);
+  }
+
   // Salvar chamados
   saveChamados(data: Chamado[]): void {
     this.setStorageItem('zelify_chamados', data);
+  }
+
+  // Salvar credenciais de login mock
+  saveAuthCredentials(data: MockAuthCredential[]): void {
+    this.setStorageItem('zelify_auth_credentials', data);
   }
 }
 
@@ -445,18 +466,24 @@ export const db = {
         condominio: condo
       };
     } else {
-      // Simulação no Modo Mock
-      // Síndico: sindico@viverbem.com / 123456
-      // Zelador: zelador@viverbem.com / 123456
-      if (password !== '123456') return null;
+      // 1. Procurar nas credenciais dinâmicas cadastradas
+      const credentials = localDB.getAuthCredentials();
+      const match = credentials.find(c => c.email.toLowerCase() === email.toLowerCase() && c.password === password);
       
-      const gestores = localDB.getGestores();
       let gestor: UsuarioGestor | undefined;
-      
-      if (email === 'sindico@viverbem.com') {
-        gestor = gestores.find(g => g.papel === 'sindico');
-      } else if (email === 'zelador@viverbem.com') {
-        gestor = gestores.find(g => g.papel === 'zelador');
+      if (match) {
+        const gestores = localDB.getGestores();
+        gestor = gestores.find(g => g.id === match.gestor_id);
+      } else {
+        // Fallback para os dados pré-semeados (mock padrão)
+        if (password !== '123456') return null;
+        
+        const gestores = localDB.getGestores();
+        if (email === 'sindico@viverbem.com') {
+          gestor = gestores.find(g => g.papel === 'sindico' && g.id === 'gestor-id-1');
+        } else if (email === 'zelador@viverbem.com') {
+          gestor = gestores.find(g => g.papel === 'zelador' && g.id === 'gestor-id-2');
+        }
       }
       
       if (!gestor) return null;
@@ -468,6 +495,138 @@ export const db = {
       return {
         gestor,
         condominio: condo
+      };
+    }
+  },
+
+  /**
+   * Verifica se um slug de condomínio é único e está disponível.
+   */
+  async isSlugUnique(slug: string): Promise<boolean> {
+    const cleanSlug = slug.trim().toLowerCase();
+    if (supabase) {
+      const { data, error } = await supabase
+        .from('condominios')
+        .select('id')
+        .eq('slug', cleanSlug)
+        .maybeSingle();
+      if (error) return false;
+      return !data;
+    } else {
+      const condominios = localDB.getCondominios();
+      const exists = condominios.some(c => c.slug.toLowerCase() === cleanSlug);
+      return !exists;
+    }
+  },
+
+  /**
+   * Efetua o cadastro do Gestor e criação do condomínio.
+   * Retorna os dados do gestor e do condomínio cadastrado.
+   */
+  async cadastrarGestor(dados: {
+    nome: string;
+    email: string;
+    password: string;
+    condominioNome: string;
+    condominioSlug: string;
+    codigoAcesso: string;
+  }): Promise<{ gestor: UsuarioGestor; condominio: Condominio }> {
+    if (supabase) {
+      // 1. Criar o usuário no Auth
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: dados.email,
+        password: dados.password,
+        options: {
+          data: {
+            nome: dados.nome
+          }
+        }
+      });
+      if (authError || !authData.user) {
+        throw new Error(authError?.message || 'Falha ao criar usuário de autenticação.');
+      }
+
+      // 2. Inserir o condomínio
+      const { data: condoData, error: condoError } = await supabase
+        .from('condominios')
+        .insert({
+          nome: dados.condominioNome,
+          slug: dados.condominioSlug.trim().toLowerCase(),
+          codigo_acesso: dados.codigoAcesso
+        })
+        .select()
+        .single();
+      if (condoError || !condoData) {
+        throw new Error(condoError?.message || 'Falha ao registrar o condomínio.');
+      }
+
+      // 3. Inserir o gestor vinculado
+      const { data: gestorData, error: gestorError } = await supabase
+        .from('usuarios_gestores')
+        .insert({
+          user_id: authData.user.id,
+          condominio_id: condoData.id,
+          nome: dados.nome,
+          papel: 'sindico'
+        })
+        .select()
+        .single();
+      if (gestorError || !gestorData) {
+        throw new Error(gestorError?.message || 'Falha ao registrar o perfil do gestor.');
+      }
+
+      return {
+        gestor: gestorData,
+        condominio: condoData
+      };
+    } else {
+      // 1. Validar unicidade do e-mail no Mock
+      const credentials = localDB.getAuthCredentials();
+      const emailExists = credentials.some(c => c.email.toLowerCase() === dados.email.toLowerCase()) || 
+                          dados.email === 'sindico@viverbem.com' || dados.email === 'zelador@viverbem.com';
+      if (emailExists) {
+        throw new Error('E-mail já cadastrado.');
+      }
+
+      // 2. Criar condomínio mock
+      const condoId = 'condo-mock-' + Math.random().toString(36).substring(2, 9);
+      const novoCondo: Condominio = {
+        id: condoId,
+        nome: dados.condominioNome,
+        slug: dados.condominioSlug.trim().toLowerCase(),
+        codigo_acesso: dados.codigoAcesso,
+        created_at: new Date().toISOString()
+      };
+      const condominios = localDB.getCondominios();
+      condominios.push(novoCondo);
+      localDB.saveCondominios(condominios);
+
+      // 3. Criar gestor mock
+      const gestorId = 'gestor-mock-' + Math.random().toString(36).substring(2, 9);
+      const novoGestor: UsuarioGestor = {
+        id: gestorId,
+        user_id: 'user-mock-' + Math.random().toString(36).substring(2, 9),
+        condominio_id: condoId,
+        nome: dados.nome,
+        papel: 'sindico',
+        created_at: new Date().toISOString()
+      };
+      const gestores = localDB.getGestores();
+      gestores.push(novoGestor);
+      localDB.saveGestores(gestores);
+
+      // 4. Salvar credencial de login mock
+      const novaCredencial: MockAuthCredential = {
+        email: dados.email,
+        password: dados.password,
+        gestor_id: gestorId
+      };
+      credentials.push(novaCredencial);
+      localDB.saveAuthCredentials(credentials);
+
+      return {
+        gestor: novoGestor,
+        condominio: novoCondo
       };
     }
   },

@@ -254,7 +254,10 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                 );
               })}
             </nav>
+          </div>
 
+          {/* MOBILE BOTTOM SECTION */}
+          <div className="space-y-4 pt-4 mt-auto">
             {/* UPGRADE CARD FOR FREE PLAN (MOBILE) */}
             {!isPortfolioView && condominio?.plan_type === 'free' && (
               <div className="p-4 rounded-xl bg-gradient-to-br from-[#0033FF]/15 via-[#0033FF]/5 to-transparent border border-[#0033FF]/20 relative overflow-hidden shadow-sm animate-in fade-in duration-300">
@@ -278,9 +281,8 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                 </button>
               </div>
             )}
-          </div>
 
-          <div className="border-t border-zinc-200 dark:border-white/[0.06] pt-4 space-y-3">
+            <div className="border-t border-zinc-200 dark:border-white/[0.06] pt-4 space-y-3">
             <div className="flex items-center space-x-3 px-2">
               <div className="w-8 h-8 rounded-full bg-[#0033FF]/10 border border-[#0033FF]/20 flex items-center justify-center text-[#0033FF] font-bold">
                 {gestor.nome.charAt(0)}
@@ -302,6 +304,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
             </button>
           </div>
         </div>
+      </div>
       )}
 
       {/* DESKTOP SIDEBAR */}
@@ -395,7 +398,10 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
               );
             })}
           </nav>
+        </div>
 
+        {/* BOTTOM SECTION */}
+        <div className="space-y-4 pt-4 mt-auto">
           {/* UPGRADE CARD FOR FREE PLAN */}
           {!isPortfolioView && condominio?.plan_type === 'free' && (
             <div className="mx-1 p-4 rounded-xl bg-gradient-to-br from-[#0033FF]/15 via-[#0033FF]/5 to-transparent border border-[#0033FF]/20 relative overflow-hidden shadow-sm animate-in fade-in duration-300">
@@ -416,28 +422,28 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
               </button>
             </div>
           )}
-        </div>
 
-        {/* PROFILE/FOOTER */}
-        <div className="border-t border-zinc-200 dark:border-white/[0.06] pt-4 flex items-center justify-between px-2">
-          <div className="flex items-center space-x-2.5 min-w-0">
-            <div className="w-7 h-7 rounded-full bg-[#0033FF]/10 border border-[#0033FF]/20 flex items-center justify-center text-[#0033FF] shrink-0 text-xs font-semibold">
-              {gestor.nome.charAt(0)}
+          {/* PROFILE/FOOTER */}
+          <div className="border-t border-zinc-200 dark:border-white/[0.06] pt-4 flex items-center justify-between px-2">
+            <div className="flex items-center space-x-2.5 min-w-0">
+              <div className="w-7 h-7 rounded-full bg-[#0033FF]/10 border border-[#0033FF]/20 flex items-center justify-center text-[#0033FF] shrink-0 text-xs font-semibold">
+                {gestor.nome.charAt(0)}
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs font-bold text-zinc-900 dark:text-white truncate leading-tight">{gestor.nome}</p>
+                <p className="text-[9px] text-zinc-550 uppercase font-bold tracking-wider leading-none mt-1">
+                  {gestor.papel === 'sindico' ? 'Síndico' : 'Zelador'}
+                </p>
+              </div>
             </div>
-            <div className="min-w-0">
-              <p className="text-xs font-bold text-zinc-900 dark:text-white truncate leading-tight">{gestor.nome}</p>
-              <p className="text-[9px] text-zinc-550 uppercase font-bold tracking-wider leading-none mt-1">
-                {gestor.papel === 'sindico' ? 'Síndico' : 'Zelador'}
-              </p>
-            </div>
+            <button
+              onClick={handleLogout}
+              className="p-1.5 text-zinc-500 hover:text-red-400 hover:bg-red-500/10 rounded-md transition-all shrink-0 border border-transparent hover:border-red-900/30"
+              title="Sair da Conta"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
           </div>
-          <button
-            onClick={handleLogout}
-            className="p-1.5 text-zinc-500 hover:text-red-400 hover:bg-red-500/10 rounded-md transition-all shrink-0 border border-transparent hover:border-red-900/30"
-            title="Sair da Conta"
-          >
-            <LogOut className="w-4 h-4" />
-          </button>
         </div>
       </aside>
 

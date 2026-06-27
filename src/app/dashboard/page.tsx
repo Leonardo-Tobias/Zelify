@@ -326,6 +326,26 @@ function DashboardHomeContent() {
 
   return (
     <div className="space-y-6 relative">
+      {/* BANNER DE ASSINATURA PENDENTE/BLOQUEADA */}
+      {condominio?.subscription_status !== 'active' && (
+        <div className="p-4 bg-red-500/10 border border-red-500/20 text-red-500 rounded-xl text-xs font-semibold leading-relaxed flex items-center justify-between gap-4 animate-in slide-in-from-top-4 duration-300">
+          <div className="flex items-start space-x-2.5">
+            <AlertTriangle className="w-4 h-4 shrink-0 text-red-500 mt-0.5" />
+            <div>
+              <p className="font-bold text-zinc-900 dark:text-white">Assinatura Suspensa (Bloqueada)</p>
+              <p className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-0.5 font-medium">
+                Seu portal de moradores está bloqueado para novos chamados devido a pendências de pagamento. Regularize para reestabelecer o serviço.
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={() => router.push('/dashboard/configuracoes?tab=faturamento')}
+            className="bg-red-600 hover:bg-red-500 text-white text-[11px] font-bold px-3 py-1.5 rounded-lg shrink-0 transition-all active:scale-[0.97] cursor-pointer"
+          >
+            Regularizar Assinatura
+          </button>
+        </div>
+      )}
       {/* CABEÇALHO */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-zinc-200 dark:border-zinc-800 pb-4">
         <div>

@@ -18,7 +18,8 @@ import {
   Moon,
   Building2,
   ArrowLeft,
-  Lock
+  Lock,
+  Sparkles
 } from 'lucide-react';
 import { db, Condominio, UsuarioGestor } from '@/lib/db';
 
@@ -253,6 +254,30 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                 );
               })}
             </nav>
+
+            {/* UPGRADE CARD FOR FREE PLAN (MOBILE) */}
+            {!isPortfolioView && condominio?.plan_type === 'free' && (
+              <div className="p-4 rounded-xl bg-gradient-to-br from-[#0033FF]/15 via-[#0033FF]/5 to-transparent border border-[#0033FF]/20 relative overflow-hidden shadow-sm animate-in fade-in duration-300">
+                <div className="absolute -right-4 -bottom-4 w-16 h-16 bg-[#0033FF]/10 blur-[20px] rounded-full pointer-events-none"></div>
+                <div className="flex items-center space-x-2 text-[10px] font-bold text-[#0033FF] uppercase tracking-wider mb-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-[#0033FF] animate-pulse" />
+                  <span>Plano Grátis</span>
+                </div>
+                <p className="text-[11px] font-bold text-zinc-900 dark:text-white leading-tight">Limite de 15 Chamados/mês</p>
+                <p className="text-[10px] text-zinc-500 dark:text-zinc-400 mt-1 leading-normal font-medium">
+                  Faça o upgrade e libere chamados ilimitados para seus moradores.
+                </p>
+                <button
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    router.push('/dashboard/configuracoes?tab=faturamento');
+                  }}
+                  className="w-full mt-3 py-1.5 bg-[#0033FF] hover:bg-[#0033FF]/90 text-white text-[10px] font-bold rounded-lg transition-all active:scale-[0.97] cursor-pointer text-center block shadow-[0_2px_8px_rgba(0,51,255,0.2)]"
+                >
+                  Fazer Upgrade
+                </button>
+              </div>
+            )}
           </div>
 
           <div className="border-t border-zinc-200 dark:border-white/[0.06] pt-4 space-y-3">
@@ -370,6 +395,27 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
               );
             })}
           </nav>
+
+          {/* UPGRADE CARD FOR FREE PLAN */}
+          {!isPortfolioView && condominio?.plan_type === 'free' && (
+            <div className="mx-1 p-4 rounded-xl bg-gradient-to-br from-[#0033FF]/15 via-[#0033FF]/5 to-transparent border border-[#0033FF]/20 relative overflow-hidden shadow-sm animate-in fade-in duration-300">
+              <div className="absolute -right-4 -bottom-4 w-16 h-16 bg-[#0033FF]/10 blur-[20px] rounded-full pointer-events-none"></div>
+              <div className="flex items-center space-x-2 text-[10px] font-bold text-[#0033FF] uppercase tracking-wider mb-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-[#0033FF] animate-pulse" />
+                <span>Plano Grátis</span>
+              </div>
+              <p className="text-[11px] font-bold text-zinc-900 dark:text-white leading-tight">Limite de 15 Chamados/mês</p>
+              <p className="text-[10px] text-zinc-500 dark:text-zinc-400 mt-1 leading-normal font-medium">
+                Faça o upgrade e libere chamados ilimitados para seus moradores.
+              </p>
+              <button
+                onClick={() => router.push('/dashboard/configuracoes?tab=faturamento')}
+                className="w-full mt-3 py-1.5 bg-[#0033FF] hover:bg-[#0033FF]/90 text-white text-[10px] font-bold rounded-lg transition-all active:scale-[0.97] cursor-pointer text-center block shadow-[0_2px_8px_rgba(0,51,255,0.2)]"
+              >
+                Fazer Upgrade
+              </button>
+            </div>
+          )}
         </div>
 
         {/* PROFILE/FOOTER */}

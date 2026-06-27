@@ -80,6 +80,16 @@ export default function ConfiguracoesPage() {
     setLoading(false);
   }, [router]);
 
+  // Carrega a aba a partir da URL se fornecida
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const tabParam = new URLSearchParams(window.location.search).get('tab');
+      if (tabParam === 'faturamento') {
+        setActiveTab('faturamento');
+      }
+    }
+  }, []);
+
   // Carrega contagem de chamados do mês se estiver no plano grátis
   useEffect(() => {
     if (!condominio) return;
@@ -657,7 +667,7 @@ export default function ConfiguracoesPage() {
                    condominio?.plan_type === 'pro' ? 'Zelify Pro' : 'Zelify Corporativo'}
                 </h3>
               </div>
-              <div className="flex gap-2">
+              <div className="flex items-center gap-2">
                 <span className={`text-[10px] font-bold px-2 py-0.5 rounded border uppercase tracking-wider ${
                   condominio?.subscription_status === 'active' 
                     ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/15' 
@@ -665,6 +675,18 @@ export default function ConfiguracoesPage() {
                 }`}>
                   {condominio?.subscription_status === 'active' ? 'Assinatura Ativa' : 'Pendente (Bloqueado)'}
                 </span>
+                {condominio?.subscription_status !== 'active' && condominio?.plan_type !== 'free' && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedUpgrade(condominio!.plan_type as 'pro' | 'corporate');
+                      setShowCheckoutModal(true);
+                    }}
+                    className="text-[10px] font-bold bg-red-600 hover:bg-red-500 text-white px-2.5 py-0.5 rounded border border-red-500/20 transition-all active:scale-[0.95] cursor-pointer shadow-sm animate-pulse"
+                  >
+                    Regularizar Agora
+                  </button>
+                )}
               </div>
             </div>
 
@@ -674,7 +696,7 @@ export default function ConfiguracoesPage() {
               ) : (
                 <span>
                   Renovação programada para:{' '}
-                  <span className="font-bold text-zinc-700 dark:text-zinc-350 font-mono">
+                  <span className="font-bold text-zinc-700 dark:text-zinc-350">
                     {condominio?.current_period_end 
                       ? new Date(condominio.current_period_end).toLocaleDateString('pt-BR') 
                       : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString('pt-BR')}
@@ -688,7 +710,7 @@ export default function ConfiguracoesPage() {
               <div className="pt-4 border-t border-zinc-150 dark:border-zinc-800/65 space-y-2">
                 <div className="flex justify-between items-center text-xs font-semibold">
                   <span className="text-zinc-550 dark:text-zinc-500">Uso de Chamados (Mês Corrente):</span>
-                  <span className="text-zinc-800 dark:text-zinc-200 font-bold font-mono">
+                  <span className="text-zinc-800 dark:text-zinc-200 font-extrabold">
                     {monthlyChamadosCount} / 15
                   </span>
                 </div>
@@ -732,7 +754,7 @@ export default function ConfiguracoesPage() {
                 </div>
                 
                 <div className="flex items-baseline">
-                  <span className="text-2xl font-black text-zinc-900 dark:text-white tracking-tight font-mono">R$ 149,00</span>
+                  <span className="text-2xl font-black text-zinc-900 dark:text-white tracking-tight">R$ 149,00</span>
                   <span className="text-zinc-500 text-xs font-semibold ml-1">/mês</span>
                 </div>
 
@@ -765,19 +787,23 @@ export default function ConfiguracoesPage() {
               <div className="pt-6">
                 <button
                   type="button"
-                  disabled={condominio?.plan_type === 'pro'}
+                  disabled={condominio?.plan_type === 'pro' && condominio?.subscription_status === 'active'}
                   onClick={() => {
                     setSelectedUpgrade('pro');
                     setShowCheckoutModal(true);
                   }}
                   className={`w-full text-xs font-bold py-2.5 rounded-lg transition-all text-center flex items-center justify-center space-x-1.5 ${
-                    condominio?.plan_type === 'pro'
+                    condominio?.plan_type === 'pro' && condominio?.subscription_status === 'active'
                       ? 'bg-zinc-100 dark:bg-zinc-950 text-zinc-400 border border-zinc-200 dark:border-zinc-800 cursor-not-allowed'
                       : 'bg-[#0033FF] hover:bg-[#0033FF]/90 text-white shadow-[0_4px_15px_rgba(0,51,255,0.2)] active:scale-[0.98] cursor-pointer'
                   }`}
                 >
                   <CreditCard className="w-3.5 h-3.5" />
-                  <span>{condominio?.plan_type === 'pro' ? 'Plano Ativo' : 'Assinar Plano Pro'}</span>
+                  <span>
+                    {condominio?.plan_type === 'pro' 
+                      ? (condominio?.subscription_status === 'active' ? 'Plano Ativo' : 'Regularizar Assinatura') 
+                      : 'Assinar Plano Pro'}
+                  </span>
                 </button>
               </div>
             </div>
@@ -809,20 +835,36 @@ export default function ConfiguracoesPage() {
                     <label htmlFor="condosQty" className="text-[9px] font-bold uppercase tracking-wider text-zinc-555 dark:text-zinc-500">
                       Nº de Condomínios
                     </label>
-                    <input
-                      id="condosQty"
-                      type="number"
-                      min={1}
-                      max={500}
-                      value={numCondos}
-                      onChange={(e) => setNumCondos(Math.max(1, parseInt(e.target.value) || 1))}
-                      className="w-16 px-2 py-1 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded text-center text-xs font-bold text-zinc-900 dark:text-white focus:outline-none focus:border-[#0033FF]/50"
-                    />
+                    <div className="flex items-center space-x-1 bg-zinc-100 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-0.5 shadow-inner">
+                      <button
+                        type="button"
+                        onClick={() => setNumCondos(prev => Math.max(1, prev - 1))}
+                        className="w-6 h-6 rounded bg-zinc-200 dark:bg-zinc-900 hover:bg-zinc-300 dark:hover:bg-zinc-850 active:scale-[0.92] text-zinc-700 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white flex items-center justify-center font-bold transition-all border border-zinc-300/40 dark:border-zinc-800/80 cursor-pointer text-xs select-none"
+                      >
+                        -
+                      </button>
+                      <input
+                        id="condosQty"
+                        type="number"
+                        min={1}
+                        max={500}
+                        value={numCondos}
+                        onChange={(e) => setNumCondos(Math.max(1, parseInt(e.target.value) || 1))}
+                        className="w-10 bg-transparent text-center text-xs font-bold font-sans text-zinc-900 dark:text-white focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setNumCondos(prev => Math.min(500, prev + 1))}
+                        className="w-6 h-6 rounded bg-[#0033FF] hover:bg-[#0033FF]/90 hover:shadow-[0_0_8px_rgba(0,51,255,0.4)] active:scale-[0.92] text-white flex items-center justify-center font-bold transition-all border border-[#0033FF]/45 cursor-pointer text-xs select-none"
+                      >
+                        +
+                      </button>
+                    </div>
                   </div>
 
                   <div className="flex justify-between items-center text-[10px] text-zinc-500 font-semibold border-t border-zinc-200 dark:border-zinc-800/60 pt-2">
                     <span>Preço / Prédio:</span>
-                    <span className="font-bold text-zinc-800 dark:text-zinc-200 font-mono">
+                    <span className="font-bold text-zinc-800 dark:text-zinc-200">
                       R$ {numCondos <= 15 ? '59,00' : numCondos <= 50 ? '49,00' : '39,00'}
                     </span>
                   </div>
@@ -830,7 +872,7 @@ export default function ConfiguracoesPage() {
                   <div className="flex justify-between items-baseline border-t border-zinc-200 dark:border-zinc-800/60 pt-2">
                     <span className="text-xs font-bold text-zinc-700 dark:text-zinc-350">Mensalidade Total:</span>
                     <div className="flex items-baseline">
-                      <span className="text-lg font-black text-[#0033FF] font-mono">
+                      <span className="text-lg font-black text-[#0033FF]">
                         R$ {(numCondos * (numCondos <= 15 ? 59 : numCondos <= 50 ? 49 : 39)).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                       </span>
                       <span className="text-zinc-500 text-[10px] font-semibold ml-0.5">/mês</span>
@@ -863,19 +905,23 @@ export default function ConfiguracoesPage() {
               <div className="pt-6">
                 <button
                   type="button"
-                  disabled={condominio?.plan_type === 'corporate'}
+                  disabled={condominio?.plan_type === 'corporate' && condominio?.subscription_status === 'active'}
                   onClick={() => {
                     setSelectedUpgrade('corporate');
                     setShowCheckoutModal(true);
                   }}
-                  className={`w-full text-xs font-bold py-2.5 rounded-lg transition-all text-center flex items-center justify-center space-x-1.5 border border-zinc-200 dark:border-zinc-800 ${
-                    condominio?.plan_type === 'corporate'
+                  className={`w-full text-xs font-bold py-2.5 rounded-lg transition-all text-center flex items-center justify-center space-x-1.5 border ${
+                    condominio?.plan_type === 'corporate' && condominio?.subscription_status === 'active'
                       ? 'bg-zinc-100 dark:bg-zinc-950 text-zinc-400 border-zinc-200 dark:border-zinc-800 cursor-not-allowed'
                       : 'border-[#0033FF] text-[#0033FF] hover:bg-[#0033FF]/5 active:scale-[0.98] cursor-pointer'
                   }`}
                 >
                   <Calculator className="w-3.5 h-3.5" />
-                  <span>{condominio?.plan_type === 'corporate' ? 'Plano Ativo' : 'Assinar Plano Lote'}</span>
+                  <span>
+                    {condominio?.plan_type === 'corporate' 
+                      ? (condominio?.subscription_status === 'active' ? 'Plano Ativo' : 'Regularizar Assinatura') 
+                      : 'Assinar Plano Lote'}
+                  </span>
                 </button>
               </div>
             </div>
@@ -923,7 +969,7 @@ export default function ConfiguracoesPage() {
                   </p>
                   <p className="text-[10px] text-zinc-550 mt-0.5">Renovação mensal automática</p>
                 </div>
-                <div className="text-right font-black text-[#0033FF] text-sm font-mono">
+                <div className="text-right font-black text-[#0033FF] text-sm">
                   {selectedUpgrade === 'pro' ? 'R$ 149,00' : 
                    `R$ ${(numCondos * (numCondos <= 15 ? 59 : numCondos <= 50 ? 49 : 39)).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
                 </div>
@@ -1055,7 +1101,7 @@ export default function ConfiguracoesPage() {
                         const v = e.target.value.replace(/\D/g, '').replace(/(\d{4})/g, '$1 ').trim();
                         setCardNumber(v);
                       }}
-                      className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-white placeholder-zinc-705 focus:outline-none focus:border-[#0033FF]/50 font-semibold font-mono"
+                      className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-white placeholder-zinc-705 focus:outline-none focus:border-[#0033FF]/50 font-semibold"
                     />
                   </div>
 
@@ -1077,7 +1123,7 @@ export default function ConfiguracoesPage() {
                           }
                           setCardExpiry(v);
                         }}
-                        className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-white placeholder-zinc-705 focus:outline-none focus:border-[#0033FF]/50 font-semibold font-mono"
+                        className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-white placeholder-zinc-705 focus:outline-none focus:border-[#0033FF]/50 font-semibold"
                       />
                     </div>
                     <div>
@@ -1091,7 +1137,7 @@ export default function ConfiguracoesPage() {
                         placeholder="000"
                         value={cardCvv}
                         onChange={(e) => setCardCvv(e.target.value.replace(/\D/g, ''))}
-                        className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-white placeholder-zinc-705 focus:outline-none focus:border-[#0033FF]/50 font-semibold font-mono text-center tracking-widest"
+                        className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-white placeholder-zinc-705 focus:outline-none focus:border-[#0033FF]/50 font-semibold text-center tracking-widest"
                       />
                     </div>
                   </div>

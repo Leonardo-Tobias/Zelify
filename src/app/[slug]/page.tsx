@@ -522,7 +522,7 @@ export default function MoradorPortal() {
   
   const resolvidosRecentes = chamados.filter(c => c.tipo === 'manutencao' && c.status === 'resolvido');
 
-  const isLimitReached = condominio.plan_type === 'free' && monthlyCount >= 15;
+  const isLimitReached = condominio.subscription_status !== 'active' || (condominio.plan_type === 'free' && monthlyCount >= 15);
 
   return (
     <div className="min-h-screen bg-zinc-950 pb-24 font-sans antialiased text-zinc-300 relative">
@@ -925,7 +925,11 @@ export default function MoradorPortal() {
                       <div className="p-3.5 bg-red-500/10 border border-red-500/20 text-red-405 rounded-lg text-xs font-semibold leading-relaxed flex items-start space-x-2 animate-in fade-in duration-200 text-left">
                         <AlertCircle className="w-4 h-4 shrink-0 text-red-400 mt-0.5" />
                         <span>
-                          Limite de alertas mensais atingido para este condomínio. A administração do prédio já foi notificada para realizar a atualização do plano. Se você for o síndico, acesse o seu painel do Zelify para liberar novos chamados.
+                          {condominio.subscription_status !== 'active' ? (
+                            'O portal deste condomínio está temporariamente suspenso devido a pendências financeiras na assinatura. Se você for o síndico, acesse o seu painel do Zelify para regularizar o pagamento.'
+                          ) : (
+                            'Limite de alertas mensais atingido para este condomínio. A administração do prédio já foi notificada para realizar a atualização do plano. Se você for o síndico, acesse o seu painel do Zelify para liberar novos chamados.'
+                          )}
                         </span>
                       </div>
                       <button

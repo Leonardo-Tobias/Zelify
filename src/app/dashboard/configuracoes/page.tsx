@@ -242,7 +242,7 @@ export default function ConfiguracoesPage() {
         setCardExpiry('');
         setCardCvv('');
         
-        alert(`Assinatura ativada com sucesso! Seu condomínio agora está no plano ${selectedUpgrade === 'pro' ? 'Zelify Pro' : 'Corporativo'}.`);
+        alert(`Assinatura ativada com sucesso! Seu condomínio agora está no plano ${selectedUpgrade === 'pro' ? 'Zelify Pro' : 'Zelify Corporate'}.`);
       } else {
         setCheckoutError('Não foi possível processar a assinatura.');
       }
@@ -664,7 +664,7 @@ export default function ConfiguracoesPage() {
                 </div>
                 <h3 className="text-lg font-black text-zinc-900 dark:text-white uppercase tracking-wider">
                   {condominio?.plan_type === 'free' ? 'Zelify Starter (Grátis)' : 
-                   condominio?.plan_type === 'pro' ? 'Zelify Pro' : 'Zelify Corporativo'}
+                   condominio?.plan_type === 'pro' ? 'Zelify Pro' : 'Zelify Corporate'}
                 </h3>
               </div>
               <div className="flex items-center gap-2">
@@ -910,17 +910,17 @@ export default function ConfiguracoesPage() {
                     setSelectedUpgrade('corporate');
                     setShowCheckoutModal(true);
                   }}
-                  className={`w-full text-xs font-bold py-2.5 rounded-lg transition-all text-center flex items-center justify-center space-x-1.5 border ${
+                  className={`w-full text-xs font-bold py-2.5 rounded-lg transition-all text-center flex items-center justify-center space-x-1.5 ${
                     condominio?.plan_type === 'corporate' && condominio?.subscription_status === 'active'
-                      ? 'bg-zinc-100 dark:bg-zinc-950 text-zinc-400 border-zinc-200 dark:border-zinc-800 cursor-not-allowed'
-                      : 'border-[#0033FF] text-[#0033FF] hover:bg-[#0033FF]/5 active:scale-[0.98] cursor-pointer'
+                      ? 'bg-zinc-100 dark:bg-zinc-950 text-zinc-400 border border-zinc-200 dark:border-zinc-800 cursor-not-allowed'
+                      : 'bg-[#0033FF] hover:bg-[#0033FF]/90 text-white shadow-[0_4px_15px_rgba(0,51,255,0.2)] active:scale-[0.98] cursor-pointer'
                   }`}
                 >
                   <Calculator className="w-3.5 h-3.5" />
                   <span>
                     {condominio?.plan_type === 'corporate' 
                       ? (condominio?.subscription_status === 'active' ? 'Plano Ativo' : 'Regularizar Assinatura') 
-                      : 'Assinar Plano Lote'}
+                      : 'Assinar Plano Corporate'}
                   </span>
                 </button>
               </div>

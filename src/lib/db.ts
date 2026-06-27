@@ -723,10 +723,12 @@ export const db = {
   async updateCondominioPlan(
     id: string,
     planType: 'free' | 'pro' | 'corporate',
-    subscriptionStatus: 'active' | 'past_due' | 'canceled'
+    subscriptionStatus: 'active' | 'past_due' | 'canceled',
+    billingInterval: 'monthly' | 'yearly' = 'monthly'
   ): Promise<Condominio | null> {
-    // Definir fim do período como 30 dias a partir de hoje
-    const periodEnd = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+    // Definir fim do período como 30 ou 365 dias a partir de hoje
+    const days = billingInterval === 'yearly' ? 365 : 30;
+    const periodEnd = new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString();
     
     if (supabase) {
       const { data, error } = await supabase

@@ -51,6 +51,7 @@ export default function ConfiguracoesPage() {
 
   // Estados de Faturamento
   const [monthlyChamadosCount, setMonthlyChamadosCount] = useState(0);
+  const [isAnnual, setIsAnnual] = useState(false);
   const [numCondos, setNumCondos] = useState(5); // Simulador corporativo
   const [showCheckoutModal, setShowCheckoutModal] = useState(false);
   const [selectedUpgrade, setSelectedUpgrade] = useState<'pro' | 'corporate'>('pro');
@@ -100,9 +101,14 @@ export default function ConfiguracoesPage() {
       const search = new URLSearchParams(window.location.search);
       const tabParam = search.get('tab');
       const planParam = search.get('plan');
+      const intervalParam = search.get('interval');
       
       if (tabParam === 'faturamento') {
         setActiveTab('faturamento');
+        
+        if (intervalParam === 'yearly') {
+          setIsAnnual(true);
+        }
         
         if (planParam === 'pro' || planParam === 'corporate') {
           setSelectedUpgrade(planParam);
@@ -248,7 +254,8 @@ export default function ConfiguracoesPage() {
       const updated = await db.updateCondominioPlan(
         condominio!.id,
         selectedUpgrade,
-        'active'
+        'active',
+        isAnnual ? 'yearly' : 'monthly'
       );
       
       if (updated) {
@@ -298,6 +305,17 @@ export default function ConfiguracoesPage() {
 
   const origin = typeof window !== 'undefined' ? window.location.origin : '';
   const publicUrl = `${origin}/${slug}`;
+
+  // Preços dinâmicos baseados no Toggle Mensal / Anual
+  const pricePro = isAnnual ? 124 : 149;
+  
+  let priceCorporatePerCondo = isAnnual ? 49 : 59;
+  if (numCondos >= 16 && numCondos <= 50) {
+    priceCorporatePerCondo = isAnnual ? 39 : 49;
+  } else if (numCondos > 50) {
+    priceCorporatePerCondo = isAnnual ? 29 : 39;
+  }
+  const totalCorporatePrice = numCondos * priceCorporatePerCondo;
 
   return (
     <div className="space-y-6 max-w-2xl relative">
@@ -756,6 +774,39 @@ export default function ConfiguracoesPage() {
             )}
           </div>
 
+          {/* Toggle Switch */}
+          <div className="flex items-center justify-center py-2 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 p-4 rounded-xl shadow-sm">
+            <div className="bg-zinc-200/60 dark:bg-zinc-900 p-1 rounded-full flex items-center space-x-1 border border-zinc-250 dark:border-zinc-800/80">
+              <button
+                type="button"
+                onClick={() => setIsAnnual(false)}
+                className={`px-4 py-1.5 text-[10px] font-black uppercase tracking-wider rounded-full transition-all duration-300 cursor-pointer ${
+                  !isAnnual 
+                    ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white shadow-sm' 
+                    : 'text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-300'
+                }`}
+              >
+                Mensal
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsAnnual(true)}
+                className={`px-4 py-1.5 text-[10px] font-black uppercase tracking-wider rounded-full transition-all duration-300 flex items-center space-x-1.5 cursor-pointer ${
+                  isAnnual 
+                    ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white shadow-sm' 
+                    : 'text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-300'
+                }`}
+              >
+                <span>Anual</span>
+                <span className={`text-[7px] px-1 py-0.5 rounded-full font-black tracking-wider transition-colors duration-300 ${
+                  isAnnual ? 'bg-[#0033FF] text-white' : 'bg-[#0033FF]/15 text-[#0033FF]'
+                }`}>
+                  2 MESES GRÁTIS
+                </span>
+              </button>
+            </div>
+          </div>
+
           {/* LISTA DE OPÇÕES DE PLANOS */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
             {/* PLANO PRO */}
@@ -779,9 +830,16 @@ export default function ConfiguracoesPage() {
                   </h4>
                 </div>
                 
-                <div className="flex items-baseline">
-                  <span className="text-2xl font-black text-zinc-900 dark:text-white tracking-tight">R$ 149,00</span>
-                  <span className="text-zinc-500 text-xs font-semibold ml-1">/mês</span>
+                <div className="flex flex-col">
+                  <div className="flex items-baseline">
+                    <span className="text-2xl font-black text-zinc-900 dark:text-white tracking-tight">R$ {pricePro},00</span>
+                    <span className="text-zinc-500 text-xs font-semibold ml-1">/mês</span>
+                  </div>
+                  {isAnnual && (
+                    <span className="text-[10px] text-zinc-400 font-bold mt-1 text-left">
+                      Cobrado anualmente R$ 1.488/ano
+                    </span>
+                  )}
                 </div>
 
                 <hr className="border-zinc-200 dark:border-zinc-800" />
@@ -896,17 +954,24 @@ export default function ConfiguracoesPage() {
                   <div className="flex justify-between items-center text-[10px] text-zinc-500 font-semibold border-t border-zinc-200 dark:border-zinc-800/60 pt-2">
                     <span>Preço / Prédio:</span>
                     <span className="font-bold text-zinc-800 dark:text-zinc-200">
-                      R$ {numCondos <= 15 ? '59,00' : numCondos <= 50 ? '49,00' : '39,00'}
+                      R$ {priceCorporatePerCondo},00
                     </span>
                   </div>
 
                   <div className="flex justify-between items-baseline border-t border-zinc-200 dark:border-zinc-800/60 pt-2">
                     <span className="text-xs font-bold text-zinc-700 dark:text-zinc-350">Mensalidade Total:</span>
-                    <div className="flex items-baseline">
-                      <span className="text-lg font-black text-[#0033FF]">
-                        R$ {(numCondos * (numCondos <= 15 ? 59 : numCondos <= 50 ? 49 : 39)).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                      </span>
-                      <span className="text-zinc-500 text-[10px] font-semibold ml-0.5">/mês</span>
+                    <div className="flex flex-col items-end">
+                      <div className="flex items-baseline">
+                        <span className="text-lg font-black text-[#0033FF]">
+                          R$ {totalCorporatePrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        </span>
+                        <span className="text-zinc-500 text-[10px] font-semibold ml-0.5">/mês</span>
+                      </div>
+                      {isAnnual && (
+                        <span className="text-[9.5px] text-zinc-450 dark:text-zinc-550 font-bold mt-0.5">
+                          Cobrado anualmente (R$ {(totalCorporatePrice * 12).toLocaleString('pt-BR')}/ano)
+                        </span>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -998,11 +1063,19 @@ export default function ConfiguracoesPage() {
                   <p className="font-bold text-white uppercase">
                     {selectedUpgrade === 'pro' ? 'Plano Zelify Pro' : 'Plano Zelify Corporate'}
                   </p>
-                  <p className="text-[10px] text-zinc-550 mt-0.5">Renovação mensal automática</p>
+                  <p className="text-[10px] text-zinc-550 mt-0.5">
+                    {isAnnual ? 'Renovação anual automática' : 'Renovação mensal automática'}
+                  </p>
                 </div>
-                <div className="text-right font-black text-[#0033FF] text-sm">
-                  {selectedUpgrade === 'pro' ? 'R$ 149,00' : 
-                   `R$ ${(numCondos * (numCondos <= 15 ? 59 : numCondos <= 50 ? 49 : 39)).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
+                <div className="text-right font-black text-[#0033FF] text-sm flex flex-col items-end">
+                  <span>
+                    {selectedUpgrade === 'pro' 
+                      ? `R$ ${pricePro},00` 
+                      : `R$ ${totalCorporatePrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
+                  </span>
+                  <span className="text-[8px] text-zinc-500 font-bold uppercase">
+                    {isAnnual ? '/mês (cobrado anualmente)' : '/mês'}
+                  </span>
                 </div>
               </div>
 

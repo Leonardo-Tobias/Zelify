@@ -558,13 +558,15 @@ export const db = {
         throw new Error(authError?.message || 'Falha ao criar usuário de autenticação.');
       }
 
-      // 2. Inserir o condomínio
+      // 2. Inserir o condomínio com plano grátis ativo por padrão
       const { data: condoData, error: condoError } = await supabase
         .from('condominios')
         .insert({
           nome: dados.condominioNome,
           slug: dados.condominioSlug.trim().toLowerCase(),
-          codigo_acesso: dados.codigoAcesso
+          codigo_acesso: dados.codigoAcesso,
+          plan_type: 'free',
+          subscription_status: 'active'
         })
         .select()
         .single();

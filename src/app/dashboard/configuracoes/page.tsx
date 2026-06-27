@@ -847,32 +847,37 @@ export default function ConfiguracoesPage() {
                     <label htmlFor="condosQty" className="text-[9px] font-bold uppercase tracking-wider text-zinc-555 dark:text-zinc-500">
                       Nº de Condomínios
                     </label>
-                    <div className="flex items-center space-x-1 bg-zinc-100 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-0.5 shadow-inner">
-                      <button
-                        type="button"
-                        onClick={() => setNumCondos(prev => Math.max(1, prev - 1))}
-                        className="w-6 h-6 rounded bg-zinc-200 dark:bg-zinc-900 hover:bg-zinc-300 dark:hover:bg-zinc-850 active:scale-[0.92] text-zinc-700 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white flex items-center justify-center font-bold transition-all border border-zinc-300/40 dark:border-zinc-800/80 cursor-pointer text-xs select-none"
-                      >
-                        -
-                      </button>
-                      <input
-                        id="condosQty"
-                        type="number"
-                        min={1}
-                        max={500}
-                        value={numCondos}
-                        onChange={(e) => setNumCondos(Math.max(1, parseInt(e.target.value) || 1))}
-                        className="w-10 bg-transparent text-center text-xs font-bold font-sans text-zinc-900 dark:text-white focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setNumCondos(prev => Math.min(500, prev + 1))}
-                        className="w-6 h-6 rounded bg-[#0033FF] hover:bg-[#0033FF]/90 hover:shadow-[0_0_8px_rgba(0,51,255,0.4)] active:scale-[0.92] text-white flex items-center justify-center font-bold transition-all border border-[#0033FF]/45 cursor-pointer text-xs select-none"
-                      >
-                        +
-                      </button>
+                    <div className="flex flex-col items-end space-y-1">
+                      <div className="flex items-center space-x-1 bg-zinc-100 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-0.5 shadow-inner">
+                        <button
+                          type="button"
+                          onClick={() => setNumCondos(prev => Math.max(5, prev - 1))}
+                          className="w-6 h-6 rounded bg-zinc-200 dark:bg-zinc-900 hover:bg-zinc-300 dark:hover:bg-zinc-850 active:scale-[0.92] text-zinc-700 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white flex items-center justify-center font-bold transition-all border border-zinc-300/40 dark:border-zinc-800/80 cursor-pointer text-xs select-none"
+                        >
+                          -
+                        </button>
+                        <input
+                          id="condosQty"
+                          type="number"
+                          min={5}
+                          max={500}
+                          value={numCondos}
+                          onChange={(e) => setNumCondos(Math.max(5, parseInt(e.target.value) || 5))}
+                          className="w-10 bg-transparent text-center text-xs font-bold font-sans text-zinc-900 dark:text-white focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setNumCondos(prev => Math.min(500, prev + 1))}
+                          className="w-6 h-6 rounded bg-[#0033FF] hover:bg-[#0033FF]/90 hover:shadow-[0_0_8px_rgba(0,51,255,0.4)] active:scale-[0.92] text-white flex items-center justify-center font-bold transition-all border border-[#0033FF]/45 cursor-pointer text-xs select-none"
+                        >
+                          +
+                        </button>
+                      </div>
                     </div>
                   </div>
+                  <p className="text-[8px] text-zinc-550 dark:text-zinc-500 text-right mt-1 font-semibold">
+                    *Pedido mínimo de 5 condomínios para condições de faturamento em lote.
+                  </p>
 
                   <div className="flex justify-between items-center text-[10px] text-zinc-500 font-semibold border-t border-zinc-200 dark:border-zinc-800/60 pt-2">
                     <span>Preço / Prédio:</span>

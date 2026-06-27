@@ -775,7 +775,7 @@ export default function ConfiguracoesPage() {
           </div>
 
           {/* Toggle Switch */}
-          <div className="flex items-center justify-center py-2 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 p-4 rounded-xl shadow-sm">
+          <div className="flex items-center justify-center py-2 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 p-4 rounded-xl shadow-sm mb-14">
             <div className="bg-zinc-200/60 dark:bg-zinc-900 p-1 rounded-full flex items-center space-x-1 border border-zinc-250 dark:border-zinc-800/80">
               <button
                 type="button"
@@ -791,16 +791,14 @@ export default function ConfiguracoesPage() {
               <button
                 type="button"
                 onClick={() => setIsAnnual(true)}
-                className={`px-4 py-1.5 text-[10px] font-black uppercase tracking-wider rounded-full transition-all duration-300 flex items-center space-x-1.5 cursor-pointer ${
+                className={`px-4 py-1.5 text-[10px] font-black uppercase tracking-wider rounded-full transition-all duration-300 flex items-center space-x-2.5 cursor-pointer ${
                   isAnnual 
                     ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white shadow-sm' 
                     : 'text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-300'
                 }`}
               >
                 <span>Anual</span>
-                <span className={`text-[7px] px-1 py-0.5 rounded-full font-black tracking-wider transition-colors duration-300 ${
-                  isAnnual ? 'bg-[#0033FF] text-white' : 'bg-[#0033FF]/15 text-[#0033FF]'
-                }`}>
+                <span className="text-xs px-3 py-1 rounded-full font-extrabold tracking-wide uppercase bg-[#001CFF] text-white shadow-[0_2px_8px_rgba(0,28,255,0.25)]">
                   2 MESES GRÁTIS
                 </span>
               </button>

@@ -80,12 +80,24 @@ export default function ConfiguracoesPage() {
     setLoading(false);
   }, [router]);
 
-  // Carrega a aba a partir da URL se fornecida
+  // Carrega a aba e o plano a partir da URL se fornecidos (fluxo de signup vindo da LP)
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const tabParam = new URLSearchParams(window.location.search).get('tab');
+      const search = new URLSearchParams(window.location.search);
+      const tabParam = search.get('tab');
+      const planParam = search.get('plan');
+      
       if (tabParam === 'faturamento') {
         setActiveTab('faturamento');
+        
+        if (planParam === 'pro' || planParam === 'corporate') {
+          setSelectedUpgrade(planParam);
+          setShowCheckoutModal(true);
+          
+          // Limpa os parâmetros de plano da URL para evitar reabrir ao atualizar
+          const newUrl = window.location.pathname + '?tab=faturamento';
+          window.history.replaceState({ path: newUrl }, '', newUrl);
+        }
       }
     }
   }, []);

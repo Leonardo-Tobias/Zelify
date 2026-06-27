@@ -9,6 +9,16 @@ export default function CadastroPage() {
   const router = useRouter();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
+  
+  // Capturar plano selecionado na LP e guardar no localStorage
+  React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const planParam = new URLSearchParams(window.location.search).get('plan');
+      if (planParam === 'pro' || planParam === 'corporate') {
+        localStorage.setItem('zelify_selected_plan_on_signup', planParam);
+      }
+    }
+  }, []);
   const [error, setError] = useState('');
 
   // Passo 1: Dados do Gestor

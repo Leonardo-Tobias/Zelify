@@ -51,6 +51,16 @@ function DashboardHomeContent() {
       router.push('/login');
       return;
     }
+
+    // Se o usuário selecionou um plano no cadastro (vindo da LP), redireciona direto para faturamento
+    if (typeof window !== 'undefined') {
+      const selectedPlan = localStorage.getItem('zelify_selected_plan_on_signup');
+      if (selectedPlan) {
+        localStorage.removeItem('zelify_selected_plan_on_signup');
+        router.push(`/dashboard/configuracoes?tab=faturamento&plan=${selectedPlan}`);
+        return;
+      }
+    }
     
     const parsedGestor = JSON.parse(savedGestor) as UsuarioGestor;
     setGestor(parsedGestor);

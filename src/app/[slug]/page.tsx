@@ -530,7 +530,7 @@ export default function MoradorPortal() {
       <div className="absolute top-0 left-1/4 right-1/4 h-[250px] bg-[#0033FF]/4 blur-[120px] rounded-full pointer-events-none z-0"></div>
 
       {/* HEADER MOBILE-FIRST */}
-      <header className="sticky top-0 bg-[#09090b]/85 backdrop-blur-md border-b border-white/[0.04] z-10 px-4 py-3 relative">
+      <header className="sticky top-0 bg-[#09090b]/85 backdrop-blur-md border-b border-white/[0.04] z-30 px-4 py-3">
         <div className="max-w-md mx-auto flex items-center justify-between">
           <div>
             <div className="flex items-center space-x-1.5">

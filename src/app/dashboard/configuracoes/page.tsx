@@ -78,6 +78,20 @@ export default function ConfiguracoesPage() {
     setSlug(condo.slug);
     setCodigoAcesso(condo.codigo_acesso);
     setLoading(false);
+
+    // Carrega dados frescos do banco de dados (Supabase ou LocalDB) para refletir atualizações
+    async function fetchFreshCondo() {
+      try {
+        const fresh = await db.getCondominioBySlug(condo.slug);
+        if (fresh) {
+          setCondominio(fresh);
+          localStorage.setItem('zelify_condominio_gestao', JSON.stringify(fresh));
+        }
+      } catch (err) {
+        console.error('Erro ao atualizar condomínio com dados do banco:', err);
+      }
+    }
+    fetchFreshCondo();
   }, [router]);
 
   // Carrega a aba e o plano a partir da URL se fornecidos (fluxo de signup vindo da LP)

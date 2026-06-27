@@ -72,6 +72,17 @@ function DashboardHomeContent() {
     async function loadConfig() {
       try {
         const list = await db.getCondominiosByGestorUser(parsedGestor.user_id);
+        
+        // Atualiza a sessão local com as informações mais recentes do banco de dados (plano, status, etc)
+        if (currentCondo) {
+          const freshCondo = list.find(c => c.id === currentCondo!.id);
+          if (freshCondo) {
+            currentCondo = freshCondo;
+            setCondominio(freshCondo);
+            localStorage.setItem('zelify_condominio_gestao', JSON.stringify(freshCondo));
+          }
+        }
+
         const hasCorporate = list.some(c => c.plan_type === 'corporate');
         const isCorp = hasCorporate || list.length > 1;
         setIsCorporate(isCorp);

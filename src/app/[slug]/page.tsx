@@ -335,17 +335,17 @@ export default function MoradorPortal() {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-zinc-950 p-4 antialiased text-zinc-300 relative overflow-hidden">
         {/* Background glow */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[350px] h-[350px] bg-[#0033FF]/5 blur-[120px] rounded-full pointer-events-none z-0"></div>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[350px] h-[350px] bg-[#001CFF]/5 blur-[120px] rounded-full pointer-events-none z-0"></div>
         
         <div className="flex flex-col items-center max-w-sm w-full p-8 text-center relative z-10">
           <div className="relative flex items-center justify-center w-16 h-16 rounded-2xl bg-white/[0.02] border border-white/[0.05] shadow-2xl mb-6 backdrop-blur-sm animate-pulse">
-            <div className="absolute inset-0 bg-[#0033FF]/5 rounded-2xl animate-ping" />
-            <Building className="h-8 w-8 text-[#0033FF] relative z-10" />
+            <div className="absolute inset-0 bg-[#001CFF]/5 rounded-2xl animate-ping" />
+            <Building className="h-8 w-8 text-[#001CFF] relative z-10" />
           </div>
           
           <h2 className="text-xl font-bold text-white tracking-tight">Zelify</h2>
           <p className="mt-2 text-zinc-400 text-sm font-medium flex items-center gap-2">
-            <Loader2 className="h-4 w-4 text-[#0033FF] animate-spin" />
+            <Loader2 className="h-4 w-4 text-[#001CFF] animate-spin" />
             Carregando o condomínio...
           </p>
         </div>
@@ -421,14 +421,14 @@ export default function MoradorPortal() {
     return (
       <div className="flex flex-col justify-center min-h-screen bg-zinc-950 p-4 md:p-6 antialiased text-zinc-300 relative overflow-hidden">
         {/* Glow de fundo */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[450px] h-[450px] bg-[#0033FF]/5 blur-[140px] rounded-full pointer-events-none z-0"></div>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[450px] h-[450px] bg-[#001CFF]/5 blur-[140px] rounded-full pointer-events-none z-0"></div>
         
         <div className="w-full max-w-sm mx-auto bg-[#0c0c0e]/60 border border-white/[0.05] rounded-2xl shadow-2xl p-6 md:p-8 backdrop-blur-md relative z-10 overflow-hidden">
           {/* Top glow line */}
-          <div className="absolute inset-x-0 -top-px h-px bg-gradient-to-r from-transparent via-[#0033FF]/40 to-transparent"></div>
+          <div className="absolute inset-x-0 -top-px h-px bg-gradient-to-r from-transparent via-[#001CFF]/40 to-transparent"></div>
           
           <div className="flex items-center space-x-2 mb-6">
-            <span className="text-2xl font-black tracking-tight text-white">Zelify<span className="text-[#0033FF]">.</span></span>
+            <span className="text-2xl font-black tracking-tight text-white">Zelify<span className="text-[#001CFF]">.</span></span>
           </div>
           
           <div className="mb-6">
@@ -456,7 +456,7 @@ export default function MoradorPortal() {
                 placeholder="••••"
                 value={codigoAcesso}
                 onChange={(e) => setCodigoAcesso(e.target.value.replace(/\D/g, ''))}
-                className="w-full px-3 py-2 bg-zinc-950 border border-white/[0.06] rounded-lg text-sm text-center tracking-widest text-white placeholder-zinc-650 focus:outline-none focus:ring-1 focus:ring-[#0033FF]/60 focus:border-[#0033FF]/60 transition-all font-medium text-center"
+                className="w-full px-3 py-2 bg-zinc-950 border border-white/[0.06] rounded-lg text-sm text-center tracking-widest text-white placeholder-zinc-650 focus:outline-none focus:ring-1 focus:ring-[#001CFF]/60 focus:border-[#001CFF]/60 transition-all font-medium text-center"
                 required
               />
             </div>
@@ -472,7 +472,7 @@ export default function MoradorPortal() {
                   placeholder="Ex: Bloco A"
                   value={bloco}
                   onChange={(e) => setBloco(e.target.value)}
-                  className="w-full px-3 py-2 bg-zinc-950 border border-white/[0.06] rounded-lg text-sm text-white placeholder-zinc-655 focus:outline-none focus:ring-1 focus:ring-[#0033FF]/60 focus:border-[#0033FF]/60 transition-all font-medium"
+                  className="w-full px-3 py-2 bg-zinc-950 border border-white/[0.06] rounded-lg text-sm text-white placeholder-zinc-655 focus:outline-none focus:ring-1 focus:ring-[#001CFF]/60 focus:border-[#001CFF]/60 transition-all font-medium"
                   required
                 />
               </div>
@@ -486,7 +486,7 @@ export default function MoradorPortal() {
                   placeholder="Ex: 302"
                   value={apartamento}
                   onChange={(e) => setApartamento(e.target.value)}
-                  className="w-full px-3 py-2 bg-zinc-950 border border-white/[0.06] rounded-lg text-sm text-white placeholder-zinc-655 focus:outline-none focus:ring-1 focus:ring-[#0033FF]/60 focus:border-[#0033FF]/60 transition-all font-medium"
+                  className="w-full px-3 py-2 bg-zinc-950 border border-white/[0.06] rounded-lg text-sm text-white placeholder-zinc-655 focus:outline-none focus:ring-1 focus:ring-[#001CFF]/60 focus:border-[#001CFF]/60 transition-all font-medium"
                   required
                 />
               </div>
@@ -495,7 +495,7 @@ export default function MoradorPortal() {
             <button
               type="submit"
               disabled={validating}
-              className="w-full mt-2 bg-gradient-to-r from-[#0033FF] to-blue-600 hover:opacity-95 active:scale-[0.98] text-white text-sm font-semibold py-2.5 px-4 rounded-lg flex items-center justify-center transition-all shadow-[0_4px_20px_rgba(0,51,255,0.25)] disabled:opacity-50 cursor-pointer"
+              className="w-full mt-2 bg-gradient-to-r from-[#001CFF] to-blue-600 hover:opacity-95 active:scale-[0.98] text-white text-sm font-semibold py-2.5 px-4 rounded-lg flex items-center justify-center transition-all shadow-[0_4px_20px_rgba(0,51,255,0.25)] disabled:opacity-50 cursor-pointer"
             >
               {validating ? (
                 <>
@@ -527,14 +527,14 @@ export default function MoradorPortal() {
   return (
     <div className="min-h-screen bg-zinc-950 pb-24 font-sans antialiased text-zinc-300 relative">
       {/* Glow de fundo */}
-      <div className="absolute top-0 left-1/4 right-1/4 h-[250px] bg-[#0033FF]/4 blur-[120px] rounded-full pointer-events-none z-0"></div>
+      <div className="absolute top-0 left-1/4 right-1/4 h-[250px] bg-[#001CFF]/4 blur-[120px] rounded-full pointer-events-none z-0"></div>
 
       {/* HEADER MOBILE-FIRST */}
       <header className="sticky top-0 bg-[#09090b]/85 backdrop-blur-md border-b border-white/[0.04] z-30 px-4 py-3">
         <div className="max-w-md mx-auto flex items-center justify-between">
           <div>
             <div className="flex items-center space-x-1.5">
-              <span className="text-lg font-black tracking-tight text-white">Zelify<span className="text-[#0033FF]">.</span></span>
+              <span className="text-lg font-black tracking-tight text-white">Zelify<span className="text-[#001CFF]">.</span></span>
               <span className="text-zinc-700 text-xs">|</span>
               <span className="text-xs font-semibold text-zinc-400 truncate max-w-[140px]">{condominio.nome}</span>
             </div>
@@ -562,7 +562,7 @@ export default function MoradorPortal() {
               <h2 className="text-xs font-bold text-zinc-450 uppercase tracking-widest">Meus Chamados</h2>
               <button
                 onClick={() => setShowManutencaoModal(true)}
-                className="bg-[#0033FF] hover:bg-[#0033FF]/90 text-white text-xs font-semibold px-3 py-1.5 rounded-lg flex items-center space-x-1.5 transition-all shadow-[0_4px_15px_rgba(0,51,255,0.2)] active:scale-[0.98]"
+                className="bg-[#001CFF] hover:bg-[#001CFF]/90 text-white text-xs font-semibold px-3 py-1.5 rounded-lg flex items-center space-x-1.5 transition-all shadow-[0_4px_15px_rgba(0,51,255,0.2)] active:scale-[0.98]"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>Relatar Problema</span>
@@ -582,7 +582,7 @@ export default function MoradorPortal() {
                 </p>
                 <button
                   onClick={() => setShowManutencaoModal(true)}
-                  className="text-xs font-bold text-[#0033FF] bg-[#0033FF]/10 hover:bg-[#0033FF]/20 px-3.5 py-1.5 rounded-lg transition-colors inline-block"
+                  className="text-xs font-bold text-[#001CFF] bg-[#001CFF]/10 hover:bg-[#001CFF]/20 px-3.5 py-1.5 rounded-lg transition-colors inline-block"
                 >
                   Relatar Novo Chamado
                 </button>
@@ -616,7 +616,7 @@ export default function MoradorPortal() {
                           item.status === 'pendente' 
                             ? 'bg-amber-500/10 text-amber-500 border-amber-500/15' 
                             : item.status === 'em_execucao' 
-                              ? 'bg-[#0033FF]/10 text-blue-400 border-blue-500/15' 
+                              ? 'bg-[#001CFF]/10 text-blue-400 border-blue-500/15' 
                               : 'bg-emerald-500/10 text-emerald-450 border-emerald-500/15'
                         }`}>
                           {item.status === 'pendente' ? 'Pendente' : item.status === 'em_execucao' ? 'Em execução' : 'Resolvido'}
@@ -641,7 +641,7 @@ export default function MoradorPortal() {
               <h2 className="text-xs font-bold text-zinc-450 uppercase tracking-widest">Mural de Achados</h2>
               <button
                 onClick={() => setShowAchadoModal(true)}
-                className="bg-[#0033FF] hover:bg-[#0033FF]/90 text-white text-xs font-semibold px-3 py-1.5 rounded-lg flex items-center space-x-1.5 transition-all shadow-[0_4px_15px_rgba(0,51,255,0.2)] active:scale-[0.98]"
+                className="bg-[#001CFF] hover:bg-[#001CFF]/90 text-white text-xs font-semibold px-3 py-1.5 rounded-lg flex items-center space-x-1.5 transition-all shadow-[0_4px_15px_rgba(0,51,255,0.2)] active:scale-[0.98]"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>Cadastrar Achado</span>
@@ -661,7 +661,7 @@ export default function MoradorPortal() {
                 </p>
                 <button
                   onClick={() => setShowAchadoModal(true)}
-                  className="text-xs font-bold text-[#0033FF] bg-[#0033FF]/10 hover:bg-[#0033FF]/20 px-3.5 py-1.5 rounded-lg transition-colors inline-block"
+                  className="text-xs font-bold text-[#001CFF] bg-[#001CFF]/10 hover:bg-[#001CFF]/20 px-3.5 py-1.5 rounded-lg transition-colors inline-block"
                 >
                   Registrar Algo Encontrado
                 </button>
@@ -689,7 +689,7 @@ export default function MoradorPortal() {
                           item.status === 'encontrado' 
                             ? 'bg-amber-500/10 text-amber-500 border-amber-500/15' 
                             : item.status === 'aguardando_retirada' 
-                              ? 'bg-[#0033FF]/10 text-blue-400 border-blue-500/15' 
+                              ? 'bg-[#001CFF]/10 text-blue-400 border-blue-500/15' 
                               : 'bg-emerald-500/10 text-emerald-450 border-emerald-500/15'
                         }`}>
                           {item.status === 'encontrado' ? 'Na Portaria' : item.status === 'aguardando_retirada' ? 'Retirar' : 'Entregue'}
@@ -836,7 +836,7 @@ export default function MoradorPortal() {
                   <select
                     value={localProblema}
                     onChange={(e) => setLocalProblema(e.target.value)}
-                    className="w-full px-3 py-2 border border-white/[0.06] rounded-lg text-sm bg-zinc-950 focus:ring-1 focus:ring-[#0033FF] focus:border-[#0033FF] outline-none font-medium text-white appearance-none"
+                    className="w-full px-3 py-2 border border-white/[0.06] rounded-lg text-sm bg-zinc-950 focus:ring-1 focus:ring-[#001CFF] focus:border-[#001CFF] outline-none font-medium text-white appearance-none"
                   >
                     <option value="Garagem">Garagem</option>
                     <option value="Hall">Hall Social</option>
@@ -856,7 +856,7 @@ export default function MoradorPortal() {
                       placeholder="Ex: Salão de Festas"
                       value={outroLocal}
                       onChange={(e) => setOutroLocal(e.target.value)}
-                      className="w-full px-3 py-2 bg-zinc-950 border border-white/[0.06] rounded-lg text-sm text-white focus:ring-1 focus:ring-[#0033FF] focus:border-[#0033FF] outline-none font-medium placeholder-zinc-650"
+                      className="w-full px-3 py-2 bg-zinc-950 border border-white/[0.06] rounded-lg text-sm text-white focus:ring-1 focus:ring-[#001CFF] focus:border-[#001CFF] outline-none font-medium placeholder-zinc-650"
                       required
                     />
                   </div>
@@ -869,7 +869,7 @@ export default function MoradorPortal() {
                     placeholder="Descreva o que está quebrado ou precisa de reparo..."
                     value={descricaoProblema}
                     onChange={(e) => setDescricaoProblema(e.target.value)}
-                    className="w-full px-3 py-2 bg-zinc-950 border border-white/[0.06] rounded-lg text-sm text-white focus:ring-1 focus:ring-[#0033FF] focus:border-[#0033FF] outline-none font-medium placeholder-zinc-650"
+                    className="w-full px-3 py-2 bg-zinc-950 border border-white/[0.06] rounded-lg text-sm text-white focus:ring-1 focus:ring-[#001CFF] focus:border-[#001CFF] outline-none font-medium placeholder-zinc-650"
                     required
                   ></textarea>
                 </div>
@@ -905,7 +905,7 @@ export default function MoradorPortal() {
                     >
                       {compressingImage ? (
                         <>
-                          <Loader2 className="w-5 h-5 animate-spin mb-1 text-[#0033FF]" />
+                          <Loader2 className="w-5 h-5 animate-spin mb-1 text-[#001CFF]" />
                           <span className="text-xs font-medium text-zinc-550">Otimizando foto...</span>
                         </>
                       ) : (
@@ -944,7 +944,7 @@ export default function MoradorPortal() {
                     <button
                       type="submit"
                       disabled={submittingProblema || compressingImage}
-                      className="w-full bg-[#0033FF] hover:bg-[#0033FF]/90 text-white text-sm font-semibold py-2.5 rounded-lg flex items-center justify-center transition-all shadow-[0_4px_15px_rgba(0,51,255,0.2)] disabled:opacity-50 cursor-pointer"
+                      className="w-full bg-[#001CFF] hover:bg-[#001CFF]/90 text-white text-sm font-semibold py-2.5 rounded-lg flex items-center justify-center transition-all shadow-[0_4px_15px_rgba(0,51,255,0.2)] disabled:opacity-50 cursor-pointer"
                     >
                       {submittingProblema ? (
                         <>
@@ -994,7 +994,7 @@ export default function MoradorPortal() {
                     placeholder="Ex: Chaveiro com controle de garagem, Urso de pelúcia..."
                     value={descricaoAchado}
                     onChange={(e) => setDescricaoAchado(e.target.value)}
-                    className="w-full px-3 py-2 bg-zinc-950 border border-white/[0.06] rounded-lg text-sm text-white focus:ring-1 focus:ring-[#0033FF] focus:border-[#0033FF] outline-none font-medium placeholder-zinc-650"
+                    className="w-full px-3 py-2 bg-zinc-950 border border-white/[0.06] rounded-lg text-sm text-white focus:ring-1 focus:ring-[#001CFF] focus:border-[#001CFF] outline-none font-medium placeholder-zinc-650"
                     required
                   ></textarea>
                 </div>
@@ -1006,7 +1006,7 @@ export default function MoradorPortal() {
                     placeholder="Ex: Bancos ao lado da churrasqueira"
                     value={localAchado}
                     onChange={(e) => setLocalAchado(e.target.value)}
-                    className="w-full px-3 py-2 bg-zinc-950 border border-white/[0.06] rounded-lg text-sm text-white focus:ring-1 focus:ring-[#0033FF] focus:border-[#0033FF] outline-none font-medium placeholder-zinc-650"
+                    className="w-full px-3 py-2 bg-zinc-950 border border-white/[0.06] rounded-lg text-sm text-white focus:ring-1 focus:ring-[#001CFF] focus:border-[#001CFF] outline-none font-medium placeholder-zinc-650"
                     required
                   />
                 </div>
@@ -1042,7 +1042,7 @@ export default function MoradorPortal() {
                     >
                       {compressingImage ? (
                         <>
-                          <Loader2 className="w-5 h-5 animate-spin mb-1 text-[#0033FF]" />
+                          <Loader2 className="w-5 h-5 animate-spin mb-1 text-[#001CFF]" />
                           <span className="text-xs font-medium text-zinc-550">Otimizando foto...</span>
                         </>
                       ) : (
@@ -1077,7 +1077,7 @@ export default function MoradorPortal() {
                     <button
                       type="submit"
                       disabled={submittingAchado || compressingImage}
-                      className="w-full bg-[#0033FF] hover:bg-[#0033FF]/90 text-white text-sm font-semibold py-2.5 rounded-lg flex items-center justify-center transition-all shadow-[0_4px_15px_rgba(0,51,255,0.2)] disabled:opacity-50 cursor-pointer"
+                      className="w-full bg-[#001CFF] hover:bg-[#001CFF]/90 text-white text-sm font-semibold py-2.5 rounded-lg flex items-center justify-center transition-all shadow-[0_4px_15px_rgba(0,51,255,0.2)] disabled:opacity-50 cursor-pointer"
                     >
                       {submittingAchado ? (
                         <>
@@ -1103,9 +1103,9 @@ export default function MoradorPortal() {
             <div className="flex items-center justify-between pb-3 border-b border-white/[0.05]">
               <div className="flex items-center space-x-2 text-[10px] font-bold text-zinc-450 uppercase tracking-widest">
                 {selectedChamado.tipo === 'manutencao' ? (
-                  <Wrench className="w-4 h-4 text-[#0033FF]" />
+                  <Wrench className="w-4 h-4 text-[#001CFF]" />
                 ) : (
-                  <Package className="w-4 h-4 text-[#0033FF]" />
+                  <Package className="w-4 h-4 text-[#001CFF]" />
                 )}
                 <span>
                   Detalhes da Ocorrência #
@@ -1162,14 +1162,14 @@ export default function MoradorPortal() {
                     selectedChamado.status === 'pendente' || selectedChamado.status === 'encontrado' 
                       ? 'bg-amber-500 animate-pulse' 
                       : selectedChamado.status === 'em_execucao' || selectedChamado.status === 'aguardando_retirada' 
-                        ? 'bg-[#0033FF]' 
+                        ? 'bg-[#001CFF]' 
                         : 'bg-emerald-500'
                   }`}></span>
                   <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded border uppercase tracking-wider ${
                     selectedChamado.status === 'pendente' || selectedChamado.status === 'encontrado'
                       ? 'bg-amber-500/10 text-amber-500 border-amber-500/15'
                       : selectedChamado.status === 'em_execucao' || selectedChamado.status === 'aguardando_retirada'
-                        ? 'bg-[#0033FF]/10 text-blue-400 border-blue-500/15'
+                        ? 'bg-[#001CFF]/10 text-blue-400 border-blue-500/15'
                         : 'bg-emerald-500/10 text-emerald-450 border-emerald-500/15'
                   }`}>
                     {selectedChamado.status === 'pendente' ? 'Pendente' 

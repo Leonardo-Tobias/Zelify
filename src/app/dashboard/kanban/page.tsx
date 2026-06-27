@@ -131,10 +131,10 @@ export default function KanbanPage() {
               className="bg-zinc-100/50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl flex flex-col h-full min-h-[400px] lg:max-h-[calc(100vh-220px)] overflow-hidden shadow-sm"
             >
               {/* TÍTULO DA COLUNA */}
-              <div className={`p-4 border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between border-t-2 ${col.status === 'em_execucao' ? 'border-t-[#0033FF]' : col.color} shrink-0 bg-zinc-100/40 dark:bg-zinc-950/60`}>
+              <div className={`p-4 border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between border-t-2 ${col.status === 'em_execucao' ? 'border-t-[#001CFF]' : col.color} shrink-0 bg-zinc-100/40 dark:bg-zinc-950/60`}>
                 <div className="flex items-center space-x-2">
                   <col.icon className={`w-4 h-4 ${
-                    col.status === 'pendente' ? 'text-amber-500' : col.status === 'em_execucao' ? 'text-[#0033FF]' : 'text-emerald-500'
+                    col.status === 'pendente' ? 'text-amber-500' : col.status === 'em_execucao' ? 'text-[#001CFF]' : 'text-emerald-500'
                   }`} />
                   <span className="text-xs font-bold text-zinc-900 dark:text-white uppercase tracking-wider">{col.title}</span>
                 </div>
@@ -172,7 +172,7 @@ export default function KanbanPage() {
                               e.stopPropagation();
                               setSelectedChamado(item);
                             }}
-                            className="absolute bottom-1.5 right-1.5 bg-black/60 hover:bg-[#0033FF] text-white p-1 rounded transition-colors border border-zinc-700 cursor-pointer"
+                            className="absolute bottom-1.5 right-1.5 bg-black/60 hover:bg-[#001CFF] text-white p-1 rounded transition-colors border border-zinc-700 cursor-pointer"
                             title="Expandir Chamado"
                           >
                             <Maximize2 className="w-3.5 h-3.5" />
@@ -223,7 +223,7 @@ export default function KanbanPage() {
                                 e.stopPropagation();
                                 handleUpdateStatus(item.id, col.status === 'pendente' ? 'em_execucao' : 'resolvido');
                               }}
-                              className="p-1 bg-zinc-100 dark:bg-zinc-925 hover:bg-zinc-200 dark:hover:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-[#0033FF] hover:text-[#0033FF]/80 rounded transition-colors cursor-pointer"
+                              className="p-1 bg-zinc-100 dark:bg-zinc-925 hover:bg-zinc-200 dark:hover:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-[#001CFF] hover:text-[#001CFF]/80 rounded transition-colors cursor-pointer"
                               title="Mover para direita"
                             >
                               <ChevronRight className="w-3 h-3" />
@@ -249,7 +249,7 @@ export default function KanbanPage() {
             {/* CABEÇALHO MODAL */}
             <div className="px-5 py-4 border-b border-zinc-200 dark:border-zinc-800 flex justify-between items-center bg-zinc-50 dark:bg-zinc-950">
               <div className="flex items-center space-x-2 text-[10px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-widest">
-                <Wrench className="w-4 h-4 text-[#0033FF]" />
+                <Wrench className="w-4 h-4 text-[#001CFF]" />
                 <span>
                   Ocorrência #
                   {(() => {
@@ -302,13 +302,13 @@ export default function KanbanPage() {
                   <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">Estado do Chamado</span>
                   <div className="mt-1 flex items-center space-x-2">
                     <span className={`w-1.5 h-1.5 rounded-full ${
-                      selectedChamado.status === 'pendente' ? 'bg-amber-500 animate-pulse' : selectedChamado.status === 'em_execucao' ? 'bg-[#0033FF]' : 'bg-emerald-400'
+                      selectedChamado.status === 'pendente' ? 'bg-amber-500 animate-pulse' : selectedChamado.status === 'em_execucao' ? 'bg-[#001CFF]' : 'bg-emerald-400'
                     }`}></span>
                     <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded border uppercase tracking-wider ${
                       selectedChamado.status === 'pendente' 
                         ? 'bg-amber-500/10 border-amber-500/25 text-amber-600 dark:text-amber-400' 
                         : selectedChamado.status === 'em_execucao' 
-                          ? 'bg-[#0033FF]/10 border-[#0033FF]/25 text-[#0033FF]' 
+                          ? 'bg-[#001CFF]/10 border-[#001CFF]/25 text-[#001CFF]' 
                           : 'bg-emerald-500/10 border-emerald-500/25 text-emerald-600 dark:text-emerald-400'
                     }`}>
                       {selectedChamado.status === 'pendente' ? 'Pendente' : selectedChamado.status === 'em_execucao' ? 'Em andamento' : 'Resolvido'}
@@ -346,7 +346,7 @@ export default function KanbanPage() {
                     onClick={() => handleUpdateStatus(selectedChamado.id, 'em_execucao')}
                     className={`py-2 px-3 rounded-lg text-xs font-bold transition-all border ${
                       selectedChamado.status === 'em_execucao'
-                        ? 'bg-[#0033FF]/10 border-[#0033FF]/30 text-[#0033FF] font-bold shadow-sm'
+                        ? 'bg-[#001CFF]/10 border-[#001CFF]/30 text-[#001CFF] font-bold shadow-sm'
                         : 'bg-zinc-100 dark:bg-zinc-925 border border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-300'
                     }`}
                   >

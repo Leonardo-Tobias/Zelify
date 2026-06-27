@@ -53,13 +53,13 @@ export default function LoginPage() {
     <div className="min-h-screen bg-[#070709] flex flex-col items-center justify-center p-4 antialiased text-zinc-300 relative overflow-hidden">
       
       {/* Background glow similar to dashboard/landing page */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-[#0033FF]/10 blur-[130px] rounded-full pointer-events-none z-0"></div>
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-[#001CFF]/10 blur-[130px] rounded-full pointer-events-none z-0"></div>
 
       <div className="w-full max-w-sm space-y-6 relative z-10">
         
         {/* LOGO E TÍTULO */}
         <div className="text-center">
-          <div className="inline-flex items-center justify-center w-12 h-12 bg-zinc-900/40 border border-zinc-800 rounded-xl mb-4 text-[#0033FF] shadow-2xl backdrop-blur-sm">
+          <div className="inline-flex items-center justify-center w-12 h-12 bg-zinc-900/40 border border-zinc-800 rounded-xl mb-4 text-[#001CFF] shadow-2xl backdrop-blur-sm">
             <ShieldCheck className="w-6 h-6" />
           </div>
           <h1 className="text-xl font-bold tracking-tight text-white">Acesse o Zelify Gestor</h1>
@@ -71,7 +71,7 @@ export default function LoginPage() {
         {/* BOX DE LOGIN */}
         <div className="bg-[#0f0f13]/90 border border-zinc-800 rounded-2xl p-6 shadow-2xl backdrop-blur-md relative overflow-hidden">
           {/* Subtle line glow inside */}
-          <div className="absolute inset-x-0 -top-px h-px bg-gradient-to-r from-transparent via-[#0033FF]/60 to-transparent"></div>
+          <div className="absolute inset-x-0 -top-px h-px bg-gradient-to-r from-transparent via-[#001CFF]/60 to-transparent"></div>
 
           <form onSubmit={handleLogin} className="space-y-4">
             
@@ -92,7 +92,7 @@ export default function LoginPage() {
                 placeholder="nome@condominio.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-[#0033FF]/50 focus:border-[#0033FF]/50 hover:border-zinc-700 transition-all font-medium"
+                className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-[#001CFF]/50 focus:border-[#001CFF]/50 hover:border-zinc-700 transition-all font-medium"
                 required
               />
             </div>
@@ -110,7 +110,7 @@ export default function LoginPage() {
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-3 pr-10 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-[#0033FF]/50 focus:border-[#0033FF]/50 hover:border-zinc-700 transition-all font-medium"
+                  className="w-full pl-3 pr-10 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-[#001CFF]/50 focus:border-[#001CFF]/50 hover:border-zinc-700 transition-all font-medium"
                   required
                 />
                 <button
@@ -126,7 +126,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full mt-2 bg-gradient-to-r from-[#0033FF] to-blue-600 hover:opacity-95 text-white text-sm font-semibold py-2 rounded-lg flex items-center justify-center transition-all shadow-[0_4px_20px_rgba(0,51,255,0.25)] active:scale-[0.98] disabled:opacity-50 cursor-pointer"
+              className="w-full mt-2 bg-gradient-to-r from-[#001CFF] to-blue-600 hover:opacity-95 text-white text-sm font-semibold py-2 rounded-lg flex items-center justify-center transition-all shadow-[0_4px_20px_rgba(0,51,255,0.25)] active:scale-[0.98] disabled:opacity-50 cursor-pointer"
             >
               {loading ? (
                 <>
@@ -147,7 +147,7 @@ export default function LoginPage() {
             <button
               type="button"
               onClick={() => router.push('/cadastro')}
-              className="text-[#0033FF] hover:underline font-bold transition-all bg-transparent border-0 cursor-pointer"
+              className="text-[#001CFF] hover:underline font-bold transition-all bg-transparent border-0 cursor-pointer"
             >
               Cadastre seu Condomínio
             </button>

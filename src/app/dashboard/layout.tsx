@@ -127,7 +127,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-white dark:bg-zinc-950 text-zinc-400">
-        <Loader2 className="h-8 w-8 text-[#0033FF] animate-spin" />
+        <Loader2 className="h-8 w-8 text-[#001CFF] animate-spin" />
         <p className="mt-4 text-xs font-semibold uppercase tracking-wider text-zinc-500">Verificando Credenciais...</p>
       </div>
     );
@@ -182,9 +182,9 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
       {/* MOBILE HEADER */}
       <div className="md:hidden bg-white/90 dark:bg-[#09090b]/90 backdrop-blur-md border-b border-zinc-200 dark:border-white/[0.06] px-4 py-3 flex items-center justify-between z-20">
         <div className="flex items-center space-x-2">
-          <span className="text-lg font-black tracking-tight text-zinc-900 dark:text-white">Zelify<span className="text-[#0033FF]">.</span></span>
+          <span className="text-lg font-black tracking-tight text-zinc-900 dark:text-white">Zelify<span className="text-[#001CFF]">.</span></span>
           {isPortfolioView ? (
-            <span className="text-[10px] bg-[#0033FF]/10 text-[#0033FF] px-1.5 py-0.5 rounded font-bold uppercase border border-[#0033FF]/20">Carteira</span>
+            <span className="text-[10px] bg-[#001CFF]/10 text-[#001CFF] px-1.5 py-0.5 rounded font-bold uppercase border border-[#001CFF]/20">Carteira</span>
           ) : (
             <span className="text-[10px] bg-zinc-100 dark:bg-white/[0.04] text-zinc-500 dark:text-zinc-400 px-1.5 py-0.5 rounded font-bold uppercase border border-zinc-200 dark:border-white/[0.06]">{condominio.nome}</span>
           )}
@@ -218,7 +218,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                   href={`/${condominio.slug}`} 
                   target="_blank" 
                   rel="noreferrer" 
-                  className="text-[#0033FF] font-bold flex items-center space-x-0.5 hover:underline"
+                  className="text-[#001CFF] font-bold flex items-center space-x-0.5 hover:underline"
                 >
                   <span>/{condominio.slug}</span>
                   <ExternalLink className="w-3.5 h-3.5 ml-1" />
@@ -245,7 +245,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                           : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/[0.03] font-medium'
                     }`}
                   >
-                    <item.icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-[#0033FF]' : 'text-zinc-500'}`} />
+                    <item.icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-[#001CFF]' : 'text-zinc-500'}`} />
                     <span>{item.name}</span>
                     {item.disabled && (
                       <Lock className="w-3.5 h-3.5 text-zinc-450 ml-auto shrink-0" />
@@ -260,10 +260,10 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
           <div className="space-y-4 pt-4 mt-auto">
             {/* UPGRADE CARD FOR FREE PLAN (MOBILE) */}
             {!isPortfolioView && condominio?.plan_type === 'free' && (
-              <div className="p-4 rounded-xl bg-gradient-to-br from-[#0033FF]/15 via-[#0033FF]/5 to-transparent border border-[#0033FF]/20 relative overflow-hidden shadow-sm animate-in fade-in duration-300">
-                <div className="absolute -right-4 -bottom-4 w-16 h-16 bg-[#0033FF]/10 blur-[20px] rounded-full pointer-events-none"></div>
-                <div className="flex items-center space-x-2 text-[10px] font-bold text-[#0033FF] uppercase tracking-wider mb-1.5">
-                  <Sparkles className="w-3.5 h-3.5 text-[#0033FF] animate-pulse" />
+              <div className="p-4 rounded-xl bg-gradient-to-br from-[#001CFF]/15 via-[#001CFF]/5 to-transparent border border-[#001CFF]/20 relative overflow-hidden shadow-sm animate-in fade-in duration-300">
+                <div className="absolute -right-4 -bottom-4 w-16 h-16 bg-[#001CFF]/10 blur-[20px] rounded-full pointer-events-none"></div>
+                <div className="flex items-center space-x-2 text-[10px] font-bold text-[#001CFF] uppercase tracking-wider mb-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-[#001CFF] animate-pulse" />
                   <span>Plano Grátis</span>
                 </div>
                 <p className="text-[11px] font-bold text-zinc-900 dark:text-white leading-tight">Limite de 15 Chamados/mês</p>
@@ -275,7 +275,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                     setMobileMenuOpen(false);
                     router.push('/dashboard/configuracoes?tab=faturamento');
                   }}
-                  className="w-full mt-3 py-1.5 bg-[#0033FF] hover:bg-[#0033FF]/90 text-white text-[10px] font-bold rounded-lg transition-all active:scale-[0.97] cursor-pointer text-center block shadow-[0_2px_8px_rgba(0,51,255,0.2)]"
+                  className="w-full mt-3 py-1.5 bg-[#001CFF] hover:bg-[#001CFF]/90 text-white text-[10px] font-bold rounded-lg transition-all active:scale-[0.97] cursor-pointer text-center block shadow-[0_2px_8px_rgba(0,51,255,0.2)]"
                 >
                   Fazer Upgrade
                 </button>
@@ -284,7 +284,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
 
             <div className="border-t border-zinc-200 dark:border-white/[0.06] pt-4 space-y-3">
             <div className="flex items-center space-x-3 px-2">
-              <div className="w-8 h-8 rounded-full bg-[#0033FF]/10 border border-[#0033FF]/20 flex items-center justify-center text-[#0033FF] font-bold">
+              <div className="w-8 h-8 rounded-full bg-[#001CFF]/10 border border-[#001CFF]/20 flex items-center justify-center text-[#001CFF] font-bold">
                 {gestor.nome.charAt(0)}
               </div>
               <div className="min-w-0">
@@ -313,25 +313,25 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
           {/* LOGO E SELETOR DE CONDOMÍNIO */}
           <div className="px-2">
             <div className="flex items-center space-x-1 mb-5">
-              <span className="text-xl font-black tracking-tight text-zinc-900 dark:text-white">Zelify<span className="text-[#0033FF]">.</span></span>
+              <span className="text-xl font-black tracking-tight text-zinc-900 dark:text-white">Zelify<span className="text-[#001CFF]">.</span></span>
             </div>
             
             {isPortfolioView ? (
-              <div className="p-2 bg-[#0033FF]/5 border border-[#0033FF]/10 rounded-lg flex items-center justify-between shadow-sm">
+              <div className="p-2 bg-[#001CFF]/5 border border-[#001CFF]/10 rounded-lg flex items-center justify-between shadow-sm">
                 <div className="flex items-center space-x-2.5 min-w-0">
-                  <div className="w-6 h-6 rounded bg-[#0033FF]/15 border border-[#0033FF]/30 flex items-center justify-center text-[#0033FF] font-extrabold text-[10px] shrink-0">
+                  <div className="w-6 h-6 rounded bg-[#001CFF]/15 border border-[#001CFF]/30 flex items-center justify-center text-[#001CFF] font-extrabold text-[10px] shrink-0">
                     <Building2 className="w-3.5 h-3.5" />
                   </div>
                   <div className="min-w-0">
                     <span className="text-xs font-bold text-zinc-900 dark:text-white block truncate leading-none">Minha Carteira</span>
-                    <span className="text-[9px] text-[#0033FF] font-bold uppercase tracking-wider block mt-1">{condominios.length} Condomínios</span>
+                    <span className="text-[9px] text-[#001CFF] font-bold uppercase tracking-wider block mt-1">{condominios.length} Condomínios</span>
                   </div>
                 </div>
               </div>
             ) : (
               <div className="p-2 bg-zinc-100 dark:bg-white/[0.04] border border-zinc-200 dark:border-white/[0.06] rounded-lg flex items-center justify-between group hover:border-zinc-300 dark:hover:border-white/[0.12] transition-all shadow-sm">
                 <div className="flex items-center space-x-2.5 min-w-0">
-                  <div className="w-6 h-6 rounded bg-[#0033FF]/10 border border-[#0033FF]/20 flex items-center justify-center text-[#0033FF] font-extrabold text-[10px] shrink-0">
+                  <div className="w-6 h-6 rounded bg-[#001CFF]/10 border border-[#001CFF]/20 flex items-center justify-center text-[#001CFF] font-extrabold text-[10px] shrink-0">
                     {condominio.nome.charAt(0)}
                   </div>
                   <span className="text-xs font-semibold text-zinc-700 dark:text-zinc-200 truncate">{condominio.nome}</span>
@@ -346,7 +346,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
             <div className="px-2 animate-in fade-in duration-200">
               <button
                 onClick={() => router.push('/dashboard?view=portfolio')}
-                className="w-full flex items-center justify-center space-x-1.5 py-2 bg-[#0033FF]/10 hover:bg-[#0033FF]/20 border border-[#0033FF]/20 text-[#0033FF] rounded-lg text-xs font-bold transition-all shadow-[0_2px_8px_rgba(0,51,255,0.05)] active:scale-[0.98] cursor-pointer"
+                className="w-full flex items-center justify-center space-x-1.5 py-2 bg-[#001CFF]/10 hover:bg-[#001CFF]/20 border border-[#001CFF]/20 text-[#001CFF] rounded-lg text-xs font-bold transition-all shadow-[0_2px_8px_rgba(0,51,255,0.05)] active:scale-[0.98] cursor-pointer"
               >
                 <ArrowLeft className="w-3.5 h-3.5" />
                 <span>Voltar para Carteira</span>
@@ -364,10 +364,10 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                 className="w-full flex items-center justify-between px-2.5 py-1.5 bg-zinc-100 dark:bg-white/[0.04] border border-zinc-200 dark:border-white/[0.06] rounded-lg text-[11px] text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-all group hover:border-zinc-300 dark:hover:border-white/[0.12] shadow-sm"
               >
                 <div className="flex items-center space-x-2 min-w-0">
-                  <ExternalLink className="w-3.5 h-3.5 text-zinc-500 group-hover:text-[#0033FF] shrink-0 transition-colors" />
+                  <ExternalLink className="w-3.5 h-3.5 text-zinc-500 group-hover:text-[#001CFF] shrink-0 transition-colors" />
                   <span className="truncate font-medium">Link do Morador</span>
                 </div>
-                <span className="text-[10px] font-mono text-zinc-500 group-hover:text-[#0033FF] truncate max-w-[80px] transition-colors">/{condominio.slug}</span>
+                <span className="text-[10px] font-mono text-zinc-500 group-hover:text-[#001CFF] truncate max-w-[80px] transition-colors">/{condominio.slug}</span>
               </a>
             </div>
           )}
@@ -389,7 +389,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                         : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/[0.03] font-medium'
                   }`}
                 >
-                  <item.icon className={`w-4 h-4 shrink-0 transition-colors ${isActive ? 'text-[#0033FF]' : 'text-zinc-500'}`} />
+                  <item.icon className={`w-4 h-4 shrink-0 transition-colors ${isActive ? 'text-[#001CFF]' : 'text-zinc-500'}`} />
                   <span>{item.name}</span>
                   {item.disabled && (
                     <Lock className="w-3 h-3 text-zinc-400 dark:text-zinc-600 ml-auto shrink-0" />
@@ -404,10 +404,10 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
         <div className="space-y-4 pt-4 mt-auto">
           {/* UPGRADE CARD FOR FREE PLAN */}
           {!isPortfolioView && condominio?.plan_type === 'free' && (
-            <div className="mx-1 p-4 rounded-xl bg-gradient-to-br from-[#0033FF]/15 via-[#0033FF]/5 to-transparent border border-[#0033FF]/20 relative overflow-hidden shadow-sm animate-in fade-in duration-300">
-              <div className="absolute -right-4 -bottom-4 w-16 h-16 bg-[#0033FF]/10 blur-[20px] rounded-full pointer-events-none"></div>
-              <div className="flex items-center space-x-2 text-[10px] font-bold text-[#0033FF] uppercase tracking-wider mb-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-[#0033FF] animate-pulse" />
+            <div className="mx-1 p-4 rounded-xl bg-gradient-to-br from-[#001CFF]/15 via-[#001CFF]/5 to-transparent border border-[#001CFF]/20 relative overflow-hidden shadow-sm animate-in fade-in duration-300">
+              <div className="absolute -right-4 -bottom-4 w-16 h-16 bg-[#001CFF]/10 blur-[20px] rounded-full pointer-events-none"></div>
+              <div className="flex items-center space-x-2 text-[10px] font-bold text-[#001CFF] uppercase tracking-wider mb-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-[#001CFF] animate-pulse" />
                 <span>Plano Grátis</span>
               </div>
               <p className="text-[11px] font-bold text-zinc-900 dark:text-white leading-tight">Limite de 15 Chamados/mês</p>
@@ -416,7 +416,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
               </p>
               <button
                 onClick={() => router.push('/dashboard/configuracoes?tab=faturamento')}
-                className="w-full mt-3 py-1.5 bg-[#0033FF] hover:bg-[#0033FF]/90 text-white text-[10px] font-bold rounded-lg transition-all active:scale-[0.97] cursor-pointer text-center block shadow-[0_2px_8px_rgba(0,51,255,0.2)]"
+                className="w-full mt-3 py-1.5 bg-[#001CFF] hover:bg-[#001CFF]/90 text-white text-[10px] font-bold rounded-lg transition-all active:scale-[0.97] cursor-pointer text-center block shadow-[0_2px_8px_rgba(0,51,255,0.2)]"
               >
                 Fazer Upgrade
               </button>
@@ -426,7 +426,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
           {/* PROFILE/FOOTER */}
           <div className="border-t border-zinc-200 dark:border-white/[0.06] pt-4 flex items-center justify-between px-2">
             <div className="flex items-center space-x-2.5 min-w-0">
-              <div className="w-7 h-7 rounded-full bg-[#0033FF]/10 border border-[#0033FF]/20 flex items-center justify-center text-[#0033FF] shrink-0 text-xs font-semibold">
+              <div className="w-7 h-7 rounded-full bg-[#001CFF]/10 border border-[#001CFF]/20 flex items-center justify-center text-[#001CFF] shrink-0 text-xs font-semibold">
                 {gestor.nome.charAt(0)}
               </div>
               <div className="min-w-0">
@@ -450,7 +450,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
       {/* CONTAINER DO CONTEÚDO PRINCIPAL */}
       <main className="flex-1 flex flex-col min-w-0 bg-zinc-100 dark:bg-zinc-950 overflow-y-auto max-h-screen relative transition-colors duration-200">
         {/* Subtle glow background */}
-        <div className="absolute top-0 left-1/4 right-1/4 h-[250px] bg-[#0033FF]/4 blur-[120px] rounded-full pointer-events-none z-0"></div>
+        <div className="absolute top-0 left-1/4 right-1/4 h-[250px] bg-[#001CFF]/4 blur-[120px] rounded-full pointer-events-none z-0"></div>
 
         {/* DESKTOP TOP HEADER */}
         <header className="hidden md:flex items-center justify-between border-b border-zinc-200 dark:border-white/[0.06] px-6 py-3.5 z-30 shrink-0 bg-white/85 dark:bg-[#09090b]/85 backdrop-blur-md sticky top-0 transition-colors duration-200">
@@ -487,7 +487,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   return (
     <React.Suspense fallback={
       <div className="flex flex-col items-center justify-center min-h-screen bg-zinc-100 dark:bg-[#09090b] text-zinc-400">
-        <Loader2 className="h-8 w-8 text-[#0033FF] animate-spin" />
+        <Loader2 className="h-8 w-8 text-[#001CFF] animate-spin" />
         <p className="mt-4 text-xs font-semibold uppercase tracking-wider text-zinc-500">Carregando...</p>
       </div>
     }>

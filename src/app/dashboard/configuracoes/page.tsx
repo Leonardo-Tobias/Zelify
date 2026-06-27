@@ -25,6 +25,7 @@ import {
   RefreshCw
 } from 'lucide-react';
 import { db, Condominio } from '@/lib/db';
+import { BillingSwitch } from '@/components/ui/switch';
 
 export default function ConfiguracoesPage() {
   const router = useRouter();
@@ -333,7 +334,7 @@ export default function ConfiguracoesPage() {
           onClick={() => setActiveTab('geral')}
           className={`pb-3 text-xs font-bold uppercase tracking-wider transition-all border-b-2 cursor-pointer ${
             activeTab === 'geral'
-              ? 'border-[#0033FF] text-[#0033FF] dark:text-[#3b82f6]'
+              ? 'border-[#001CFF] text-[#001CFF] dark:text-[#3b82f6]'
               : 'border-transparent text-zinc-550 dark:text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-300'
           }`}
         >
@@ -344,7 +345,7 @@ export default function ConfiguracoesPage() {
           onClick={() => setActiveTab('faturamento')}
           className={`pb-3 text-xs font-bold uppercase tracking-wider transition-all border-b-2 cursor-pointer ${
             activeTab === 'faturamento'
-              ? 'border-[#0033FF] text-[#0033FF] dark:text-[#3b82f6]'
+              ? 'border-[#001CFF] text-[#001CFF] dark:text-[#3b82f6]'
               : 'border-transparent text-zinc-550 dark:text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-300'
           }`}
         >
@@ -358,7 +359,7 @@ export default function ConfiguracoesPage() {
         {/* BOX DO LINK PÚBLICO */}
         <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-6 rounded-xl space-y-4 shadow-sm">
           <div className="flex items-center space-x-2 text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-widest">
-            <Compass className="w-4 h-4 text-[#0033FF]" />
+            <Compass className="w-4 h-4 text-[#001CFF]" />
             <span>Endereço de Acesso Público</span>
           </div>
           
@@ -377,7 +378,7 @@ export default function ConfiguracoesPage() {
               <button
                 type="button"
                 onClick={handleCopyLink}
-                className="p-2 bg-zinc-100 dark:bg-zinc-900 hover:bg-[#0033FF] border border-zinc-200 dark:border-zinc-800 text-zinc-500 dark:text-zinc-400 hover:text-white rounded-md transition-colors cursor-pointer"
+                className="p-2 bg-zinc-100 dark:bg-zinc-900 hover:bg-[#001CFF] border border-zinc-200 dark:border-zinc-800 text-zinc-500 dark:text-zinc-400 hover:text-white rounded-md transition-colors cursor-pointer"
                 title="Copiar URL"
               >
                 {copied ? <Check className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-450 animate-pulse" /> : <Copy className="w-3.5 h-3.5" />}
@@ -386,7 +387,7 @@ export default function ConfiguracoesPage() {
                 href={condominio ? `https://zelify.app/${condominio.slug}` : '#'}
                 target="_blank"
                 rel="noreferrer"
-                className="p-2 bg-zinc-100 dark:bg-zinc-900 hover:bg-[#0033FF] border border-zinc-200 dark:border-zinc-800 text-zinc-500 dark:text-zinc-400 hover:text-white rounded-md transition-colors"
+                className="p-2 bg-zinc-100 dark:bg-zinc-900 hover:bg-[#001CFF] border border-zinc-200 dark:border-zinc-800 text-zinc-500 dark:text-zinc-400 hover:text-white rounded-md transition-colors"
                 title="Visualizar Página Pública"
               >
                 <ExternalLink className="w-3.5 h-3.5" />
@@ -398,7 +399,7 @@ export default function ConfiguracoesPage() {
         {/* GERADOR DE PLACA INFORMATIVA E QR CODE */}
         <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6 shadow-sm space-y-6">
           <div className="flex items-center space-x-2 text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-widest">
-            <QrCode className="w-4 h-4 text-[#0033FF]" />
+            <QrCode className="w-4 h-4 text-[#001CFF]" />
             <span>Placa Informativa & QR Code</span>
           </div>
 
@@ -417,7 +418,7 @@ export default function ConfiguracoesPage() {
                   type="text"
                   value={posterTitle}
                   onChange={(e) => setPosterTitle(e.target.value)}
-                  className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg text-xs text-zinc-900 dark:text-white focus:outline-none focus:border-[#0033FF]/50 font-semibold"
+                  className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg text-xs text-zinc-900 dark:text-white focus:outline-none focus:border-[#001CFF]/50 font-semibold"
                   placeholder="Ex: Portal do Morador"
                 />
               </div>
@@ -430,7 +431,7 @@ export default function ConfiguracoesPage() {
                   value={posterInstructions}
                   onChange={(e) => setPosterInstructions(e.target.value)}
                   rows={3}
-                  className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg text-xs text-zinc-900 dark:text-white focus:outline-none focus:border-[#0033FF]/50 font-medium resize-none leading-relaxed"
+                  className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg text-xs text-zinc-900 dark:text-white focus:outline-none focus:border-[#001CFF]/50 font-medium resize-none leading-relaxed"
                   placeholder="Instruções para os moradores..."
                 />
               </div>
@@ -445,11 +446,11 @@ export default function ConfiguracoesPage() {
                     onClick={() => setPosterTheme('blue')}
                     className={`flex-1 py-1.5 rounded-lg border text-xs font-semibold flex items-center justify-center space-x-1 transition-all cursor-pointer ${
                       posterTheme === 'blue'
-                        ? 'bg-[#0033FF]/10 border-[#0033FF] text-[#0033FF]'
+                        ? 'bg-[#001CFF]/10 border-[#001CFF] text-[#001CFF]'
                         : 'bg-zinc-50 dark:bg-zinc-950 border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400'
                     }`}
                   >
-                    <span className="w-2.5 h-2.5 rounded-full bg-[#0033FF] inline-block mr-1"></span>
+                    <span className="w-2.5 h-2.5 rounded-full bg-[#001CFF] inline-block mr-1"></span>
                     Azul
                   </button>
                   <button
@@ -510,7 +511,7 @@ export default function ConfiguracoesPage() {
                 id="preview-poster" 
                 className={`w-full max-w-[240px] bg-white rounded-lg border-2 p-5 shadow-md flex flex-col items-center justify-between text-zinc-800 ${
                   posterTheme === 'blue' 
-                    ? 'border-[#0033FF]' 
+                    ? 'border-[#001CFF]' 
                     : posterTheme === 'emerald' 
                     ? 'border-emerald-500' 
                     : 'border-zinc-800'
@@ -520,7 +521,7 @@ export default function ConfiguracoesPage() {
                 <div className="flex items-center space-x-1.5 mb-3">
                   <Building className={`w-4 h-4 ${
                     posterTheme === 'blue' 
-                      ? 'text-[#0033FF]' 
+                      ? 'text-[#001CFF]' 
                       : posterTheme === 'emerald' 
                       ? 'text-emerald-500' 
                       : 'text-zinc-800'
@@ -546,7 +547,7 @@ export default function ConfiguracoesPage() {
                 {/* QR Code Frame */}
                 <div className={`p-2 border rounded-lg bg-zinc-50 mb-3 shadow-inner ${
                   posterTheme === 'blue' 
-                    ? 'border-[#0033FF]/20' 
+                    ? 'border-[#001CFF]/20' 
                     : posterTheme === 'emerald' 
                     ? 'border-emerald-500/20' 
                     : 'border-zinc-200'
@@ -565,7 +566,7 @@ export default function ConfiguracoesPage() {
                   </div>
                   <div className={`text-xs font-black tracking-widest ${
                     posterTheme === 'blue' 
-                      ? 'text-[#0033FF]' 
+                      ? 'text-[#001CFF]' 
                       : posterTheme === 'emerald' 
                       ? 'text-emerald-600' 
                       : 'text-zinc-800'
@@ -615,7 +616,7 @@ export default function ConfiguracoesPage() {
                     placeholder="Ex: Residencial Viver Bem"
                     value={nome}
                     onChange={(e) => setNome(e.target.value)}
-                    className="w-full pl-9 pr-3 py-2 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg text-xs text-zinc-900 dark:text-white focus:outline-none focus:border-[#0033FF]/50 focus:ring-4 focus:ring-[#0033FF]/10 font-semibold"
+                    className="w-full pl-9 pr-3 py-2 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg text-xs text-zinc-900 dark:text-white focus:outline-none focus:border-[#001CFF]/50 focus:ring-4 focus:ring-[#001CFF]/10 font-semibold"
                     required
                   />
                 </div>
@@ -626,7 +627,7 @@ export default function ConfiguracoesPage() {
                 <label htmlFor="slugCondo" className="block text-[10px] font-bold uppercase tracking-wider text-zinc-500">
                   Slug da URL (Endereço Público)
                 </label>
-                <div className="flex rounded-lg border border-zinc-200 dark:border-zinc-800 overflow-hidden bg-zinc-50 dark:bg-zinc-950 focus-within:border-[#0033FF]/50 focus-within:ring-4 focus-within:ring-[#0033FF]/10 transition-all">
+                <div className="flex rounded-lg border border-zinc-200 dark:border-zinc-800 overflow-hidden bg-zinc-50 dark:bg-zinc-950 focus-within:border-[#001CFF]/50 focus-within:ring-4 focus-within:ring-[#001CFF]/10 transition-all">
                   <span className="flex items-center bg-zinc-100 dark:bg-zinc-900 border-r border-zinc-200 dark:border-zinc-800 px-3 text-zinc-500 dark:text-zinc-400 font-mono text-xs font-semibold select-none">
                     zelify.app/
                   </span>
@@ -661,7 +662,7 @@ export default function ConfiguracoesPage() {
                     placeholder="Ex: 1234"
                     value={codigoAcesso}
                     onChange={(e) => setCodigoAcesso(e.target.value.replace(/\D/g, ''))}
-                    className="w-full pl-9 pr-3 py-2 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg text-xs text-zinc-900 dark:text-white text-left tracking-widest focus:outline-none focus:border-[#0033FF]/50 focus:ring-4 focus:ring-[#0033FF]/10 font-bold"
+                    className="w-full pl-9 pr-3 py-2 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg text-xs text-zinc-900 dark:text-white text-left tracking-widest focus:outline-none focus:border-[#001CFF]/50 focus:ring-4 focus:ring-[#001CFF]/10 font-bold"
                     required
                   />
                 </div>
@@ -676,7 +677,7 @@ export default function ConfiguracoesPage() {
               <button
                 type="submit"
                 disabled={saving}
-                className="bg-[#0033FF] hover:bg-[#0033FF]/90 text-white text-xs font-bold px-4 py-2 rounded-lg flex items-center space-x-1.5 transition-all shadow-[0_4px_20px_rgba(0,51,255,0.20)] active:scale-[0.98] disabled:opacity-50 cursor-pointer"
+                className="bg-[#001CFF] hover:bg-[#001CFF]/90 text-white text-xs font-bold px-4 py-2 rounded-lg flex items-center space-x-1.5 transition-all shadow-[0_4px_20px_rgba(0,51,255,0.20)] active:scale-[0.98] disabled:opacity-50 cursor-pointer"
               >
                 {saving ? (
                   <>
@@ -698,12 +699,12 @@ export default function ConfiguracoesPage() {
         <div className="space-y-6 animate-in fade-in duration-200">
           {/* CARD DE STATUS DO PLANO ATUAL */}
           <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-6 rounded-xl space-y-4 shadow-sm relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-[200px] h-[200px] bg-[#0033FF]/5 blur-[60px] rounded-full pointer-events-none"></div>
+            <div className="absolute top-0 right-0 w-[200px] h-[200px] bg-[#001CFF]/5 blur-[60px] rounded-full pointer-events-none"></div>
             
             <div className="flex items-center justify-between flex-wrap gap-3">
               <div className="space-y-1">
                 <div className="flex items-center space-x-2 text-[10px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-widest">
-                  <Layers className="w-3.5 h-3.5 text-[#0033FF]" />
+                  <Layers className="w-3.5 h-3.5 text-[#001CFF]" />
                   <span>Plano Atual</span>
                 </div>
                 <h3 className="text-lg font-black text-zinc-900 dark:text-white uppercase tracking-wider">
@@ -762,7 +763,7 @@ export default function ConfiguracoesPage() {
                   <div 
                     className={`h-full transition-all duration-500 ${
                       monthlyChamadosCount >= 15 ? 'bg-red-500' : 
-                      monthlyChamadosCount >= 12 ? 'bg-amber-550' : 'bg-[#0033FF]'
+                      monthlyChamadosCount >= 12 ? 'bg-amber-550' : 'bg-[#001CFF]'
                     }`}
                     style={{ width: `${Math.min((monthlyChamadosCount / 15) * 100, 100)}%` }}
                   ></div>
@@ -775,46 +776,18 @@ export default function ConfiguracoesPage() {
           </div>
 
           {/* Toggle Switch */}
-          <div className="flex items-center justify-center py-2 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 p-4 rounded-xl shadow-sm mb-14">
-            <div className="bg-zinc-200/60 dark:bg-zinc-900 p-1.5 rounded-full flex items-center space-x-3 border border-zinc-250 dark:border-zinc-800/80">
-              <button
-                type="button"
-                onClick={() => setIsAnnual(false)}
-                className={`px-4 py-1.5 text-[10px] font-black uppercase tracking-wider rounded-full transition-all duration-300 cursor-pointer ${
-                  !isAnnual 
-                    ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white shadow-sm' 
-                    : 'text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-300'
-                }`}
-              >
-                Mensal
-              </button>
-              <button
-                type="button"
-                onClick={() => setIsAnnual(true)}
-                className={`px-4 py-1.5 text-[10px] font-black uppercase tracking-wider rounded-full transition-all duration-300 cursor-pointer ${
-                  isAnnual 
-                    ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white shadow-sm' 
-                    : 'text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-300'
-                }`}
-              >
-                Anual
-              </button>
-              <span className="text-[9px] px-2.5 py-1 rounded-full font-extrabold tracking-wide uppercase bg-[#001CFF] text-white shadow-[0_2px_8px_rgba(0,28,255,0.25)] whitespace-nowrap shrink-0">
-                2 MESES GRÁTIS
-              </span>
-            </div>
-          </div>
+          <BillingSwitch isAnnual={isAnnual} onChange={setIsAnnual} />
 
           {/* LISTA DE OPÇÕES DE PLANOS */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
             {/* PLANO PRO */}
             <div className={`bg-white dark:bg-zinc-900 border p-6 rounded-2xl flex flex-col justify-between shadow-sm dark:shadow-xl transition-all relative ${
               condominio?.plan_type === 'pro' 
-                ? 'border-[#0033FF]' 
+                ? 'border-[#001CFF]' 
                 : 'border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700'
             }`}>
               {condominio?.plan_type === 'pro' && (
-                <div className="absolute top-3 right-3 text-[8px] bg-[#0033FF]/10 text-[#0033FF] border border-[#0033FF]/20 px-2 py-0.5 rounded-full font-black uppercase tracking-wider">
+                <div className="absolute top-3 right-3 text-[8px] bg-[#001CFF]/10 text-[#001CFF] border border-[#001CFF]/20 px-2 py-0.5 rounded-full font-black uppercase tracking-wider">
                   Plano Ativo
                 </div>
               )}
@@ -824,7 +797,7 @@ export default function ConfiguracoesPage() {
                   <span className="text-[9px] font-bold text-zinc-550 dark:text-zinc-500 uppercase tracking-widest">Para Síndicos</span>
                   <h4 className="text-base font-black text-zinc-900 dark:text-white uppercase tracking-wider flex items-center">
                     Zelify Pro
-                    <Sparkles className="w-4 h-4 text-[#0033FF] ml-1.5" />
+                    <Sparkles className="w-4 h-4 text-[#001CFF] ml-1.5" />
                   </h4>
                 </div>
                 
@@ -877,7 +850,7 @@ export default function ConfiguracoesPage() {
                   className={`w-full text-xs font-bold py-2.5 rounded-lg transition-all text-center flex items-center justify-center space-x-1.5 ${
                     condominio?.plan_type === 'pro' && condominio?.subscription_status === 'active'
                       ? 'bg-zinc-100 dark:bg-zinc-950 text-zinc-400 border border-zinc-200 dark:border-zinc-800 cursor-not-allowed'
-                      : 'bg-[#0033FF] hover:bg-[#0033FF]/90 text-white shadow-[0_4px_15px_rgba(0,51,255,0.2)] active:scale-[0.98] cursor-pointer'
+                      : 'bg-[#001CFF] hover:bg-[#001CFF]/90 text-white shadow-[0_4px_15px_rgba(0,51,255,0.2)] active:scale-[0.98] cursor-pointer'
                   }`}
                 >
                   <CreditCard className="w-3.5 h-3.5" />
@@ -893,11 +866,11 @@ export default function ConfiguracoesPage() {
             {/* PLANO CORPORATIVO (SIMULADOR) */}
             <div className={`bg-white dark:bg-zinc-900 border p-6 rounded-2xl flex flex-col justify-between shadow-sm dark:shadow-xl transition-all relative ${
               condominio?.plan_type === 'corporate' 
-                ? 'border-[#0033FF]' 
+                ? 'border-[#001CFF]' 
                 : 'border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700'
             }`}>
               {condominio?.plan_type === 'corporate' && (
-                <div className="absolute top-3 right-3 text-[8px] bg-[#0033FF]/10 text-[#0033FF] border border-[#0033FF]/20 px-2 py-0.5 rounded-full font-black uppercase tracking-wider">
+                <div className="absolute top-3 right-3 text-[8px] bg-[#001CFF]/10 text-[#001CFF] border border-[#001CFF]/20 px-2 py-0.5 rounded-full font-black uppercase tracking-wider">
                   Plano Ativo
                 </div>
               )}
@@ -907,7 +880,7 @@ export default function ConfiguracoesPage() {
                   <span className="text-[9px] font-bold text-zinc-555 dark:text-zinc-500 uppercase tracking-widest">Para Administradoras</span>
                   <h4 className="text-base font-black text-zinc-900 dark:text-white uppercase tracking-wider flex items-center">
                     Zelify Corporate
-                    <Building className="w-4 h-4 text-[#0033FF] ml-1.5" />
+                    <Building className="w-4 h-4 text-[#001CFF] ml-1.5" />
                   </h4>
                 </div>
 
@@ -938,7 +911,7 @@ export default function ConfiguracoesPage() {
                         <button
                           type="button"
                           onClick={() => setNumCondos(prev => Math.min(500, prev + 1))}
-                          className="w-6 h-6 rounded bg-[#0033FF] hover:bg-[#0033FF]/90 hover:shadow-[0_0_8px_rgba(0,51,255,0.4)] active:scale-[0.92] text-white flex items-center justify-center font-bold transition-all border border-[#0033FF]/45 cursor-pointer text-xs select-none"
+                          className="w-6 h-6 rounded bg-[#001CFF] hover:bg-[#001CFF]/90 hover:shadow-[0_0_8px_rgba(0,51,255,0.4)] active:scale-[0.92] text-white flex items-center justify-center font-bold transition-all border border-[#001CFF]/45 cursor-pointer text-xs select-none"
                         >
                           +
                         </button>
@@ -960,7 +933,7 @@ export default function ConfiguracoesPage() {
                     <span className="text-xs font-bold text-zinc-700 dark:text-zinc-350">Mensalidade Total:</span>
                     <div className="flex flex-col items-end">
                       <div className="flex items-baseline">
-                        <span className="text-lg font-black text-[#0033FF]">
+                        <span className="text-lg font-black text-[#001CFF]">
                           R$ {totalCorporatePrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                         </span>
                         <span className="text-zinc-500 text-[10px] font-semibold ml-0.5">/mês</span>
@@ -1007,7 +980,7 @@ export default function ConfiguracoesPage() {
                   className={`w-full text-xs font-bold py-2.5 rounded-lg transition-all text-center flex items-center justify-center space-x-1.5 ${
                     condominio?.plan_type === 'corporate' && condominio?.subscription_status === 'active'
                       ? 'bg-zinc-100 dark:bg-zinc-950 text-zinc-400 border border-zinc-200 dark:border-zinc-800 cursor-not-allowed'
-                      : 'bg-[#0033FF] hover:bg-[#0033FF]/90 text-white shadow-[0_4px_15px_rgba(0,51,255,0.2)] active:scale-[0.98] cursor-pointer'
+                      : 'bg-[#001CFF] hover:bg-[#001CFF]/90 text-white shadow-[0_4px_15px_rgba(0,51,255,0.2)] active:scale-[0.98] cursor-pointer'
                   }`}
                 >
                   <Calculator className="w-3.5 h-3.5" />
@@ -1028,7 +1001,7 @@ export default function ConfiguracoesPage() {
         <div className="fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="bg-[#0c0c0e] border border-zinc-800 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl relative">
             {/* Linha superior azul */}
-            <div className="h-1 bg-[#0033FF]"></div>
+            <div className="h-1 bg-[#001CFF]"></div>
             
             {/* Header do checkout */}
             <div className="p-6 pb-4 border-b border-zinc-800/80 flex justify-between items-center">
@@ -1065,7 +1038,7 @@ export default function ConfiguracoesPage() {
                     {isAnnual ? 'Renovação anual automática' : 'Renovação mensal automática'}
                   </p>
                 </div>
-                <div className="text-right font-black text-[#0033FF] text-sm flex flex-col items-end">
+                <div className="text-right font-black text-[#001CFF] text-sm flex flex-col items-end">
                   <span>
                     {selectedUpgrade === 'pro' 
                       ? `R$ ${pricePro},00` 
@@ -1185,7 +1158,7 @@ export default function ConfiguracoesPage() {
                       placeholder="Ex: CARLOS S SANTOS"
                       value={cardName}
                       onChange={(e) => setCardName(e.target.value.toUpperCase())}
-                      className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-white placeholder-zinc-705 focus:outline-none focus:border-[#0033FF]/50 font-semibold"
+                      className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-white placeholder-zinc-705 focus:outline-none focus:border-[#001CFF]/50 font-semibold"
                     />
                   </div>
 
@@ -1203,7 +1176,7 @@ export default function ConfiguracoesPage() {
                         const v = e.target.value.replace(/\D/g, '').replace(/(\d{4})/g, '$1 ').trim();
                         setCardNumber(v);
                       }}
-                      className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-white placeholder-zinc-705 focus:outline-none focus:border-[#0033FF]/50 font-semibold"
+                      className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-white placeholder-zinc-705 focus:outline-none focus:border-[#001CFF]/50 font-semibold"
                     />
                   </div>
 
@@ -1225,7 +1198,7 @@ export default function ConfiguracoesPage() {
                           }
                           setCardExpiry(v);
                         }}
-                        className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-white placeholder-zinc-705 focus:outline-none focus:border-[#0033FF]/50 font-semibold"
+                        className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-white placeholder-zinc-705 focus:outline-none focus:border-[#001CFF]/50 font-semibold"
                       />
                     </div>
                     <div>
@@ -1239,7 +1212,7 @@ export default function ConfiguracoesPage() {
                         placeholder="000"
                         value={cardCvv}
                         onChange={(e) => setCardCvv(e.target.value.replace(/\D/g, ''))}
-                        className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-white placeholder-zinc-705 focus:outline-none focus:border-[#0033FF]/50 font-semibold text-center tracking-widest"
+                        className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-white placeholder-zinc-705 focus:outline-none focus:border-[#001CFF]/50 font-semibold text-center tracking-widest"
                       />
                     </div>
                   </div>
@@ -1251,7 +1224,7 @@ export default function ConfiguracoesPage() {
                 <button
                   type="submit"
                   disabled={processingCheckout}
-                  className="w-full bg-[#0033FF] hover:bg-[#0033FF]/90 text-white text-xs font-bold py-2.5 rounded-lg flex items-center justify-center space-x-1.5 transition-all shadow-[0_4px_15px_rgba(0,51,255,0.2)] active:scale-[0.98] disabled:opacity-50 cursor-pointer"
+                  className="w-full bg-[#001CFF] hover:bg-[#001CFF]/90 text-white text-xs font-bold py-2.5 rounded-lg flex items-center justify-center space-x-1.5 transition-all shadow-[0_4px_15px_rgba(0,51,255,0.2)] active:scale-[0.98] disabled:opacity-50 cursor-pointer"
                 >
                   {processingCheckout ? (
                     <>
@@ -1278,7 +1251,7 @@ export default function ConfiguracoesPage() {
         id="printable-poster" 
         className={`hidden flex-col items-center justify-between text-center p-12 text-black bg-white rounded-none border-[12px] h-[297mm] w-[210mm] border-double ${
           posterTheme === 'blue' 
-            ? 'border-[#0033FF]' 
+            ? 'border-[#001CFF]' 
             : posterTheme === 'emerald' 
             ? 'border-emerald-500' 
             : 'border-zinc-900'
@@ -1289,7 +1262,7 @@ export default function ConfiguracoesPage() {
         <div className="flex items-center justify-center space-x-3 mt-6">
           <Building className={`w-12 h-12 ${
             posterTheme === 'blue' 
-              ? 'text-[#0033FF]' 
+              ? 'text-[#001CFF]' 
               : posterTheme === 'emerald' 
               ? 'text-emerald-500' 
               : 'text-zinc-900'
@@ -1314,7 +1287,7 @@ export default function ConfiguracoesPage() {
         {/* QR Code Container */}
         <div className={`p-6 border-4 rounded-3xl bg-zinc-50 shadow-md ${
           posterTheme === 'blue' 
-            ? 'border-[#0033FF]/30' 
+            ? 'border-[#001CFF]/30' 
             : posterTheme === 'emerald' 
             ? 'border-emerald-500/30' 
             : 'border-zinc-300'
@@ -1333,7 +1306,7 @@ export default function ConfiguracoesPage() {
           </div>
           <div className={`text-4xl font-black tracking-widest ${
             posterTheme === 'blue' 
-              ? 'text-[#0033FF]' 
+              ? 'text-[#001CFF]' 
               : posterTheme === 'emerald' 
               ? 'text-emerald-600' 
               : 'text-zinc-900'

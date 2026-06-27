@@ -19,7 +19,10 @@ import {
   Lock,
   Layers,
   FileText,
-  FileSpreadsheet
+  FileSpreadsheet,
+  X,
+  Sparkles,
+  Crown
 } from 'lucide-react';
 import { db, Chamado, Condominio, UsuarioGestor } from '@/lib/db';
 
@@ -45,6 +48,7 @@ function DashboardHomeContent() {
     emExecucao: number;
     health: 'Estável' | 'Atenção' | 'Crítico';
   }>>([]);
+  const [toastMsg, setToastMsg] = useState<{ type: 'upgrade' | 'error'; title: string; text: string } | null>(null);
 
   // Verificar sessão do gestor e condomínio ativo
   useEffect(() => {
@@ -150,8 +154,7 @@ function DashboardHomeContent() {
   const handleExportCSV = () => {
     if (!condominio) return;
     if (condominio.plan_type === 'free') {
-      alert('A exportação de relatórios em CSV é uma funcionalidade exclusiva dos planos Pro e Corporate. Faça o upgrade para liberar!');
-      router.push('/dashboard/configuracoes?tab=faturamento');
+      setToastMsg({ type: 'upgrade', title: 'Funcionalidade Premium', text: 'A exportação de relatórios em CSV é exclusiva dos planos Pro e Corporate.' });
       return;
     }
 
@@ -184,8 +187,7 @@ function DashboardHomeContent() {
   const handleExportPDF = async () => {
     if (!condominio) return;
     if (condominio.plan_type === 'free') {
-      alert('A exportação de relatórios em PDF é uma funcionalidade exclusiva dos planos Pro e Corporate. Faça o upgrade para liberar!');
-      router.push('/dashboard/configuracoes?tab=faturamento');
+      setToastMsg({ type: 'upgrade', title: 'Funcionalidade Premium', text: 'A exportação de relatórios em PDF é exclusiva dos planos Pro e Corporate.' });
       return;
     }
 
@@ -342,7 +344,7 @@ function DashboardHomeContent() {
       doc.save(`Relatorio_Mensal_${condominio.slug}.pdf`);
     } catch (err) {
       console.error('Erro ao gerar PDF:', err);
-      alert('Erro ao gerar relatório em PDF.');
+      setToastMsg({ type: 'error', title: 'Erro na Exportação', text: 'Não foi possível gerar o relatório em PDF. Tente novamente.' });
     }
   };
 
@@ -452,8 +454,74 @@ function DashboardHomeContent() {
       doc.save(`Relatorio_Consolidado_Carteira_${new Date().toISOString().split('T')[0]}.pdf`);
     } catch (err) {
       console.error(err);
-      alert('Erro ao gerar PDF da carteira.');
+      setToastMsg({ type: 'error', title: 'Erro na Exportação', text: 'Não foi possível gerar o PDF da carteira. Tente novamente.' });
     }
+  };
+
+  // Auto-dismiss toast
+  useEffect(() => {
+    if (toastMsg) {
+      const timer = setTimeout(() => setToastMsg(null), 6000);
+      return () => clearTimeout(timer);
+    }
+  }, [toastMsg]);
+
+  const renderToast = () => {
+    if (!toastMsg) return null;
+    const isUpgrade = toastMsg.type === 'upgrade';
+    return (
+      <div className="fixed bottom-6 right-6 z-50 animate-in slide-in-from-bottom-4 fade-in duration-300 max-w-sm w-full">
+        <div className={`relative overflow-hidden rounded-2xl border shadow-2xl backdrop-blur-xl ${
+          isUpgrade 
+            ? 'bg-gradient-to-br from-[#0033FF]/15 via-zinc-950/95 to-zinc-950/95 border-[#0033FF]/25 shadow-[0_8px_40px_rgba(0,51,255,0.15)]' 
+            : 'bg-gradient-to-br from-red-500/10 via-zinc-950/95 to-zinc-950/95 border-red-500/25 shadow-[0_8px_40px_rgba(239,68,68,0.1)]'
+        }`}>
+          {/* Glow */}
+          <div className={`absolute -top-6 -right-6 w-20 h-20 rounded-full blur-2xl pointer-events-none ${
+            isUpgrade ? 'bg-[#0033FF]/20' : 'bg-red-500/15'
+          }`} />
+          
+          <div className="relative p-4">
+            {/* Close */}
+            <button
+              onClick={() => setToastMsg(null)}
+              className="absolute top-3 right-3 p-1 text-zinc-500 hover:text-white rounded-md hover:bg-white/10 transition-all cursor-pointer"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+
+            {/* Icon + Title */}
+            <div className="flex items-start space-x-3 pr-6">
+              <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border ${
+                isUpgrade 
+                  ? 'bg-[#0033FF]/15 border-[#0033FF]/30 text-[#0033FF]' 
+                  : 'bg-red-500/15 border-red-500/30 text-red-400'
+              }`}>
+                {isUpgrade ? <Crown className="w-4.5 h-4.5" /> : <AlertTriangle className="w-4.5 h-4.5" />}
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm font-bold text-white leading-tight">{toastMsg.title}</p>
+                <p className="text-[11px] text-zinc-400 mt-1 leading-relaxed font-medium">{toastMsg.text}</p>
+              </div>
+            </div>
+
+            {/* CTA for upgrade */}
+            {isUpgrade && (
+              <button
+                onClick={() => {
+                  setToastMsg(null);
+                  router.push('/dashboard/configuracoes?tab=faturamento');
+                }}
+                className="w-full mt-3.5 py-2 bg-[#0033FF] hover:bg-[#0033FF]/90 text-white text-[11px] font-bold rounded-lg transition-all active:scale-[0.98] cursor-pointer flex items-center justify-center space-x-1.5 shadow-[0_4px_15px_rgba(0,51,255,0.25)]"
+              >
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>Fazer Upgrade Agora</span>
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+    );
   };
 
   if (loading) {
@@ -657,6 +725,7 @@ function DashboardHomeContent() {
             </table>
           </div>
         </div>
+        {renderToast()}
       </div>
     );
   }
@@ -855,6 +924,7 @@ function DashboardHomeContent() {
           </div>
         )}
       </div>
+      {renderToast()}
     </div>
   );
 }

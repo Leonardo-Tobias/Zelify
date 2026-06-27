@@ -889,8 +889,8 @@ export default function ConfiguracoesPage() {
                       </div>
                     </div>
                   </div>
-                  <p className="text-[8px] text-zinc-550 dark:text-zinc-500 text-right mt-1 font-semibold">
-                    *Pedido mínimo de 5 condomínios para condições de faturamento em lote.
+                  <p className="text-[8px] text-zinc-555 dark:text-zinc-500 text-right mt-1.5 font-semibold">
+                    *Condição exclusiva para o plano Corporate (mínimo de 5 condomínios ativos).
                   </p>
 
                   <div className="flex justify-between items-center text-[10px] text-zinc-500 font-semibold border-t border-zinc-200 dark:border-zinc-800/60 pt-2">

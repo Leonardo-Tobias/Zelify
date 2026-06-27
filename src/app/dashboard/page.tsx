@@ -17,7 +17,9 @@ import {
   ArrowUpRight,
   Loader2,
   Lock,
-  Layers
+  Layers,
+  FileText,
+  FileSpreadsheet
 } from 'lucide-react';
 import { db, Chamado, Condominio, UsuarioGestor } from '@/lib/db';
 
@@ -145,6 +147,315 @@ function DashboardHomeContent() {
     }
   };
 
+  const handleExportCSV = () => {
+    if (!condominio) return;
+    if (condominio.plan_type === 'free') {
+      alert('A exportação de relatórios em CSV é uma funcionalidade exclusiva dos planos Pro e Corporate. Faça o upgrade para liberar!');
+      router.push('/dashboard/configuracoes?tab=faturamento');
+      return;
+    }
+
+    const headers = ['Data', 'Tipo', 'Local', 'Unidade', 'Descrição', 'Status'];
+    const rows = chamados.map(c => [
+      new Date(c.created_at).toLocaleDateString('pt-BR'),
+      c.tipo === 'manutencao' ? 'Manutenção' : 'Achado e Perdido',
+      c.local,
+      c.bloco === 'Portaria' ? 'Portaria' : `${c.bloco} - Apto ${c.apartamento}`,
+      `"${c.descricao.replace(/"/g, '""').replace(/\r?\n/g, ' ')}"`,
+      c.status === 'pendente' ? 'Pendente' 
+        : c.status === 'em_execucao' ? 'Em andamento' 
+        : c.status === 'resolvido' ? 'Resolvido'
+        : c.status === 'encontrado' ? 'Na Portaria'
+        : c.status === 'aguardando_retirada' ? 'Aguardando Retirada'
+        : 'Entregue'
+    ]);
+    
+    const csvString = "\uFEFF" + [headers.join(";")].concat(rows.map(e => e.join(";"))).join("\r\n");
+    const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `Relatorio_Ocorrencias_${condominio.slug}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleExportPDF = async () => {
+    if (!condominio) return;
+    if (condominio.plan_type === 'free') {
+      alert('A exportação de relatórios em PDF é uma funcionalidade exclusiva dos planos Pro e Corporate. Faça o upgrade para liberar!');
+      router.push('/dashboard/configuracoes?tab=faturamento');
+      return;
+    }
+
+    try {
+      const { default: jsPDF } = await import('jspdf');
+      const { default: autoTable } = await import('jspdf-autotable');
+      
+      const doc = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4'
+      });
+      
+      const primaryColor = [0, 51, 255]; // #0033FF Zelify Blue
+      const darkColor = [39, 39, 42];    // zinc-800
+      const lightGray = [228, 228, 231]; // zinc-200
+      
+      // Calcs
+      const manutencoesList = chamados.filter(c => c.tipo === 'manutencao');
+      const pCount = manutencoesList.filter(c => c.status === 'pendente').length;
+      const eCount = manutencoesList.filter(c => c.status === 'em_execucao').length;
+      const rCount = manutencoesList.filter(c => c.status === 'resolvido').length;
+      
+      // Header
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(22);
+      doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+      doc.text('Zelify', 20, 20);
+      
+      doc.setFontSize(10);
+      doc.setTextColor(115, 115, 115);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Gerado em: ${new Date().toLocaleDateString('pt-BR')}`, 145, 17);
+      doc.text(`Período: ${new Date().toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}`, 145, 22);
+
+      // Line
+      doc.setDrawColor(lightGray[0], lightGray[1], lightGray[2]);
+      doc.setLineWidth(0.5);
+      doc.line(20, 26, 190, 26);
+      
+      // Title
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(14);
+      doc.setTextColor(darkColor[0], darkColor[1], darkColor[2]);
+      doc.text('Relatório Operacional Mensal', 20, 36);
+      
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Condomínio: ${condominio.nome}`, 20, 42);
+      doc.text(`Plano: ${condominio.plan_type.toUpperCase()}`, 20, 47);
+      
+      // Cards
+      doc.setFillColor(244, 244, 245);
+      doc.roundedRect(20, 53, 38, 20, 2, 2, 'F');
+      doc.roundedRect(62, 53, 38, 20, 2, 2, 'F');
+      doc.roundedRect(104, 53, 38, 20, 2, 2, 'F');
+      doc.roundedRect(146, 53, 44, 20, 2, 2, 'F');
+      
+      // Pendentes
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(11);
+      doc.setTextColor(217, 119, 6);
+      doc.text(`${pCount}`, 25, 60);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8);
+      doc.setTextColor(82, 82, 91);
+      doc.text('Pendentes', 25, 67);
+      
+      // Em Execução
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(11);
+      doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+      doc.text(`${eCount}`, 67, 60);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8);
+      doc.setTextColor(82, 82, 91);
+      doc.text('Em Execução', 67, 67);
+      
+      // Resolvidos
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(11);
+      doc.setTextColor(5, 150, 105);
+      doc.text(`${rCount}`, 109, 60);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8);
+      doc.setTextColor(82, 82, 91);
+      doc.text('Concluídos', 109, 67);
+
+      // Total
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(11);
+      doc.setTextColor(darkColor[0], darkColor[1], darkColor[2]);
+      doc.text(`${chamados.length}`, 151, 60);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8);
+      doc.setTextColor(82, 82, 91);
+      doc.text('Ocorrências Totais', 151, 67);
+      
+      // Table
+      const tableHeaders = [['Data', 'Tipo', 'Local', 'Unidade', 'Descrição', 'Status']];
+      const tableRows = chamados.map(c => [
+        new Date(c.created_at).toLocaleDateString('pt-BR'),
+        c.tipo === 'manutencao' ? 'Manutenção' : 'Achado/Perdido',
+        c.local,
+        c.bloco === 'Portaria' ? 'Portaria' : `${c.bloco} - Apto ${c.apartamento}`,
+        c.descricao,
+        c.status === 'pendente' ? 'Pendente' 
+          : c.status === 'em_execucao' ? 'Em andamento' 
+          : c.status === 'resolvido' ? 'Resolvido'
+          : c.status === 'encontrado' ? 'Na Portaria'
+          : c.status === 'aguardando_retirada' ? 'Aguardando Retirada'
+          : 'Entregue'
+      ]);
+      
+      autoTable(doc, {
+        head: tableHeaders,
+        body: tableRows,
+        startY: 82,
+        margin: { left: 20, right: 20 },
+        theme: 'striped',
+        headStyles: {
+          fillColor: primaryColor as [number, number, number],
+          textColor: [255, 255, 255],
+          fontSize: 9,
+          fontStyle: 'bold',
+          halign: 'left'
+        },
+        bodyStyles: {
+          fontSize: 8,
+          textColor: [39, 39, 42]
+        },
+        columnStyles: {
+          0: { cellWidth: 20 },
+          1: { cellWidth: 25 },
+          2: { cellWidth: 20 },
+          3: { cellWidth: 25 },
+          4: { cellWidth: 55 },
+          5: { cellWidth: 25 }
+        },
+        alternateRowStyles: {
+          fillColor: [248, 250, 252]
+        },
+        didDrawPage: (data) => {
+          doc.setFont('helvetica', 'normal');
+          doc.setFontSize(8);
+          doc.setTextColor(115, 115, 115);
+          doc.text(`Zelify - Gestão Inteligente de Condomínios`, 20, doc.internal.pageSize.height - 10);
+          
+          const str = `Página ${data.pageNumber}`;
+          doc.text(str, doc.internal.pageSize.width - 20 - doc.getTextWidth(str), doc.internal.pageSize.height - 10);
+        }
+      });
+      
+      doc.save(`Relatorio_Mensal_${condominio.slug}.pdf`);
+    } catch (err) {
+      console.error('Erro ao gerar PDF:', err);
+      alert('Erro ao gerar relatório em PDF.');
+    }
+  };
+
+  const handleExportPortfolioCSV = () => {
+    const headers = ['Condomínio', 'Plano', 'Status Assinatura', 'Total Chamados', 'Chamados Pendentes', 'Chamados Em Execução', 'Saúde Operacional'];
+    const rows = portfolioCondos.map(item => [
+      item.nome,
+      item.plan_type.toUpperCase(),
+      item.subscription_status === 'active' ? 'Ativo' : item.subscription_status === 'past_due' ? 'Bloqueado' : 'Cancelado',
+      item.totalChamados,
+      item.pendentes,
+      item.emExecucao,
+      item.health
+    ]);
+    const csvString = "\uFEFF" + [headers.join(";")].concat(rows.map(e => e.join(";"))).join("\r\n");
+    const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `Carteira_Condominios_${gestor?.nome.replace(/\s+/g, '_')}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleExportPortfolioPDF = async () => {
+    try {
+      const { default: jsPDF } = await import('jspdf');
+      const { default: autoTable } = await import('jspdf-autotable');
+      
+      const doc = new jsPDF({
+        orientation: 'landscape',
+        unit: 'mm',
+        format: 'a4'
+      });
+      
+      const primaryColor = [0, 51, 255];
+      const darkColor = [39, 39, 42];
+      const lightGray = [228, 228, 231];
+      
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(22);
+      doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+      doc.text('Zelify', 20, 20);
+      
+      doc.setFontSize(10);
+      doc.setTextColor(115, 115, 115);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Gerado em: ${new Date().toLocaleDateString('pt-BR')}`, 225, 17);
+      
+      doc.setDrawColor(lightGray[0], lightGray[1], lightGray[2]);
+      doc.setLineWidth(0.5);
+      doc.line(20, 26, 277, 26);
+      
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(14);
+      doc.setTextColor(darkColor[0], darkColor[1], darkColor[2]);
+      doc.text('Relatório Consolidado de Carteira - Zelify Corporate', 20, 36);
+      
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Administradora / Gestor: ${gestor?.nome}`, 20, 42);
+      doc.text(`Total de Prédios na Carteira: ${portfolioCondos.length}`, 20, 47);
+      
+      const tableHeaders = [['Condomínio', 'Plano', 'Status Assinatura', 'Total Ocorrências', 'Pendentes', 'Em Execução', 'Saúde Operacional']];
+      const tableRows = portfolioCondos.map(item => [
+        item.nome,
+        item.plan_type.toUpperCase(),
+        item.subscription_status === 'active' ? 'Ativo' : item.subscription_status === 'past_due' ? 'Inadimplente (Bloqueado)' : 'Cancelado',
+        item.totalChamados,
+        item.pendentes,
+        item.emExecucao,
+        item.health
+      ]);
+      
+      autoTable(doc, {
+        head: tableHeaders,
+        body: tableRows,
+        startY: 55,
+        margin: { left: 20, right: 20 },
+        theme: 'striped',
+        headStyles: {
+          fillColor: primaryColor as [number, number, number],
+          textColor: [255, 255, 255],
+          fontSize: 9,
+          fontStyle: 'bold',
+          halign: 'left'
+        },
+        bodyStyles: {
+          fontSize: 8,
+          textColor: [39, 39, 42]
+        },
+        alternateRowStyles: {
+          fillColor: [248, 250, 252]
+        },
+        didDrawPage: (data) => {
+          doc.setFont('helvetica', 'normal');
+          doc.setFontSize(8);
+          doc.setTextColor(115, 115, 115);
+          doc.text(`Zelify - Painel Consolidado Multi-Condomínios`, 20, doc.internal.pageSize.height - 10);
+          
+          const str = `Página ${data.pageNumber}`;
+          doc.text(str, doc.internal.pageSize.width - 20 - doc.getTextWidth(str), doc.internal.pageSize.height - 10);
+        }
+      });
+      
+      doc.save(`Relatorio_Consolidado_Carteira_${new Date().toISOString().split('T')[0]}.pdf`);
+    } catch (err) {
+      console.error(err);
+      alert('Erro ao gerar PDF da carteira.');
+    }
+  };
+
   if (loading) {
     return (
       <div className="h-full flex flex-col items-center justify-center py-20 text-zinc-500">
@@ -168,6 +479,22 @@ function DashboardHomeContent() {
           <div>
             <h1 className="text-base font-bold text-zinc-900 dark:text-white uppercase tracking-wider">Carteira de Condomínios</h1>
             <p className="text-xs text-zinc-500 font-medium">Visão de gerenciamento multi-condomínio e saúde operacional</p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <button 
+              onClick={handleExportPortfolioPDF}
+              className="bg-white dark:bg-zinc-925 hover:bg-zinc-50 dark:hover:bg-zinc-900 text-zinc-700 dark:text-zinc-300 text-xs font-semibold px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-800 flex items-center space-x-1.5 transition-all active:scale-[0.98] cursor-pointer"
+            >
+              <FileText className="w-3.5 h-3.5" />
+              <span>Exportar PDF</span>
+            </button>
+            <button 
+              onClick={handleExportPortfolioCSV}
+              className="bg-white dark:bg-zinc-925 hover:bg-zinc-50 dark:hover:bg-zinc-900 text-zinc-700 dark:text-zinc-300 text-xs font-semibold px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-800 flex items-center space-x-1.5 transition-all active:scale-[0.98] cursor-pointer"
+            >
+              <FileSpreadsheet className="w-3.5 h-3.5" />
+              <span>Exportar CSV</span>
+            </button>
           </div>
         </div>
 
@@ -373,10 +700,24 @@ function DashboardHomeContent() {
           <h1 className="text-base font-bold text-zinc-900 dark:text-white uppercase tracking-wider">Painel Operacional</h1>
           <p className="text-xs text-zinc-500 font-medium">Resumo de atividades e métricas do {condominio?.nome}</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
+          <button 
+            onClick={handleExportPDF}
+            className="bg-white dark:bg-zinc-925 hover:bg-zinc-50 dark:hover:bg-zinc-900 text-zinc-700 dark:text-zinc-300 text-xs font-semibold px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-800 flex items-center space-x-1.5 transition-all active:scale-[0.98] cursor-pointer"
+          >
+            <FileText className="w-3.5 h-3.5" />
+            <span>Exportar PDF</span>
+          </button>
+          <button 
+            onClick={handleExportCSV}
+            className="bg-white dark:bg-zinc-925 hover:bg-zinc-50 dark:hover:bg-zinc-900 text-zinc-700 dark:text-zinc-300 text-xs font-semibold px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-800 flex items-center space-x-1.5 transition-all active:scale-[0.98] cursor-pointer"
+          >
+            <FileSpreadsheet className="w-3.5 h-3.5" />
+            <span>Exportar CSV</span>
+          </button>
           <button 
             onClick={() => router.push('/dashboard/kanban')}
-            className="bg-[#0033FF] hover:bg-[#0033FF]/90 text-white text-xs font-semibold px-4 py-2 rounded-lg flex items-center space-x-1.5 transition-all shadow-[0_4px_20px_rgba(0,51,255,0.25)] active:scale-[0.98]"
+            className="bg-[#0033FF] hover:bg-[#0033FF]/90 text-white text-xs font-semibold px-4 py-2.5 rounded-lg flex items-center space-x-1.5 transition-all shadow-[0_4px_20px_rgba(0,51,255,0.25)] active:scale-[0.98] cursor-pointer"
           >
             <span>Ver Kanban</span>
             <ArrowRight className="w-3.5 h-3.5" />

@@ -329,14 +329,16 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                 </div>
               </div>
             ) : (
-              <div className="p-2 bg-zinc-100 dark:bg-white/[0.04] border border-zinc-200 dark:border-white/[0.06] rounded-lg flex items-center justify-between group hover:border-zinc-300 dark:hover:border-white/[0.12] transition-all shadow-sm">
-                <div className="flex items-center space-x-2.5 min-w-0">
+              <div className="p-2.5 bg-zinc-100 dark:bg-white/[0.04] border border-zinc-200 dark:border-white/[0.06] rounded-xl flex items-center justify-between group hover:border-zinc-300 dark:hover:border-white/[0.12] transition-all shadow-sm">
+                <div className="flex items-center space-x-2.5 min-w-0 flex-1">
                   <div className="w-6 h-6 rounded bg-[#001CFF]/10 border border-[#001CFF]/20 flex items-center justify-center text-[#001CFF] font-extrabold text-[10px] shrink-0">
                     {condominio.nome.charAt(0)}
                   </div>
-                  <span className="text-xs font-semibold text-zinc-700 dark:text-zinc-200 truncate">{condominio.nome}</span>
+                  <span className="text-xs font-bold text-zinc-700 dark:text-zinc-200 truncate flex-1 min-w-0" title={condominio.nome}>
+                    {condominio.nome}
+                  </span>
                 </div>
-                <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full shrink-0 ml-1.5 shadow-[0_0_8px_rgba(16,185,129,0.7)] animate-pulse"></span>
+                <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full shrink-0 ml-2 shadow-[0_0_8px_rgba(16,185,129,0.7)] animate-pulse"></span>
               </div>
             )}
           </div>
@@ -361,13 +363,15 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                 href={`/${condominio.slug}`} 
                 target="_blank" 
                 rel="noreferrer" 
-                className="w-full flex items-center justify-between px-2.5 py-1.5 bg-zinc-100 dark:bg-white/[0.04] border border-zinc-200 dark:border-white/[0.06] rounded-lg text-[11px] text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-all group hover:border-zinc-300 dark:hover:border-white/[0.12] shadow-sm"
+                className="w-full flex flex-col p-2.5 bg-zinc-100 dark:bg-white/[0.04] border border-zinc-200 dark:border-white/[0.06] rounded-xl text-left hover:text-zinc-900 dark:hover:text-white transition-all group hover:border-zinc-300 dark:hover:border-white/[0.12] shadow-sm"
               >
-                <div className="flex items-center space-x-2 min-w-0">
+                <div className="flex items-center space-x-2 text-[11px] font-bold text-zinc-600 dark:text-zinc-300 group-hover:text-[#001CFF] transition-colors w-full">
                   <ExternalLink className="w-3.5 h-3.5 text-zinc-500 group-hover:text-[#001CFF] shrink-0 transition-colors" />
-                  <span className="truncate font-medium">Link do Morador</span>
+                  <span className="truncate">Link do Morador</span>
                 </div>
-                <span className="text-[10px] font-mono text-zinc-500 group-hover:text-[#001CFF] truncate max-w-[80px] transition-colors">/{condominio.slug}</span>
+                <span className="text-[10px] font-mono text-zinc-400 dark:text-zinc-550 group-hover:text-[#001CFF] truncate max-w-full block mt-1 transition-colors pl-5.5">
+                  zelify.vercel.app/{condominio.slug}
+                </span>
               </a>
             </div>
           )}

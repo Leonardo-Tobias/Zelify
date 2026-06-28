@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -32,10 +32,10 @@ export default function ConfiguracoesPage() {
   const [condominio, setCondominio] = useState<Condominio | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Navegação por abas
+  // NavegaÃ§Ã£o por abas
   const [activeTab, setActiveTab] = useState<'geral' | 'faturamento'>('geral');
 
-  // Estados do formulário
+  // Estados do formulÃ¡rio
   const [nome, setNome] = useState('');
   const [slug, setSlug] = useState('');
   const [codigoAcesso, setCodigoAcesso] = useState('');
@@ -47,7 +47,7 @@ export default function ConfiguracoesPage() {
 
   // Estados da Placa Informativa
   const [posterTitle, setPosterTitle] = useState('Portal do Morador');
-  const [posterInstructions, setPosterInstructions] = useState('Escaneie o QR Code abaixo com seu celular para abrir o Portal do Morador, relatar problemas de manutenção ou cadastrar achados e perdidos.');
+  const [posterInstructions, setPosterInstructions] = useState('Escaneie o QR Code abaixo com seu celular para abrir o Portal do Morador, relatar problemas de manutenÃ§Ã£o ou cadastrar achados e perdidos.');
   const [posterTheme, setPosterTheme] = useState<'blue' | 'zinc' | 'emerald'>('blue');
 
   // Estados de Faturamento
@@ -59,7 +59,7 @@ export default function ConfiguracoesPage() {
   const [checkoutTab, setCheckoutTab] = useState<'pix' | 'card'>('pix');
   const [copiedPix, setCopiedPix] = useState(false);
 
-  // Formulário do cartão
+  // FormulÃ¡rio do cartÃ£o
   const [cardNumber, setCardNumber] = useState('');
   const [cardName, setCardName] = useState('');
   const [cardExpiry, setCardExpiry] = useState('');
@@ -81,7 +81,7 @@ export default function ConfiguracoesPage() {
     setCodigoAcesso(condo.codigo_acesso);
     setLoading(false);
 
-    // Carrega dados frescos do banco de dados (Supabase ou LocalDB) para refletir atualizações
+    // Carrega dados frescos do banco de dados (Supabase ou LocalDB) para refletir atualizaÃ§Ãµes
     async function fetchFreshCondo() {
       try {
         const fresh = await db.getCondominioBySlug(condo.slug);
@@ -90,7 +90,7 @@ export default function ConfiguracoesPage() {
           localStorage.setItem('zelify_condominio_gestao', JSON.stringify(fresh));
         }
       } catch (err) {
-        console.error('Erro ao atualizar condomínio com dados do banco:', err);
+        console.error('Erro ao atualizar condomÃ­nio com dados do banco:', err);
       }
     }
     fetchFreshCondo();
@@ -115,7 +115,7 @@ export default function ConfiguracoesPage() {
           setSelectedUpgrade(planParam);
           setShowCheckoutModal(true);
           
-          // Limpa os parâmetros de plano da URL para evitar reabrir ao atualizar
+          // Limpa os parÃ¢metros de plano da URL para evitar reabrir ao atualizar
           const newUrl = window.location.pathname + '?tab=faturamento';
           window.history.replaceState({ path: newUrl }, '', newUrl);
         }
@@ -123,7 +123,7 @@ export default function ConfiguracoesPage() {
     }
   }, []);
 
-  // Carrega contagem de chamados do mês se estiver no plano grátis
+  // Carrega contagem de chamados do mÃªs se estiver no plano grÃ¡tis
   useEffect(() => {
     if (!condominio) return;
     
@@ -138,19 +138,19 @@ export default function ConfiguracoesPage() {
     loadMonthlyCount();
   }, [condominio]);
 
-  // Limpar e formatar o slug (letras, números, hífen, sem espaços ou acentos)
+  // Limpar e formatar o slug (letras, nÃºmeros, hÃ­fen, sem espaÃ§os ou acentos)
   const formatSlug = (val: string) => {
     return val
       .toLowerCase()
       .normalize('NFD')
       .replace(/[\u0300-\u036f]/g, '') // remove acentos
-      .replace(/[^a-z0-9-]/g, '') // remove caracteres inválidos
-      .replace(/\s+/g, '-'); // substitui espaços por hífen
+      .replace(/[^a-z0-9-]/g, '') // remove caracteres invÃ¡lidos
+      .replace(/\s+/g, '-'); // substitui espaÃ§os por hÃ­fen
   };
 
   const handleCopyLink = () => {
     if (!condominio) return;
-    const fullUrl = `https://zelify.app/${condominio.slug}`;
+    const fullUrl = `https://zelify.vercel.app/${condominio.slug}`;
     
     navigator.clipboard.writeText(fullUrl);
     setCopied(true);
@@ -160,7 +160,7 @@ export default function ConfiguracoesPage() {
   const handleDownloadQR = async () => {
     try {
       if (!condominio) return;
-      const targetUrl = `https://zelify.app/${condominio.slug}`;
+      const targetUrl = `https://zelify.vercel.app/${condominio.slug}`;
       const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=${encodeURIComponent(targetUrl)}`;
       const response = await fetch(qrUrl);
       const blob = await response.blob();
@@ -174,7 +174,7 @@ export default function ConfiguracoesPage() {
       URL.revokeObjectURL(blobUrl);
     } catch (err) {
       console.error('Erro ao baixar o QR Code:', err);
-      alert('Não foi possível baixar o QR Code diretamente. Clique com o botão direito na imagem do QR Code e escolha "Salvar imagem".');
+      alert('NÃ£o foi possÃ­vel baixar o QR Code diretamente. Clique com o botÃ£o direito na imagem do QR Code e escolha "Salvar imagem".');
     }
   };
 
@@ -189,7 +189,7 @@ export default function ConfiguracoesPage() {
     }
 
     if (codigoAcesso.length !== 4 || !/^\d+$/.test(codigoAcesso)) {
-      setError('O código de acesso deve possuir exatamente 4 dígitos numéricos.');
+      setError('O cÃ³digo de acesso deve possuir exatamente 4 dÃ­gitos numÃ©ricos.');
       return;
     }
 
@@ -204,7 +204,7 @@ export default function ConfiguracoesPage() {
 
       if (updated) {
         setCondominio(updated);
-        // Atualizar localStorage para refletir na navegação do layout
+        // Atualizar localStorage para refletir na navegaÃ§Ã£o do layout
         localStorage.setItem('zelify_condominio_gestao', JSON.stringify(updated));
         
         // Disparar evento para atualizar outros componentes ouvindo storage
@@ -215,7 +215,7 @@ export default function ConfiguracoesPage() {
         setSuccess(true);
         setTimeout(() => setSuccess(false), 3000);
       } else {
-        setError('Não foi possível salvar as configurações.');
+        setError('NÃ£o foi possÃ­vel salvar as configuraÃ§Ãµes.');
       }
     } catch (err) {
       setError('Erro ao salvar no banco de dados. Verifique a unicidade do slug.');
@@ -231,11 +231,11 @@ export default function ConfiguracoesPage() {
     
     if (checkoutTab === 'card') {
       if (!cardNumber || !cardName || !cardExpiry || !cardCvv) {
-        setCheckoutError('Por favor, preencha todos os campos do cartão.');
+        setCheckoutError('Por favor, preencha todos os campos do cartÃ£o.');
         return;
       }
       if (cardNumber.replace(/\s/g, '').length < 16) {
-        setCheckoutError('Número de cartão de crédito inválido.');
+        setCheckoutError('NÃºmero de cartÃ£o de crÃ©dito invÃ¡lido.');
         return;
       }
       if (cardExpiry.length < 5) {
@@ -243,7 +243,7 @@ export default function ConfiguracoesPage() {
         return;
       }
       if (cardCvv.length < 3) {
-        setCheckoutError('Código CVV inválido.');
+        setCheckoutError('CÃ³digo CVV invÃ¡lido.');
         return;
       }
     }
@@ -277,13 +277,13 @@ export default function ConfiguracoesPage() {
         setCardExpiry('');
         setCardCvv('');
         
-        alert(`Assinatura ativada com sucesso! Seu condomínio agora está no plano ${selectedUpgrade === 'pro' ? 'Zelify Pro' : 'Zelify Corporate'}.`);
+        alert(`Assinatura ativada com sucesso! Seu condomÃ­nio agora estÃ¡ no plano ${selectedUpgrade === 'pro' ? 'Zelify Pro' : 'Zelify Corporate'}.`);
       } else {
-        setCheckoutError('Não foi possível processar a assinatura.');
+        setCheckoutError('NÃ£o foi possÃ­vel processar a assinatura.');
       }
     } catch (err) {
       console.error(err);
-      setCheckoutError('Erro de processamento da transação. Tente novamente.');
+      setCheckoutError('Erro de processamento da transaÃ§Ã£o. Tente novamente.');
     } finally {
       setProcessingCheckout(false);
     }
@@ -300,14 +300,14 @@ export default function ConfiguracoesPage() {
     return (
       <div className="h-full flex items-center justify-center py-20 text-zinc-500">
         <Loader2 className="w-5 h-5 animate-spin mr-2" />
-        <span className="text-xs font-medium">Carregando configurações...</span>
+        <span className="text-xs font-medium">Carregando configuraÃ§Ãµes...</span>
       </div>
     );
   }
 
 
 
-  // Preços dinâmicos baseados no Toggle Mensal / Anual
+  // PreÃ§os dinÃ¢micos baseados no Toggle Mensal / Anual
   const pricePro = isAnnual ? 124 : 149;
   
   let priceCorporatePerCondo = isAnnual ? 49 : 59;
@@ -323,11 +323,11 @@ export default function ConfiguracoesPage() {
       
       {/* HEADER */}
       <div className="border-b border-zinc-200 dark:border-zinc-800 pb-4">
-        <h1 className="text-base font-bold text-zinc-900 dark:text-white uppercase tracking-wider">Configurações do Condomínio</h1>
+        <h1 className="text-base font-bold text-zinc-900 dark:text-white uppercase tracking-wider">ConfiguraÃ§Ãµes do CondomÃ­nio</h1>
         <p className="text-xs text-zinc-500 font-medium">Personalize a identidade e acesso dos moradores</p>
       </div>
 
-      {/* SUB-ABAS DE NAVEGAÇÃO */}
+      {/* SUB-ABAS DE NAVEGAÃ‡ÃƒO */}
       <div className="flex border-b border-zinc-250 dark:border-zinc-800/80 gap-6">
         <button
           type="button"
@@ -356,22 +356,22 @@ export default function ConfiguracoesPage() {
       {activeTab === 'geral' ? (
         <div className="grid grid-cols-1 gap-6">
         
-        {/* BOX DO LINK PÚBLICO */}
+        {/* BOX DO LINK PÃšBLICO */}
         <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-6 rounded-xl space-y-4 shadow-sm">
           <div className="flex items-center space-x-2 text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-widest">
             <Compass className="w-4 h-4 text-[#001CFF]" />
-            <span>Endereço de Acesso Público</span>
+            <span>EndereÃ§o de Acesso PÃºblico</span>
           </div>
           
           <p className="text-xs text-zinc-500 leading-relaxed font-medium">
-            Os moradores não criam conta ou senha. Eles acessam as manutenções e o mural de achados e perdidos utilizando a URL pública abaixo.
+            Os moradores nÃ£o criam conta ou senha. Eles acessam as manutenÃ§Ãµes e o mural de achados e perdidos utilizando a URL pÃºblica abaixo.
           </p>
 
           <div className="flex items-center gap-2 bg-zinc-50 dark:bg-zinc-950 p-2.5 rounded-lg border border-zinc-200 dark:border-zinc-800">
             <input
               type="text"
               readOnly
-              value={condominio ? `https://zelify.app/${condominio.slug}` : ''}
+              value={condominio ? `https://zelify.vercel.app/${condominio.slug}` : ''}
               className="bg-transparent flex-1 text-xs text-zinc-800 dark:text-zinc-300 font-mono focus:outline-none select-all"
             />
             <div className="flex shrink-0 gap-1.5">
@@ -384,11 +384,11 @@ export default function ConfiguracoesPage() {
                 {copied ? <Check className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-450 animate-pulse" /> : <Copy className="w-3.5 h-3.5" />}
               </button>
               <a
-                href={condominio ? `https://zelify.app/${condominio.slug}` : '#'}
+                href={condominio ? `https://zelify.vercel.app/${condominio.slug}` : '#'}
                 target="_blank"
                 rel="noreferrer"
                 className="p-2 bg-zinc-100 dark:bg-zinc-900 hover:bg-[#001CFF] border border-zinc-200 dark:border-zinc-800 text-zinc-500 dark:text-zinc-400 hover:text-white rounded-md transition-colors"
-                title="Visualizar Página Pública"
+                title="Visualizar PÃ¡gina PÃºblica"
               >
                 <ExternalLink className="w-3.5 h-3.5" />
               </a>
@@ -404,15 +404,15 @@ export default function ConfiguracoesPage() {
           </div>
 
           <p className="text-xs text-zinc-500 leading-relaxed font-medium">
-            Gere uma placa informativa profissional para imprimir e colar nos elevadores, portarias ou áreas comuns do seu condomínio.
+            Gere uma placa informativa profissional para imprimir e colar nos elevadores, portarias ou Ã¡reas comuns do seu condomÃ­nio.
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* CONTROLES DE CUSTOMIZAÇÃO */}
+            {/* CONTROLES DE CUSTOMIZAÃ‡ÃƒO */}
             <div className="space-y-4">
               <div>
                 <label className="block text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-1.5">
-                  Título da Placa
+                  TÃ­tulo da Placa
                 </label>
                 <input
                   type="text"
@@ -425,14 +425,14 @@ export default function ConfiguracoesPage() {
 
               <div>
                 <label className="block text-[10px] font-bold uppercase tracking-wider text-zinc-500 mb-1.5">
-                  Instruções da Placa
+                  InstruÃ§Ãµes da Placa
                 </label>
                 <textarea
                   value={posterInstructions}
                   onChange={(e) => setPosterInstructions(e.target.value)}
                   rows={3}
                   className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg text-xs text-zinc-900 dark:text-white focus:outline-none focus:border-[#001CFF]/50 font-medium resize-none leading-relaxed"
-                  placeholder="Instruções para os moradores..."
+                  placeholder="InstruÃ§Ãµes para os moradores..."
                 />
               </div>
 
@@ -500,10 +500,10 @@ export default function ConfiguracoesPage() {
               </div>
             </div>
 
-            {/* PREVISÃO DA PLACA */}
+            {/* PREVISÃƒO DA PLACA */}
             <div className="border border-zinc-200 dark:border-zinc-800 rounded-xl pt-10 pb-6 px-4 bg-zinc-50 dark:bg-zinc-950 flex flex-col items-center justify-center text-center shadow-inner relative overflow-hidden min-h-[380px]">
               <div className="absolute top-3 right-3 text-[9px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest">
-                Pré-visualização
+                PrÃ©-visualizaÃ§Ã£o
               </div>
 
               {/* POSTER CARD */}
@@ -531,15 +531,15 @@ export default function ConfiguracoesPage() {
 
                 {/* Nome do Condominio */}
                 <div className="text-[8px] bg-zinc-200 font-extrabold uppercase px-1.5 py-0.5 rounded tracking-wide border border-zinc-200 mb-2 truncate max-w-[180px]">
-                  {nome || 'Seu Condomínio'}
+                  {nome || 'Seu CondomÃ­nio'}
                 </div>
 
-                {/* Título do Poster */}
+                {/* TÃ­tulo do Poster */}
                 <h3 className="font-extrabold text-sm tracking-tight mb-2 leading-none">
                   {posterTitle || 'Portal do Morador'}
                 </h3>
 
-                {/* Instruções */}
+                {/* InstruÃ§Ãµes */}
                 <p className="text-[7px] text-zinc-500 leading-normal mb-3 font-medium px-1">
                   {posterInstructions || 'Aponte seu celular.'}
                 </p>
@@ -553,16 +553,16 @@ export default function ConfiguracoesPage() {
                     : 'border-zinc-200'
                 }`}>
                   <img
-                    src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(condominio ? `https://zelify.app/${condominio.slug}` : '')}`}
+                    src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(condominio ? `https://zelify.vercel.app/${condominio.slug}` : '')}`}
                     alt="QR Code de Acesso"
                     className="w-24 h-24 object-contain"
                   />
                 </div>
 
-                {/* Rodapé do Poster */}
+                {/* RodapÃ© do Poster */}
                 <div className="w-full text-center space-y-1 bg-zinc-50 p-2 rounded border border-zinc-100">
                   <div className="text-[7px] text-zinc-500 font-bold uppercase tracking-widest">
-                    Código de Acesso
+                    CÃ³digo de Acesso
                   </div>
                   <div className={`text-xs font-black tracking-widest ${
                     posterTheme === 'blue' 
@@ -574,7 +574,7 @@ export default function ConfiguracoesPage() {
                     {codigoAcesso || '----'}
                   </div>
                   <div className="text-[6px] text-zinc-400 font-mono truncate">
-                    {condominio?.slug ? `zelify.app/${condominio.slug}` : 'link'}
+                    {condominio?.slug ? `zelify.vercel.app/${condominio.slug}` : 'link'}
                   </div>
                 </div>
               </div>
@@ -582,7 +582,7 @@ export default function ConfiguracoesPage() {
           </div>
         </div>
 
-        {/* FORMULÁRIO DE EDIÇÃO */}
+        {/* FORMULÃRIO DE EDIÃ‡ÃƒO */}
         <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6 shadow-sm">
           <form onSubmit={handleSalvar} className="space-y-5">
             
@@ -596,7 +596,7 @@ export default function ConfiguracoesPage() {
             {success && (
               <div className="p-3.5 bg-emerald-500/10 border border-emerald-500/20 rounded-lg text-xs font-semibold text-emerald-600 dark:text-emerald-400 flex items-center space-x-2 animate-in fade-in duration-200">
                 <Check className="w-4 h-4 shrink-0 animate-pulse" />
-                <span>Configurações salvas com sucesso!</span>
+                <span>ConfiguraÃ§Ãµes salvas com sucesso!</span>
               </div>
             )}
 
@@ -604,7 +604,7 @@ export default function ConfiguracoesPage() {
               
               <div className="space-y-2 pt-0">
                 <label htmlFor="nomeCondo" className="block text-[10px] font-bold uppercase tracking-wider text-zinc-500">
-                  Nome do Condomínio
+                  Nome do CondomÃ­nio
                 </label>
                 <div className="relative">
                   <span className="absolute inset-y-0 left-3 flex items-center text-zinc-400 dark:text-zinc-600">
@@ -625,11 +625,11 @@ export default function ConfiguracoesPage() {
               {/* SLUG DA URL */}
               <div className="space-y-2 pt-5">
                 <label htmlFor="slugCondo" className="block text-[10px] font-bold uppercase tracking-wider text-zinc-500">
-                  Slug da URL (Endereço Público)
+                  Slug da URL (EndereÃ§o PÃºblico)
                 </label>
                 <div className="flex rounded-lg border border-zinc-200 dark:border-zinc-800 overflow-hidden bg-zinc-50 dark:bg-zinc-950 focus-within:border-[#001CFF]/50 focus-within:ring-4 focus-within:ring-[#001CFF]/10 transition-all">
                   <span className="flex items-center bg-zinc-100 dark:bg-zinc-900 border-r border-zinc-200 dark:border-zinc-800 px-3 text-zinc-500 dark:text-zinc-400 font-mono text-xs font-semibold select-none">
-                    zelify.app/
+                    zelify.vercel.app/
                   </span>
                   <input
                     id="slugCondo"
@@ -642,14 +642,14 @@ export default function ConfiguracoesPage() {
                   />
                 </div>
                 <p className="text-[10px] text-zinc-500 leading-tight font-medium">
-                  Apenas letras minúsculas, números e hífens. O link final ficará: <span className="font-mono">https://zelify.app/{slug}</span>
+                  Apenas letras minÃºsculas, nÃºmeros e hÃ­fens. O link final ficarÃ¡: <span className="font-mono">https://zelify.vercel.app/{slug}</span>
                 </p>
               </div>
 
               {/* CODIGO DE ACESSO */}
               <div className="space-y-2 pt-5">
                 <label htmlFor="codigoCondo" className="block text-[10px] font-bold uppercase tracking-wider text-zinc-500">
-                  Código de Acesso do Condomínio (4 Dígitos)
+                  CÃ³digo de Acesso do CondomÃ­nio (4 DÃ­gitos)
                 </label>
                 <div className="relative">
                   <span className="absolute inset-y-0 left-3 flex items-center text-zinc-400 dark:text-zinc-650">
@@ -667,7 +667,7 @@ export default function ConfiguracoesPage() {
                   />
                 </div>
                 <p className="text-[10px] text-zinc-500 leading-tight font-medium">
-                  Código de 4 dígitos inserido pelo morador no primeiro acesso à página pública para evitar envios de spam.
+                  CÃ³digo de 4 dÃ­gitos inserido pelo morador no primeiro acesso Ã  pÃ¡gina pÃºblica para evitar envios de spam.
                 </p>
               </div>
 
@@ -687,7 +687,7 @@ export default function ConfiguracoesPage() {
                 ) : (
                   <>
                     <Save className="w-4 h-4" />
-                    <span>Salvar Configurações</span>
+                    <span>Salvar ConfiguraÃ§Ãµes</span>
                   </>
                 )}
               </button>
@@ -708,7 +708,7 @@ export default function ConfiguracoesPage() {
                   <span>Plano Atual</span>
                 </div>
                 <h3 className="text-lg font-black text-zinc-900 dark:text-white uppercase tracking-wider">
-                  {condominio?.plan_type === 'free' ? 'Zelify Starter (Grátis)' : 
+                  {condominio?.plan_type === 'free' ? 'Zelify Starter (GrÃ¡tis)' : 
                    condominio?.plan_type === 'pro' ? 'Zelify Pro' : 'Zelify Corporate'}
                 </h3>
               </div>
@@ -737,10 +737,10 @@ export default function ConfiguracoesPage() {
 
             <div className="text-xs text-zinc-500 font-medium">
               {condominio?.plan_type === 'free' ? (
-                <span>Seu condomínio possui limites mensais. Faça o upgrade para ter acesso ilimitado.</span>
+                <span>Seu condomÃ­nio possui limites mensais. FaÃ§a o upgrade para ter acesso ilimitado.</span>
               ) : (
                 <span>
-                  Renovação programada para:{' '}
+                  RenovaÃ§Ã£o programada para:{' '}
                   <span className="font-bold text-zinc-700 dark:text-zinc-350">
                     {condominio?.current_period_end 
                       ? new Date(condominio.current_period_end).toLocaleDateString('pt-BR') 
@@ -750,11 +750,11 @@ export default function ConfiguracoesPage() {
               )}
             </div>
 
-            {/* TRACKER DE LIMITES PARA PLANO GRÁTIS */}
+            {/* TRACKER DE LIMITES PARA PLANO GRÃTIS */}
             {condominio?.plan_type === 'free' && (
               <div className="pt-4 border-t border-zinc-150 dark:border-zinc-800/65 space-y-2">
                 <div className="flex justify-between items-center text-xs font-semibold">
-                  <span className="text-zinc-550 dark:text-zinc-500">Uso de Chamados (Mês Corrente):</span>
+                  <span className="text-zinc-550 dark:text-zinc-500">Uso de Chamados (MÃªs Corrente):</span>
                   <span className="text-zinc-800 dark:text-zinc-200 font-extrabold">
                     {monthlyChamadosCount} / 15
                   </span>
@@ -769,7 +769,7 @@ export default function ConfiguracoesPage() {
                   ></div>
                 </div>
                 <p className="text-[10px] text-zinc-500 dark:text-zinc-400 leading-relaxed font-semibold">
-                  No plano Starter, seu condomínio está limitado a 15 chamados por mês (Manutenções e Achados). Ao atingir o limite, os moradores não conseguirão enviar novos chamados até o próximo mês ou até que seja feito o upgrade para o plano Pro.
+                  No plano Starter, seu condomÃ­nio estÃ¡ limitado a 15 chamados por mÃªs (ManutenÃ§Ãµes e Achados). Ao atingir o limite, os moradores nÃ£o conseguirÃ£o enviar novos chamados atÃ© o prÃ³ximo mÃªs ou atÃ© que seja feito o upgrade para o plano Pro.
                 </p>
               </div>
             )}
@@ -778,7 +778,7 @@ export default function ConfiguracoesPage() {
           {/* Toggle Switch */}
           <BillingSwitch isAnnual={isAnnual} onChange={setIsAnnual} />
 
-          {/* LISTA DE OPÇÕES DE PLANOS */}
+          {/* LISTA DE OPÃ‡Ã•ES DE PLANOS */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
             {/* PLANO PRO */}
             <div className={`bg-white dark:bg-zinc-900 border p-6 rounded-2xl flex flex-col justify-between shadow-sm dark:shadow-xl transition-all relative ${
@@ -794,7 +794,7 @@ export default function ConfiguracoesPage() {
               
               <div className="space-y-4">
                 <div className="space-y-1">
-                  <span className="text-[9px] font-bold text-zinc-550 dark:text-zinc-500 uppercase tracking-widest">Para Síndicos</span>
+                  <span className="text-[9px] font-bold text-zinc-550 dark:text-zinc-500 uppercase tracking-widest">Para SÃ­ndicos</span>
                   <h4 className="text-base font-black text-zinc-900 dark:text-white uppercase tracking-wider flex items-center">
                     Zelify Pro
                     <Sparkles className="w-4 h-4 text-[#001CFF] ml-1.5" />
@@ -804,7 +804,7 @@ export default function ConfiguracoesPage() {
                 <div className="flex flex-col">
                   <div className="flex items-baseline">
                     <span className="text-2xl font-black text-zinc-900 dark:text-white tracking-tight">R$ {pricePro},00</span>
-                    <span className="text-zinc-500 text-xs font-semibold ml-1">/mês</span>
+                    <span className="text-zinc-500 text-xs font-semibold ml-1">/mÃªs</span>
                   </div>
                   {isAnnual && (
                     <span className="text-[10px] text-zinc-400 font-bold mt-1 text-left">
@@ -818,7 +818,7 @@ export default function ConfiguracoesPage() {
                 <ul className="space-y-2.5 text-xs font-semibold text-zinc-500 dark:text-zinc-400">
                   <li className="flex items-center text-zinc-750 dark:text-zinc-300">
                     <CheckCircle2 className="w-4 h-4 text-emerald-500 mr-2 shrink-0" />
-                    Chamados de Manutenção Ilimitados
+                    Chamados de ManutenÃ§Ã£o Ilimitados
                   </li>
                   <li className="flex items-center text-zinc-750 dark:text-zinc-300">
                     <CheckCircle2 className="w-4 h-4 text-emerald-500 mr-2 shrink-0" />
@@ -830,11 +830,11 @@ export default function ConfiguracoesPage() {
                   </li>
                   <li className="flex items-center text-zinc-750 dark:text-zinc-300">
                     <CheckCircle2 className="w-4 h-4 text-emerald-500 mr-2 shrink-0" />
-                    Relatórios Operacionais Mensais
+                    RelatÃ³rios Operacionais Mensais
                   </li>
                   <li className="flex items-center text-zinc-750 dark:text-zinc-300">
                     <CheckCircle2 className="w-4 h-4 text-emerald-500 mr-2 shrink-0" />
-                    QR Code Oficial em Alta Resolução
+                    QR Code Oficial em Alta ResoluÃ§Ã£o
                   </li>
                 </ul>
               </div>
@@ -888,7 +888,7 @@ export default function ConfiguracoesPage() {
                 <div className="bg-zinc-50 dark:bg-zinc-950 p-3.5 rounded-xl border border-zinc-200 dark:border-zinc-800 space-y-3">
                   <div className="flex justify-between items-center">
                     <label htmlFor="condosQty" className="text-[9px] font-bold uppercase tracking-wider text-zinc-555 dark:text-zinc-500">
-                      Nº de Condomínios
+                      NÂº de CondomÃ­nios
                     </label>
                     <div className="flex flex-col items-end space-y-1">
                       <div className="flex items-center space-x-1 bg-zinc-100 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-0.5 shadow-inner">
@@ -919,11 +919,11 @@ export default function ConfiguracoesPage() {
                     </div>
                   </div>
                   <p className="text-[8px] text-zinc-555 dark:text-zinc-500 text-right mt-1.5 font-semibold">
-                    *Condição exclusiva para o plano Corporate (mínimo de 5 condomínios ativos).
+                    *CondiÃ§Ã£o exclusiva para o plano Corporate (mÃ­nimo de 5 condomÃ­nios ativos).
                   </p>
 
                   <div className="flex justify-between items-center text-[10px] text-zinc-500 font-semibold border-t border-zinc-200 dark:border-zinc-800/60 pt-2">
-                    <span>Preço / Prédio:</span>
+                    <span>PreÃ§o / PrÃ©dio:</span>
                     <span className="font-bold text-zinc-800 dark:text-zinc-200">
                       R$ {priceCorporatePerCondo},00
                     </span>
@@ -936,7 +936,7 @@ export default function ConfiguracoesPage() {
                         <span className="text-lg font-black text-[#001CFF]">
                           R$ {totalCorporatePrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                         </span>
-                        <span className="text-zinc-500 text-[10px] font-semibold ml-0.5">/mês</span>
+                        <span className="text-zinc-500 text-[10px] font-semibold ml-0.5">/mÃªs</span>
                       </div>
                       {isAnnual && (
                         <span className="text-[9.5px] text-zinc-450 dark:text-zinc-550 font-bold mt-0.5">
@@ -952,19 +952,19 @@ export default function ConfiguracoesPage() {
                 <ul className="space-y-2.5 text-xs font-semibold text-zinc-500 dark:text-zinc-400">
                   <li className="flex items-center text-zinc-750 dark:text-zinc-300">
                     <CheckCircle2 className="w-4 h-4 text-emerald-500 mr-2 shrink-0" />
-                    Painel Multi-Condomínios Unificado
+                    Painel Multi-CondomÃ­nios Unificado
                   </li>
                   <li className="flex items-center text-zinc-750 dark:text-zinc-300">
                     <CheckCircle2 className="w-4 h-4 text-emerald-500 mr-2 shrink-0" />
-                    Controle de Manutenção Consolidado
+                    Controle de ManutenÃ§Ã£o Consolidado
                   </li>
                   <li className="flex items-center text-zinc-750 dark:text-zinc-300">
                     <CheckCircle2 className="w-4 h-4 text-emerald-500 mr-2 shrink-0" />
-                    Relatórios em PDF por Lote
+                    RelatÃ³rios em PDF por Lote
                   </li>
                   <li className="flex items-center text-zinc-750 dark:text-zinc-300">
                     <CheckCircle2 className="w-4 h-4 text-emerald-500 mr-2 shrink-0" />
-                    Rodapé Customizado com sua Marca
+                    RodapÃ© Customizado com sua Marca
                   </li>
                 </ul>
               </div>
@@ -1008,7 +1008,7 @@ export default function ConfiguracoesPage() {
               <div>
                 <h3 className="text-sm font-bold text-white uppercase tracking-wider">Finalizar Assinatura</h3>
                 <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider mt-0.5">
-                  Simulação de pagamento Zelify
+                  SimulaÃ§Ã£o de pagamento Zelify
                 </p>
               </div>
               <button 
@@ -1035,7 +1035,7 @@ export default function ConfiguracoesPage() {
                     {selectedUpgrade === 'pro' ? 'Plano Zelify Pro' : 'Plano Zelify Corporate'}
                   </p>
                   <p className="text-[10px] text-zinc-550 mt-0.5">
-                    {isAnnual ? 'Renovação anual automática' : 'Renovação mensal automática'}
+                    {isAnnual ? 'RenovaÃ§Ã£o anual automÃ¡tica' : 'RenovaÃ§Ã£o mensal automÃ¡tica'}
                   </p>
                 </div>
                 <div className="text-right font-black text-[#001CFF] text-sm flex flex-col items-end">
@@ -1045,7 +1045,7 @@ export default function ConfiguracoesPage() {
                       : `R$ ${totalCorporatePrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
                   </span>
                   <span className="text-[8px] text-zinc-500 font-bold uppercase">
-                    {isAnnual ? '/mês (cobrado anualmente)' : '/mês'}
+                    {isAnnual ? '/mÃªs (cobrado anualmente)' : '/mÃªs'}
                   </span>
                 </div>
               </div>
@@ -1072,11 +1072,11 @@ export default function ConfiguracoesPage() {
                       : 'text-zinc-500 hover:text-zinc-300'
                   }`}
                 >
-                  Cartão de Crédito
+                  CartÃ£o de CrÃ©dito
                 </button>
               </div>
 
-              {/* CONTEÚDO PIX */}
+              {/* CONTEÃšDO PIX */}
               {checkoutTab === 'pix' ? (
                 <div className="space-y-4 flex flex-col items-center py-2">
                   {/* SVG QR Code */}
@@ -1124,7 +1124,7 @@ export default function ConfiguracoesPage() {
                     </svg>
                   </div>
                   <p className="text-[10px] text-zinc-550 dark:text-zinc-500 font-bold uppercase tracking-wider text-center">
-                    Aponte a câmera do celular ou copie o código Pix abaixo
+                    Aponte a cÃ¢mera do celular ou copie o cÃ³digo Pix abaixo
                   </p>
                   
                   <button
@@ -1135,22 +1135,22 @@ export default function ConfiguracoesPage() {
                     {copiedPix ? (
                       <>
                         <Check className="w-3.5 h-3.5 text-emerald-500" />
-                        <span>Código Pix Copiado!</span>
+                        <span>CÃ³digo Pix Copiado!</span>
                       </>
                     ) : (
                       <>
                         <Copy className="w-3.5 h-3.5" />
-                        <span>Copiar Código Pix (Copia e Cola)</span>
+                        <span>Copiar CÃ³digo Pix (Copia e Cola)</span>
                       </>
                     )}
                   </button>
                 </div>
               ) : (
-                /* CONTEÚDO CARTÃO DE CRÉDITO */
+                /* CONTEÃšDO CARTÃƒO DE CRÃ‰DITO */
                 <div className="space-y-3 pt-1">
                   <div>
                     <label className="block text-[9px] font-bold uppercase tracking-wider text-zinc-500 mb-1">
-                      Nome no Cartão
+                      Nome no CartÃ£o
                     </label>
                     <input
                       type="text"
@@ -1164,7 +1164,7 @@ export default function ConfiguracoesPage() {
 
                   <div>
                     <label className="block text-[9px] font-bold uppercase tracking-wider text-zinc-500 mb-1">
-                      Número do Cartão
+                      NÃºmero do CartÃ£o
                     </label>
                     <input
                       type="text"
@@ -1219,7 +1219,7 @@ export default function ConfiguracoesPage() {
                 </div>
               )}
 
-              {/* Botão de Finalizar */}
+              {/* BotÃ£o de Finalizar */}
               <div className="pt-4 border-t border-zinc-800 flex justify-end">
                 <button
                   type="submit"
@@ -1272,7 +1272,7 @@ export default function ConfiguracoesPage() {
 
         <div className="space-y-4">
           <div className="text-sm bg-zinc-200 font-black uppercase px-4 py-2 rounded-lg tracking-widest border border-zinc-300 inline-block">
-            {nome || 'Seu Condomínio'}
+            {nome || 'Seu CondomÃ­nio'}
           </div>
           
           <h1 className="font-black text-4xl tracking-tight leading-tight max-w-xl mx-auto">
@@ -1293,16 +1293,16 @@ export default function ConfiguracoesPage() {
             : 'border-zinc-300'
         }`}>
           <img
-            src={`https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(condominio ? `https://zelify.app/${condominio.slug}` : '')}`}
+            src={`https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(condominio ? `https://zelify.vercel.app/${condominio.slug}` : '')}`}
             alt="QR Code de Acesso"
             className="w-64 h-64 object-contain mx-auto"
           />
         </div>
 
-        {/* Instruções de Acesso */}
+        {/* InstruÃ§Ãµes de Acesso */}
         <div className="w-full max-w-md mx-auto space-y-3 bg-zinc-50 p-6 rounded-2xl border border-zinc-200 shadow-sm mb-6">
           <div className="text-xs font-black uppercase tracking-widest text-zinc-500">
-            Código de Acesso
+            CÃ³digo de Acesso
           </div>
           <div className={`text-4xl font-black tracking-widest ${
             posterTheme === 'blue' 
@@ -1314,7 +1314,7 @@ export default function ConfiguracoesPage() {
             {codigoAcesso || '----'}
           </div>
           <div className="text-sm text-zinc-500 font-mono pt-1">
-            Link de Acesso: <span className="font-bold underline">https://zelify.app/{condominio?.slug || ''}</span>
+            Link de Acesso: <span className="font-bold underline">https://zelify.vercel.app/{condominio?.slug || ''}</span>
           </div>
         </div>
 
@@ -1323,18 +1323,18 @@ export default function ConfiguracoesPage() {
         </div>
       </div>
 
-      {/* FOLHA DE ESTILOS DINAMICA PARA IMPRESSÃO A4 */}
+      {/* FOLHA DE ESTILOS DINAMICA PARA IMPRESSÃƒO A4 */}
       <style dangerouslySetInnerHTML={{ __html: `
         @media print {
           body {
             background: white !important;
             color: black !important;
           }
-          /* Ocultar tudo na página */
+          /* Ocultar tudo na pÃ¡gina */
           body * {
             visibility: hidden;
           }
-          /* Mostrar apenas o poster de impressão e seus filhos */
+          /* Mostrar apenas o poster de impressÃ£o e seus filhos */
           #printable-poster, #printable-poster * {
             visibility: visible;
           }

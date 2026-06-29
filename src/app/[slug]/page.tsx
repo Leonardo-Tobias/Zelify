@@ -136,9 +136,18 @@ export default function MoradorPortal() {
           if (savedAuth) {
             try {
               const authData = JSON.parse(savedAuth);
-              setBloco(authData.bloco);
-              setApartamento(authData.apartamento);
-              setValidated(true);
+              // Validar schema: bloco e apartamento devem ser strings não vazias
+              if (
+                typeof authData?.bloco === 'string' && authData.bloco.trim() !== '' &&
+                typeof authData?.apartamento === 'string' && authData.apartamento.trim() !== ''
+              ) {
+                setBloco(authData.bloco);
+                setApartamento(authData.apartamento);
+                setValidated(true);
+              } else {
+                // Dado inválido ou adulterado — limpar e forçar nova validação
+                localStorage.removeItem(`zelify_auth_${condo.id}`);
+              }
             } catch (e) {
               localStorage.removeItem(`zelify_auth_${condo.id}`);
             }
@@ -147,7 +156,17 @@ export default function MoradorPortal() {
           // Carregar IDs de chamados criados localmente
           const savedIds = localStorage.getItem(`zelify_meus_chamados_${condo.id}`);
           if (savedIds) {
-            setMeusChamadosIds(JSON.parse(savedIds));
+            try {
+              const parsedIds = JSON.parse(savedIds);
+              // Validar schema: deve ser um array de strings
+              if (Array.isArray(parsedIds) && parsedIds.every(id => typeof id === 'string')) {
+                setMeusChamadosIds(parsedIds);
+              } else {
+                localStorage.removeItem(`zelify_meus_chamados_${condo.id}`);
+              }
+            } catch (e) {
+              localStorage.removeItem(`zelify_meus_chamados_${condo.id}`);
+            }
           }
         }
       } catch (err) {

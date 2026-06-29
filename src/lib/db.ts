@@ -20,6 +20,23 @@ async function hashPassword(password: string): Promise<string> {
 // SHA-256('123456') = 8d969eef...
 const SEED_PASSWORD_HASH = '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92';
 
+/**
+ * Estima o uso atual do localStorage em kilobytes.
+ * Cada caractere em localStorage ocupa ~2 bytes (UTF-16).
+ */
+function getLocalStorageUsageKB(): number {
+  if (typeof window === 'undefined') return 0;
+  let total = 0;
+  for (const key of Object.keys(localStorage)) {
+    const value = localStorage.getItem(key) || '';
+    total += (key.length + value.length) * 2; // bytes
+  }
+  return Math.round(total / 1024); // KB
+}
+
+// Limite seguro: 4MB (deixa 1MB de margem do limite de 5MB do navegador)
+const LOCAL_STORAGE_SAFE_LIMIT_KB = 4096;
+
 export function logClient(msg: string) {
   if (typeof window !== 'undefined') {
     const w = window as any;
@@ -392,6 +409,19 @@ export const db = {
         created_at: timestamp,
         updated_at: timestamp
       };
+
+      // Guarda de espaço: verificar se salvar este chamado (com foto base64) excederia o limite seguro
+      // Evita corrupção silenciosa do localStorage por estouro de 5MB
+      const chamadoJson = JSON.stringify(novoChamado);
+      const chamadoSizeKB = Math.round((chamadoJson.length * 2) / 1024);
+      const currentUsageKB = getLocalStorageUsageKB();
+
+      if (currentUsageKB + chamadoSizeKB > LOCAL_STORAGE_SAFE_LIMIT_KB && novoChamado.foto_url) {
+        // Espaço insuficiente: salvar sem a foto para não corromper o localStorage
+        console.warn(`[Zelify Mock] Limite de armazenamento local próximo (${currentUsageKB}KB). Foto removida do chamado para evitar estouro.`);
+        novoChamado.foto_url = '';
+      }
+
       const chamados = localDB.getChamadosRaw();
       chamados.push(novoChamado);
       localDB.saveChamados(chamados);

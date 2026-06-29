@@ -110,8 +110,8 @@ export default function KanbanPage() {
       {/* HEADER DO QUADRO */}
       <div className="flex justify-between items-center shrink-0 border-b border-zinc-200 dark:border-zinc-800 pb-4">
         <div>
-          <h1 className="text-base font-bold text-zinc-900 dark:text-white uppercase tracking-wider">Mural Kanban</h1>
-          <p className="text-xs text-zinc-500 font-medium">Controle de solicitações de manutenção</p>
+          <h1 className="text-base font-bold text-zinc-900 dark:text-white uppercase tracking-wider">Mural de Ocorrências</h1>
+          <p className="text-xs text-zinc-500 font-medium">Controle e gestão de ocorrências do condomínio</p>
         </div>
         <div className="text-[10px] text-zinc-600 dark:text-zinc-400 font-bold uppercase tracking-wider bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 px-2.5 py-1 rounded-lg">
           Total: {chamados.length} ocorrências

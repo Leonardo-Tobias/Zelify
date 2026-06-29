@@ -5,6 +5,7 @@ import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { 
   LayoutDashboard, 
   Kanban, 
+  ClipboardList,
   Package, 
   Settings, 
   LogOut, 
@@ -116,6 +117,15 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
+  // Atualizar título do navegador dinamicamente
+  useEffect(() => {
+    if (pathname === '/dashboard/kanban') {
+      document.title = "Kanban de Ocorrências | Zelify";
+    } else {
+      document.title = "Zelify | Gestão Operacional de Condomínios";
+    }
+  }, [pathname]);
+
   const handleLogout = () => {
     if (confirm('Deseja sair do painel administrativo?')) {
       localStorage.removeItem('zelify_gestor');
@@ -155,9 +165,9 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
       disabled: isPortfolioView 
     },
     { 
-      name: 'Kanban Manutenção', 
+      name: 'Mural de Ocorrências', 
       href: '/dashboard/kanban', 
-      icon: Kanban, 
+      icon: ClipboardList, 
       active: !isPortfolioView && pathname === '/dashboard/kanban', 
       disabled: isPortfolioView 
     },
@@ -459,7 +469,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
         {/* DESKTOP TOP HEADER */}
         <header className="hidden md:flex items-center justify-between border-b border-zinc-200 dark:border-white/[0.06] px-6 py-3.5 z-30 shrink-0 bg-white/85 dark:bg-[#09090b]/85 backdrop-blur-md sticky top-0 transition-colors duration-200">
           <h2 className="text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-widest">
-            {navigation.find(nav => nav.active)?.name || 'Área Administrativa'}
+            {pathname === '/dashboard/kanban' ? 'KANBAN DE OCORRÊNCIAS' : (navigation.find(nav => nav.active)?.name || 'Área Administrativa')}
           </h2>
           <div className="flex items-center space-x-4">
             <button

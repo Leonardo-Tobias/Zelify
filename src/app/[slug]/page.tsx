@@ -559,7 +559,7 @@ export default function MoradorPortal() {
         {activeTab === 'manutencao' && (
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-xs font-bold text-zinc-450 uppercase tracking-widest">Meus Chamados</h2>
+              <h2 className="text-xs font-bold text-zinc-450 uppercase tracking-widest">Minhas Ocorrências</h2>
               <button
                 onClick={() => setShowManutencaoModal(true)}
                 className="bg-[#001CFF] hover:bg-[#001CFF]/90 text-white text-xs font-semibold px-3 py-1.5 rounded-lg flex items-center space-x-1.5 transition-all shadow-[0_4px_15px_rgba(0,51,255,0.2)] active:scale-[0.98]"
@@ -777,8 +777,14 @@ export default function MoradorPortal() {
                 : 'text-zinc-500 hover:text-zinc-300 font-medium'
             }`}
           >
-            <Wrench className="w-5 h-5 mb-0.5" />
-            <span className="text-[9px] uppercase tracking-wider font-bold">Manutenção</span>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 mb-0.5">
+              <rect x="8" y="2" width="8" height="4" rx="1" ry="1" />
+              <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+              <path d="M9 12h6" />
+              <path d="M9 16h6" />
+              <path d="M9 8h6" />
+            </svg>
+            <span className="text-[9px] uppercase tracking-wider font-bold">Ocorrências</span>
           </button>
 
           <button

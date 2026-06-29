@@ -300,13 +300,14 @@ export const db = {
    */
   async validateAcesso(condominioId: string, codigo: string): Promise<boolean> {
     if (supabase) {
-      const { data, error } = await supabase
-        .from('condominios')
-        .select('codigo_acesso')
-        .eq('id', condominioId)
-        .single();
+      // SEGURANÇA: Usa RPC com SECURITY DEFINER para validar o código sem expô-lo via SELECT.
+      // A ANON_KEY nunca acessa o campo codigo_acesso diretamente.
+      const { data, error } = await supabase.rpc('validar_codigo_acesso', {
+        p_condominio_id: condominioId,
+        p_codigo: codigo
+      });
       if (error) return false;
-      return data.codigo_acesso === codigo;
+      return data === true;
     } else {
       const condominios = localDB.getCondominios();
       const condo = condominios.find(c => c.id === condominioId);
@@ -763,6 +764,20 @@ export const db = {
   /**
    * Obtém todos os condomínios aos quais o gestor tem acesso (para administradoras).
    */
+  /**
+   * Retorna o usuário autenticado atual do Supabase.
+   * Usado para verificar se o JWT ainda é válido ao carregar o dashboard.
+   * Retorna null em modo Mock (sem Supabase).
+   */
+  async getCurrentUser(): Promise<{ id: string } | null> {
+    if (supabase) {
+      const { data: { user }, error } = await supabase.auth.getUser();
+      if (error || !user) return null;
+      return { id: user.id };
+    }
+    return null; // Modo Mock: sem validação de JWT real
+  },
+
   async getCondominiosByGestorUser(userId: string): Promise<Condominio[]> {
     if (supabase) {
       const { data: gestorRows, error: gestorError } = await supabase

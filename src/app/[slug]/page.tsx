@@ -1,11 +1,5 @@
 'use client';
 
-if (typeof window !== 'undefined') {
-  window.onerror = function(msg, url, line, col, error) {
-    alert(`CRITICAL CLIENT ERROR: ${msg}\nUrl: ${url}\nLine: ${line}\nStack: ${error?.stack}`);
-    return false;
-  };
-}
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
@@ -77,6 +71,10 @@ export default function MoradorPortal() {
   const [apartamento, setApartamento] = useState('');
   const [validationError, setValidationError] = useState('');
   const [validating, setValidating] = useState(false);
+
+  // Rate limiting: bloquear após 5 tentativas erradas por 60 segundos
+  const [failedAttempts, setFailedAttempts] = useState(0);
+  const [blockedUntil, setBlockedUntil] = useState<number | null>(null);
 
   // Estados do Painel do Morador
   const [activeTab, setActiveTab] = useState<'manutencao' | 'achados' | 'historico'>('manutencao');
@@ -185,6 +183,13 @@ export default function MoradorPortal() {
     e.preventDefault();
     setValidationError('');
 
+    // Verificar se o acesso está temporariamente bloqueado
+    if (blockedUntil && Date.now() < blockedUntil) {
+      const seconds = Math.ceil((blockedUntil - Date.now()) / 1000);
+      setValidationError(`Muitas tentativas incorretas. Aguarde ${seconds}s para tentar novamente.`);
+      return;
+    }
+
     if (!codigoAcesso || !bloco || !apartamento) {
       setValidationError('Por favor, preencha todos os campos.');
       return;
@@ -194,12 +199,23 @@ export default function MoradorPortal() {
     try {
       const isValid = await db.validateAcesso(condominio!.id, codigoAcesso);
       if (isValid) {
-        // Salvar autenticação
+        // Login bem-sucedido: resetar contadores e salvar sessão
+        setFailedAttempts(0);
+        setBlockedUntil(null);
         const authData = { bloco, apartamento };
         localStorage.setItem(`zelify_auth_${condominio!.id}`, JSON.stringify(authData));
         setValidated(true);
       } else {
-        setValidationError('Código de acesso incorreto. Tente novamente.');
+        // Incrementar tentativas e bloquear se atingir o limite
+        const newAttempts = failedAttempts + 1;
+        setFailedAttempts(newAttempts);
+        if (newAttempts >= 5) {
+          setBlockedUntil(Date.now() + 60000); // Bloqueio de 60 segundos
+          setValidationError('Muitas tentativas incorretas. Acesso bloqueado por 60 segundos.');
+        } else {
+          const remaining = 5 - newAttempts;
+          setValidationError(`Código de acesso incorreto. ${remaining} tentativa${remaining > 1 ? 's' : ''} restante${remaining > 1 ? 's' : ''}.`);
+        }
       }
     } catch (err) {
       setValidationError('Ocorreu um erro ao validar. Tente novamente.');

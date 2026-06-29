@@ -22,7 +22,7 @@ import {
   Lock,
   Sparkles
 } from 'lucide-react';
-import { db, Condominio, UsuarioGestor } from '@/lib/db';
+import { db, Condominio, UsuarioGestor, isSupabaseConfigured } from '@/lib/db';
 
 function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -50,23 +50,56 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
       document.documentElement.classList.remove('dark');
     }
 
-    // Verificar sessão do gestor
-    const savedGestor = localStorage.getItem('zelify_gestor');
-    const savedCondo = localStorage.getItem('zelify_condominio_gestao');
+    // Verificar sessão do gestor (async encapsulado)
+    async function initSession() {
+      const savedGestor = localStorage.getItem('zelify_gestor');
+      const savedCondo = localStorage.getItem('zelify_condominio_gestao');
 
-    if (!savedGestor || !savedCondo) {
-      router.push('/login');
-    } else {
+      if (!savedGestor || !savedCondo) {
+        router.push('/login');
+        return;
+      }
+
       try {
-        setGestor(JSON.parse(savedGestor));
-        setCondominio(JSON.parse(savedCondo));
+        const gestorData = JSON.parse(savedGestor);
+        const condoData = JSON.parse(savedCondo);
+
+        // #6 — Validar schema: garantir que os campos obrigatórios existem
+        // Impede que alguém manipule o localStorage via DevTools para elevar privilégios
+        if (
+          !gestorData?.id ||
+          !gestorData?.user_id ||
+          !gestorData?.condominio_id ||
+          !gestorData?.papel ||
+          !['sindico', 'zelador', 'admin'].includes(gestorData.papel)
+        ) {
+          throw new Error('Dados de sessão do gestor inválidos ou adulterados.');
+        }
+        if (!condoData?.id || !condoData?.slug || !condoData?.nome) {
+          throw new Error('Dados de sessão do condomínio inválidos.');
+        }
+
+        // #7 — Verificar sessão real no Supabase (apenas quando conectado ao backend)
+        // Garante que o JWT não expirou e a conta ainda existe
+        if (isSupabaseConfigured) {
+          const currentUser = await db.getCurrentUser();
+          if (!currentUser || currentUser.id !== gestorData.user_id) {
+            throw new Error('Sessão Supabase expirada ou inválida.');
+          }
+        }
+
+        setGestor(gestorData);
+        setCondominio(condoData);
       } catch (e) {
         localStorage.removeItem('zelify_gestor');
         localStorage.removeItem('zelify_condominio_gestao');
         router.push('/login');
+      } finally {
+        setLoading(false);
       }
     }
-    setLoading(false);
+
+    initSession();
   }, [router]);
 
   // Alternar Modo Claro / Modo Escuro

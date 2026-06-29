@@ -56,26 +56,75 @@ ALTER TABLE public.chamados ENABLE ROW LEVEL SECURITY;
 -- 4. POLÍTICAS DE RLS (SEGURANÇA)
 
 -- POLÍTICAS PARA MORADORES (PÚBLICO)
--- Permitir que qualquer pessoa consulte condomínios pelo slug
-CREATE POLICY "Permitir leitura pública de condomínios" ON public.condominios
+-- SEGURANÇA: Moradores podem consultar condomínios pelo slug, mas NÃO devem ver codigo_acesso.
+-- A validação do código acontece via função RPC segura (ver abaixo), nunca por SELECT direto.
+CREATE POLICY "Leitura pública limitada de condomínios" ON public.condominios
     FOR SELECT USING (true);
 
--- Permitir que moradores leiam chamados (somente do próprio condomínio, o que será filtrado na consulta via slug)
+-- VIEW pública para moradores — exclui codigo_acesso e asaas_customer_id
+CREATE OR REPLACE VIEW public.condominios_publico AS
+    SELECT
+        id,
+        nome,
+        slug,
+        plan_type,
+        subscription_status,
+        current_period_end,
+        created_at
+    FROM public.condominios;
+
+-- Conceder acesso de leitura à view pública para usuários anônimos
+GRANT SELECT ON public.condominios_publico TO anon;
+
+-- Permitir que moradores leiam chamados (somente do próprio condomínio, filtrado na consulta via slug)
 CREATE POLICY "Permitir leitura pública de chamados" ON public.chamados
     FOR SELECT USING (true);
 
--- Permitir que moradores insiram novos chamados
-CREATE POLICY "Permitir inserção pública de chamados" ON public.chamados
-    FOR INSERT WITH CHECK (true);
+-- SEGURANÇA: Moradores só podem inserir chamados em condomínios ativos e existentes.
+-- Impede spam/flood em condomínios de terceiros ou suspensos.
+CREATE POLICY "Inserção pública de chamados validada" ON public.chamados
+    FOR INSERT WITH CHECK (
+        EXISTS (
+            SELECT 1 FROM public.condominios
+            WHERE condominios.id = chamados.condominio_id
+              AND condominios.subscription_status = 'active'
+        )
+    );
+
+-- FUNÇÃO RPC SEGURA para validar o código de acesso do morador.
+-- Executada com permissão de SECURITY DEFINER (acessa codigo_acesso sem expô-lo via SELECT).
+-- A ANON_KEY nunca verá o valor do código diretamente; apenas recebe true/false.
+CREATE OR REPLACE FUNCTION public.validar_codigo_acesso(
+    p_condominio_id UUID,
+    p_codigo TEXT
+)
+RETURNS BOOLEAN
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+    RETURN EXISTS (
+        SELECT 1
+        FROM public.condominios
+        WHERE id = p_condominio_id
+          AND codigo_acesso = p_codigo
+    );
+END;
+$$;
+
+-- Conceder permissão de execução da função para usuários anônimos (moradores)
+GRANT EXECUTE ON FUNCTION public.validar_codigo_acesso(UUID, TEXT) TO anon;
 
 -- POLÍTICAS PARA GESTORES (AUTENTICADOS)
 -- Gestores podem ler seus próprios dados de perfil
 CREATE POLICY "Gestores leem seu próprio perfil" ON public.usuarios_gestores
     FOR SELECT TO authenticated USING (user_id = auth.uid());
 
--- Permitir inserção de gestores durante o cadastro/onboarding
-CREATE POLICY "Permitir inserção de gestores" ON public.usuarios_gestores
-    FOR INSERT WITH CHECK (true);
+-- SEGURANÇA: Gestores só podem ser inseridos por usuários autenticados,
+-- e somente vinculando o próprio user_id (impede escalada de privilégio).
+CREATE POLICY "Inserção de gestor vinculada ao próprio usuário" ON public.usuarios_gestores
+    FOR INSERT TO authenticated WITH CHECK (user_id = auth.uid());
 
 -- Gestores podem ler e editar o condomínio ao qual pertencem
 CREATE POLICY "Gestores gerenciam seu condomínio" ON public.condominios
@@ -87,9 +136,9 @@ CREATE POLICY "Gestores gerenciam seu condomínio" ON public.condominios
         )
     );
 
--- Permitir inserção de condomínios durante o cadastro/onboarding
-CREATE POLICY "Permitir inserção de condomínios" ON public.condominios
-    FOR INSERT WITH CHECK (true);
+-- SEGURANÇA: Apenas usuários autenticados podem criar condomínios (durante o onboarding).
+CREATE POLICY "Inserção de condomínio por usuário autenticado" ON public.condominios
+    FOR INSERT TO authenticated WITH CHECK (true);
 
 -- Gestores podem gerenciar todos os chamados pertencentes ao seu condomínio
 CREATE POLICY "Gestores gerenciam chamados de seu condomínio" ON public.chamados

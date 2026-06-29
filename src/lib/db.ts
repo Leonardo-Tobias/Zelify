@@ -1,5 +1,25 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
+/**
+ * Hash SHA-256 via SubtleCrypto (disponível em navegadores modernos e Node 18+).
+ * Garante que senhas nunca sejam salvas em texto puro no localStorage (modo Mock).
+ */
+async function hashPassword(password: string): Promise<string> {
+  if (typeof window !== 'undefined' && window.crypto?.subtle) {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(password);
+    const hashBuffer = await window.crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+  // Fallback para SSR (nunca deve rodar no servidor neste projeto client-side)
+  return btoa(password);
+}
+
+// Hash pré-computado da senha seed '123456' para as contas de demo
+// SHA-256('123456') = 8d969eef...
+const SEED_PASSWORD_HASH = '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92';
+
 export function logClient(msg: string) {
   if (typeof window !== 'undefined') {
     const w = window as any;
@@ -481,7 +501,9 @@ export const db = {
     } else {
       // 1. Procurar nas credenciais dinâmicas cadastradas
       const credentials = localDB.getAuthCredentials();
-      const match = credentials.find(c => c.email.toLowerCase() === email.toLowerCase() && c.password === password);
+      // Comparar usando hash SHA-256 — senhas nunca ficam em texto puro
+      const hashedInput = await hashPassword(password);
+      const match = credentials.find(c => c.email.toLowerCase() === email.toLowerCase() && c.password === hashedInput);
       
       let gestor: UsuarioGestor | undefined;
       if (match) {
@@ -489,7 +511,8 @@ export const db = {
         gestor = gestores.find(g => g.id === match.gestor_id);
       } else {
         // Fallback para os dados pré-semeados (mock padrão)
-        if (password !== '123456') return null;
+        // Compara com hash pré-computado de '123456'
+        if (hashedInput !== SEED_PASSWORD_HASH) return null;
         
         const gestores = localDB.getGestores();
         if (email === 'sindico@viverbem.com') {
@@ -643,10 +666,12 @@ export const db = {
       gestores.push(novoGestor);
       localDB.saveGestores(gestores);
 
-      // 4. Salvar credencial de login mock
+      // 4. Salvar credencial de login mock com senha hasheada (SHA-256)
+      // Nunca salvar senha em texto puro no localStorage
+      const hashedPassword = await hashPassword(dados.password);
       const novaCredencial: MockAuthCredential = {
         email: dados.email,
-        password: dados.password,
+        password: hashedPassword,
         gestor_id: gestorId
       };
       credentials.push(novaCredencial);

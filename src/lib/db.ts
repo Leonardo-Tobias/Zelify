@@ -55,6 +55,8 @@ export interface Condominio {
   plan_type: 'free' | 'pro' | 'corporate';
   subscription_status: 'active' | 'past_due' | 'canceled';
   asaas_customer_id?: string | null;
+  asaas_subscription_id?: string | null;
+  billing_type?: 'PIX' | 'CREDIT_CARD' | null;
   current_period_end?: string | null;
   created_at: string;
 }
@@ -780,26 +782,29 @@ export const db = {
     id: string,
     planType: 'free' | 'pro' | 'corporate',
     subscriptionStatus: 'active' | 'past_due' | 'canceled',
-    billingInterval: 'monthly' | 'yearly' = 'monthly'
+    billingInterval: 'monthly' | 'yearly' = 'monthly',
+    billingType?: 'PIX' | 'CREDIT_CARD'
   ): Promise<Condominio | null> {
-    // Definir fim do período como 30 ou 365 dias a partir de hoje
     const days = billingInterval === 'yearly' ? 365 : 30;
     const periodEnd = new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString();
     
     if (supabase) {
+      const updateData: Record<string, unknown> = {
+        plan_type: planType,
+        subscription_status: subscriptionStatus,
+        current_period_end: periodEnd
+      };
+      if (billingType) updateData.billing_type = billingType;
+      
       const { data, error } = await supabase
         .from('condominios')
-        .update({
-          plan_type: planType,
-          subscription_status: subscriptionStatus,
-          current_period_end: periodEnd
-        })
+        .update(updateData)
         .eq('id', id)
         .select()
         .maybeSingle();
       
       if (error) throw error;
-      return data;
+      return data as Condominio;
     } else {
       const condominios = localDB.getCondominios();
       const index = condominios.findIndex(c => c.id === id);
@@ -809,7 +814,8 @@ export const db = {
         ...condominios[index],
         plan_type: planType,
         subscription_status: subscriptionStatus,
-        current_period_end: periodEnd
+        current_period_end: periodEnd,
+        billing_type: (billingType || condominios[index].billing_type) as 'PIX' | 'CREDIT_CARD' | null | undefined,
       };
       localDB.saveCondominios(condominios);
       return condominios[index];

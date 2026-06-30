@@ -9,6 +9,8 @@ CREATE TABLE IF NOT EXISTS public.condominios (
     plan_type TEXT DEFAULT 'free' CHECK (plan_type IN ('free', 'pro', 'corporate')) NOT NULL,
     subscription_status TEXT DEFAULT 'active' CHECK (subscription_status IN ('active', 'past_due', 'canceled')) NOT NULL,
     asaas_customer_id TEXT,
+    asaas_subscription_id TEXT,
+    billing_type TEXT CHECK (billing_type IN ('PIX', 'CREDIT_CARD')),
     current_period_end TIMESTAMPTZ,
     created_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL
 );

@@ -67,6 +67,12 @@ export default function ConfiguracoesPage() {
   const [checkoutError, setCheckoutError] = useState('');
   const [processingCheckout, setProcessingCheckout] = useState(false);
 
+  // Estados do PIX real
+  const [pixQrCode, setPixQrCode] = useState<string | null>(null);
+  const [pixCopyPaste, setPixCopyPaste] = useState<string | null>(null);
+  const [checkoutSubscriptionId, setCheckoutSubscriptionId] = useState<string | null>(null);
+  const [pixPaid, setPixPaid] = useState(false);
+
   useEffect(() => {
     const savedCondo = localStorage.getItem('zelcore_condominio_gestao');
     if (!savedCondo) {
@@ -228,7 +234,7 @@ export default function ConfiguracoesPage() {
   const handleCheckout = async (e: React.FormEvent) => {
     e.preventDefault();
     setCheckoutError('');
-    
+
     if (checkoutTab === 'card') {
       if (!cardNumber || !cardName || !cardExpiry || !cardCvv) {
         setCheckoutError('Por favor, preencha todos os campos do cartão.');
@@ -247,53 +253,115 @@ export default function ConfiguracoesPage() {
         return;
       }
     }
-    
+
     setProcessingCheckout(true);
+
     try {
-      // Simula tempo de resposta da API Asaas (2 segundos)
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      const updated = await db.updateCondominioPlan(
-        condominio!.id,
-        selectedUpgrade,
-        'active',
-        isAnnual ? 'yearly' : 'monthly'
-      );
-      
-      if (updated) {
-        setCondominio(updated);
-        // Atualiza local storage
-        localStorage.setItem('zelcore_condominio_gestao', JSON.stringify(updated));
-        
-        // Disparar evento para atualizar outros componentes
-        if (typeof window !== 'undefined') {
-          window.dispatchEvent(new Event('storage'));
-        }
-        
-        setShowCheckoutModal(false);
-        // Limpar campos
-        setCardNumber('');
-        setCardName('');
-        setCardExpiry('');
-        setCardCvv('');
-        
-        alert(`Assinatura ativada com sucesso! Seu condomínio agora está no plano ${selectedUpgrade === 'pro' ? 'Zelcore Pro' : 'Zelcore Corporate'}.`);
-      } else {
-        setCheckoutError('Não foi possível processar a assinatura.');
+      const price = selectedUpgrade === 'pro'
+        ? (isAnnual ? 124 : 149)
+        : Math.round(totalCorporatePrice * 100) / 100;
+
+      const body: Record<string, unknown> = {
+        condominioId: condominio!.id,
+        nome: condominio!.nome,
+        email: localStorage.getItem('zelcore_user_email') || '',
+        planType: selectedUpgrade,
+        billingType: checkoutTab === 'pix' ? 'PIX' : 'CREDIT_CARD',
+        cycle: isAnnual ? 'YEARLY' : 'MONTHLY',
+        value: price,
+      };
+
+      if (checkoutTab === 'card') {
+        const [expMonth, expYear] = cardExpiry.split('/');
+        body.creditCard = {
+          holderName: cardName,
+          number: cardNumber.replace(/\s/g, ''),
+          expiryMonth: expMonth,
+          expiryYear: `20${expYear}`,
+          ccv: cardCvv,
+        };
+        body.holderInfo = {
+          name: cardName,
+          email: localStorage.getItem('zelcore_user_email') || '',
+          cpfCnpj: '',
+        };
       }
+
+      const res = await fetch('/api/asaas/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Erro ao processar checkout');
+      }
+
+      if (checkoutTab === 'pix' && data.pix) {
+        setPixQrCode(data.pix.qrCode || null);
+        setPixCopyPaste(data.pix.copyPaste || null);
+        setCheckoutSubscriptionId(data.subscriptionId);
+        setProcessingCheckout(false);
+        // Não fecha o modal — aguarda pagamento PIX
+        return;
+      }
+
+      // Cartão: já confirmado, atualiza local
+      const updated: Condominio = {
+        ...condominio!,
+        plan_type: selectedUpgrade,
+        subscription_status: 'active',
+        billing_type: 'CREDIT_CARD' as const,
+        current_period_end: new Date(Date.now() + (isAnnual ? 365 : 30) * 86400000).toISOString(),
+      };
+      setCondominio(updated);
+      localStorage.setItem('zelcore_condominio_gestao', JSON.stringify(updated));
+      window.dispatchEvent(new Event('storage'));
+      setShowCheckoutModal(false);
+      setCardNumber(''); setCardName(''); setCardExpiry(''); setCardCvv('');
+      alert(`Assinatura ativada com sucesso! Seu condomínio agora está no plano ${selectedUpgrade === 'pro' ? 'Zelcore Pro' : 'Zelcore Corporate'}.`);
     } catch (err) {
       console.error(err);
-      setCheckoutError('Erro de processamento da transação. Tente novamente.');
+      setCheckoutError(err instanceof Error ? err.message : 'Erro de processamento da transação. Tente novamente.');
     } finally {
       setProcessingCheckout(false);
     }
   };
 
   const handleCopyPix = () => {
-    const fakePixKey = '00020126580014br.gov.bcb.pix0136kpgmpwthrnlrikkplrul5204000053039865405149.005802BR5914Zelcore%20Condominio6009Sao%20Paulo62070503***6304ABCD';
-    navigator.clipboard.writeText(fakePixKey);
+    const key = pixCopyPaste || '00020126580014br.gov.bcb.pix0136kpgmpwthrnlrikkplrul5204000053039865405149.005802BR5914Zelcore%20Condominio6009Sao%20Paulo62070503***6304ABCD';
+    navigator.clipboard.writeText(key);
     setCopiedPix(true);
     setTimeout(() => setCopiedPix(false), 2000);
+  };
+
+  const handlePixPaid = async () => {
+    if (!checkoutSubscriptionId) return;
+    try {
+      const updated = await db.updateCondominioPlan(
+        condominio!.id,
+        selectedUpgrade,
+        'active',
+        isAnnual ? 'yearly' : 'monthly',
+        'PIX'
+      );
+      if (updated) {
+        setCondominio(updated);
+        localStorage.setItem('zelcore_condominio_gestao', JSON.stringify(updated));
+        window.dispatchEvent(new Event('storage'));
+        setShowCheckoutModal(false);
+        setPixQrCode(null);
+        setPixCopyPaste(null);
+        setCheckoutSubscriptionId(null);
+        setPixPaid(true);
+        setTimeout(() => setPixPaid(false), 4000);
+      }
+    } catch {
+      // fallback: mesmo sem confirmação do webhook, ativa localmente
+      setShowCheckoutModal(false);
+    }
   };
 
   if (loading) {
@@ -996,7 +1064,15 @@ export default function ConfiguracoesPage() {
         </div>
       )}
 
-      {/* MODAL DE CHECKOUT SIMULADO */}
+      {/* Banner PIX pago com sucesso */}
+      {pixPaid && (
+        <div className="mb-4 p-4 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-xl text-xs font-semibold flex items-center space-x-2">
+          <CheckCircle2 className="w-4 h-4 shrink-0" />
+          <span>Pagamento PIX confirmado! Seu plano foi ativado com sucesso.</span>
+        </div>
+      )}
+
+      {/* MODAL DE CHECKOUT */}
       {showCheckoutModal && (
         <div className="fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="bg-[#0c0c0e] border border-zinc-800 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl relative">
@@ -1079,71 +1155,55 @@ export default function ConfiguracoesPage() {
               {/* CONTEÚDO PIX */}
               {checkoutTab === 'pix' ? (
                 <div className="space-y-4 flex flex-col items-center py-2">
-                  {/* SVG QR Code */}
-                  <div className="bg-white p-3 rounded-xl border border-zinc-200 shadow-inner">
-                    <svg className="w-32 h-32 text-zinc-950" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                      <rect width="100" height="100" fill="white" />
-                      <rect x="5" y="5" width="25" height="25" fill="black" />
-                      <rect x="8" y="8" width="19" height="19" fill="white" />
-                      <rect x="12" y="12" width="11" height="11" fill="black" />
+                  {pixQrCode ? (
+                    <>
+                      {/* QR Code real do Asaas */}
+                      <div className="bg-white p-3 rounded-xl border border-zinc-200 shadow-inner">
+                        <img src={`data:image/png;base64,${pixQrCode}`} alt="QR Code PIX" className="w-32 h-32" />
+                      </div>
+                      <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider text-center">
+                        Aponte a câmera do celular ou copie o código Pix abaixo
+                      </p>
 
-                      <rect x="70" y="5" width="25" height="25" fill="black" />
-                      <rect x="73" y="8" width="19" height="19" fill="white" />
-                      <rect x="77" y="12" width="11" height="11" fill="black" />
+                      <button
+                        type="button"
+                        onClick={handleCopyPix}
+                        className="w-full py-2 bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-bold rounded-lg border border-zinc-800 flex items-center justify-center space-x-1.5 transition-colors cursor-pointer"
+                      >
+                        {copiedPix ? (
+                          <><Check className="w-3.5 h-3.5 text-emerald-500" /><span>Código Pix Copiado!</span></>
+                        ) : (
+                          <><Copy className="w-3.5 h-3.5" /><span>Copiar Código Pix (Copia e Cola)</span></>
+                        )}
+                      </button>
 
-                      <rect x="5" y="70" width="25" height="25" fill="black" />
-                      <rect x="8" y="73" width="19" height="19" fill="white" />
-                      <rect x="12" y="77" width="11" height="11" fill="black" />
+                      <span className="text-[9px] text-zinc-600 text-center leading-relaxed block">
+                        Após pagar, clique no botão abaixo para ativar seu plano.<br />
+                        O sistema também será atualizado automaticamente quando o pagamento for confirmado.
+                      </span>
 
-                      <rect x="35" y="5" width="10" height="5" fill="black" />
-                      <rect x="50" y="5" width="5" height="10" fill="black" />
-                      <rect x="60" y="10" width="5" height="5" fill="black" />
-                      <rect x="35" y="20" width="5" height="5" fill="black" />
-                      <rect x="45" y="20" width="10" height="5" fill="black" />
-                      <rect x="60" y="20" width="5" height="10" fill="black" />
-                      <rect x="35" y="35" width="15" height="5" fill="black" />
-                      <rect x="55" y="30" width="5" height="15" fill="black" />
-                      <rect x="70" y="35" width="10" height="5" fill="black" />
-                      <rect x="5" y="45" width="10" height="5" fill="black" />
-                      <rect x="20" y="45" width="5" height="10" fill="black" />
-                      <rect x="30" y="50" width="15" height="5" fill="black" />
-                      <rect x="50" y="45" width="5" height="15" fill="black" />
-                      <rect x="65" y="50" width="10" height="5" fill="black" />
-                      <rect x="80" y="45" width="15" height="5" fill="black" />
-                      <rect x="35" y="60" width="5" height="10" fill="black" />
-                      <rect x="45" y="65" width="15" height="5" fill="black" />
-                      <rect x="65" y="60" width="5" height="5" fill="black" />
-                      <rect x="35" y="75" width="10" height="5" fill="black" />
-                      <rect x="50" y="75" width="5" height="15" fill="black" />
-                      <rect x="60" y="80" width="15" height="5" fill="black" />
-                      <rect x="80" y="70" width="5" height="15" fill="black" />
-                      <rect x="90" y="80" width="5" height="10" fill="black" />
-                      <rect x="35" y="90" width="10" height="5" fill="black" />
-                      <rect x="55" y="90" width="15" height="5" fill="black" />
-                      <rect x="75" y="90" width="5" height="5" fill="black" />
-                    </svg>
-                  </div>
-                  <p className="text-[10px] text-zinc-550 dark:text-zinc-500 font-bold uppercase tracking-wider text-center">
-                    Aponte a câmera do celular ou copie o código Pix abaixo
-                  </p>
-                  
-                  <button
-                    type="button"
-                    onClick={handleCopyPix}
-                    className="w-full py-2 bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-bold rounded-lg border border-zinc-800 flex items-center justify-center space-x-1.5 transition-colors cursor-pointer"
-                  >
-                    {copiedPix ? (
-                      <>
-                        <Check className="w-3.5 h-3.5 text-emerald-500" />
-                        <span>Código Pix Copiado!</span>
-                      </>
-                    ) : (
-                      <>
-                        <Copy className="w-3.5 h-3.5" />
-                        <span>Copiar Código Pix (Copia e Cola)</span>
-                      </>
-                    )}
-                  </button>
+                      <button
+                        type="button"
+                        onClick={handlePixPaid}
+                        className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-lg border border-emerald-700 flex items-center justify-center space-x-1.5 transition-colors cursor-pointer"
+                      >
+                        <Check className="w-4 h-4" />
+                        <span>Já paguei! Ativar Plano</span>
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      {/* Estado de loading / QR Code placeholder */}
+                      <div className="bg-white p-3 rounded-xl border border-zinc-200 shadow-inner">
+                        <div className="w-32 h-32 flex items-center justify-center text-zinc-300">
+                          <Loader2 className="w-8 h-8 animate-spin" />
+                        </div>
+                      </div>
+                      <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider text-center">
+                        Gerando QR Code PIX...
+                      </p>
+                    </>
+                  )}
                 </div>
               ) : (
                 /* CONTEÚDO CARTÃO DE CRÉDITO */

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-import { createAsaasCustomer, createAsaasSubscription, getPixPaymentData } from '@/lib/asaas'
+import { createAsaasCustomer, createAsaasSubscription, createAsaasPixPayment } from '@/lib/asaas'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || ''
@@ -93,10 +93,25 @@ export async function POST(req: NextRequest) {
         .eq('id', condominioId)
     }
 
-    // 4. Se for PIX, buscar dados do QR Code
+    // 4. Se for PIX, cria primeiro pagamento avulso com vencimento imediato
+    //    (a assinatura em si não gera QR Code PIX automaticamente)
     let pixData = null
     if (billingType === 'PIX') {
-      pixData = await getPixPaymentData(subscription.id)
+      const dueDate = new Date(Date.now() + 86400000).toISOString().split('T')[0] // amanhã
+      const payment = await createAsaasPixPayment({
+        customer: customerId,
+        value,
+        dueDate,
+        description: planType === 'pro' ? 'Zelcore Pro - 1º mês' : 'Zelcore Corporate - 1º mês',
+      })
+      if (payment) {
+        pixData = {
+          qrCode: payment.pixQrCode,
+          copyPaste: payment.pixCopyPaste,
+          invoiceUrl: payment.invoiceUrl,
+          status: payment.status,
+        }
+      }
     }
 
     return NextResponse.json({

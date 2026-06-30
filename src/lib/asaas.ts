@@ -184,4 +184,20 @@ export async function getSubscriptionStatus(subscriptionId: string) {
   return sub.status
 }
 
+export async function createAsaasPixPayment(params: {
+  customer: string
+  value: number
+  dueDate: string
+  description?: string
+}) {
+  const payment = await api.createPaymentWithPix({
+    customer: params.customer,
+    billingType: 'PIX',
+    value: params.value,
+    dueDate: params.dueDate,
+    description: params.description,
+  })
+  return payment
+}
+
 export { api }

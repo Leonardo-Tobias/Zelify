@@ -20,6 +20,7 @@ export async function POST(req: NextRequest) {
       nome,
       email,
       cpfCnpj,
+      phone,
       planType,        // 'pro' | 'corporate'
       billingType,     // 'PIX' | 'CREDIT_CARD'
       cycle,           // 'MONTHLY' | 'YEARLY'
@@ -53,7 +54,7 @@ export async function POST(req: NextRequest) {
     }
 
     if (!customerId) {
-      const customer = await createAsaasCustomer(nome, email, cpfCnpj)
+      const customer = await createAsaasCustomer(nome, email, cpfCnpj, phone)
       customerId = customer.id
 
       // Salvar customer_id no Supabase

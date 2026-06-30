@@ -66,6 +66,7 @@ export default function ConfiguracoesPage() {
   const [cardCvv, setCardCvv] = useState('');
   const [cardEmail, setCardEmail] = useState('');
   const [cardCpf, setCardCpf] = useState('');
+  const [cardPhone, setCardPhone] = useState('');
   const [checkoutError, setCheckoutError] = useState('');
   const [processingCheckout, setProcessingCheckout] = useState(false);
 
@@ -238,8 +239,8 @@ export default function ConfiguracoesPage() {
     setCheckoutError('');
 
     if (checkoutTab === 'card') {
-      if (!cardNumber || !cardName || !cardExpiry || !cardCvv || !cardEmail || !cardCpf) {
-        setCheckoutError('Preencha todos os campos do cartão (nome, número, validade, CVV, e-mail e CPF).');
+      if (!cardNumber || !cardName || !cardExpiry || !cardCvv || !cardEmail || !cardCpf || !cardPhone) {
+        setCheckoutError('Preencha todos os campos do cartão (nome, e-mail, CPF, telefone, número, validade e CVV).');
         return;
       }
       if (cardNumber.replace(/\s/g, '').length < 16) {
@@ -256,6 +257,10 @@ export default function ConfiguracoesPage() {
       }
       if (cardCpf.replace(/\D/g, '').length !== 11) {
         setCheckoutError('CPF inválido. Digite 11 dígitos.');
+        return;
+      }
+      if (cardPhone.replace(/\D/g, '').length < 10) {
+        setCheckoutError('Telefone inválido. Informe DDD + número (ex: 11999999999).');
         return;
       }
     }
@@ -287,6 +292,7 @@ export default function ConfiguracoesPage() {
           ccv: cardCvv,
         };
         body.cpfCnpj = cardCpf.replace(/\D/g, '');
+        body.phone = cardPhone.replace(/\D/g, '');
         body.holderInfo = {
           name: cardName,
           email: cardEmail,
@@ -327,7 +333,7 @@ export default function ConfiguracoesPage() {
       localStorage.setItem('zelcore_condominio_gestao', JSON.stringify(updated));
       window.dispatchEvent(new Event('storage'));
       setShowCheckoutModal(false);
-      setCardNumber(''); setCardName(''); setCardExpiry(''); setCardCvv(''); setCardEmail(''); setCardCpf('');
+      setCardNumber(''); setCardName(''); setCardExpiry(''); setCardCvv(''); setCardEmail(''); setCardCpf(''); setCardPhone('');
       alert(`Assinatura ativada com sucesso! Seu condomínio agora está no plano ${selectedUpgrade === 'pro' ? 'Zelcore Pro' : 'Zelcore Corporate'}.`);
     } catch (err) {
       console.error(err);
@@ -1256,6 +1262,24 @@ export default function ConfiguracoesPage() {
                       onChange={(e) => {
                         const v = e.target.value.replace(/\D/g, '').replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4').substring(0, 14);
                         setCardCpf(v);
+                      }}
+                      className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-white placeholder-zinc-705 focus:outline-none focus:border-[#001CFF]/50 font-semibold"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[9px] font-bold uppercase tracking-wider text-zinc-500 mb-1">
+                      Telefone (com DDD)
+                    </label>
+                    <input
+                      type="tel"
+                      required
+                      maxLength={15}
+                      placeholder="(11) 99999-9999"
+                      value={cardPhone}
+                      onChange={(e) => {
+                        const v = e.target.value.replace(/\D/g, '').replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3').substring(0, 15);
+                        setCardPhone(v);
                       }}
                       className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-white placeholder-zinc-705 focus:outline-none focus:border-[#001CFF]/50 font-semibold"
                     />

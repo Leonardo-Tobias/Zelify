@@ -43,8 +43,8 @@ const api = {
     return data
   },
 
-  async createCustomer(name: string, email: string, cpfCnpj?: string): Promise<AsaasCustomer> {
-    return this.request<AsaasCustomer>('POST', '/customers', { name, email, cpfCnpj })
+  async createCustomer(name: string, email: string, cpfCnpj?: string, phone?: string): Promise<AsaasCustomer> {
+    return this.request<AsaasCustomer>('POST', '/customers', { name, email, cpfCnpj, mobilePhone: phone })
   },
 
   async getCustomer(id: string): Promise<AsaasCustomer> {
@@ -111,8 +111,8 @@ const api = {
   },
 }
 
-export async function createAsaasCustomer(name: string, email: string, cpfCnpj?: string) {
-  return api.createCustomer(name, email, cpfCnpj)
+export async function createAsaasCustomer(name: string, email: string, cpfCnpj?: string, phone?: string) {
+  return api.createCustomer(name, email, cpfCnpj, phone)
 }
 
 export async function createAsaasSubscription(

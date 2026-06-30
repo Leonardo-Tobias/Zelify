@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
       case 'SUBSCRIPTION_OVERDUE':
         newStatus = 'past_due'
         break
-      case 'SUBSCRIPTION_CANCELLED':
+      case 'SUBSCRIPTION_DELETED':
       case 'PAYMENT_REFUNDED':
       case 'PAYMENT_CHARGEBACK_REQUESTED':
         newStatus = 'canceled'

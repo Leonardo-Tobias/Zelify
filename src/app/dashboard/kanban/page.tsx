@@ -41,7 +41,7 @@ export default function KanbanPage() {
   };
 
   useEffect(() => {
-    const savedCondo = localStorage.getItem('zelify_condominio_gestao');
+    const savedCondo = localStorage.getItem('zelcore_condominio_gestao');
     if (!savedCondo) {
       router.push('/login');
       return;

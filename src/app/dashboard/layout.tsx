@@ -42,7 +42,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   // Inicializar sessão e tema
   useEffect(() => {
     // Carregar tema salvo
-    const savedTheme = (localStorage.getItem('zelify_theme') as 'dark' | 'light') || 'dark';
+    const savedTheme = (localStorage.getItem('zelcore_theme') as 'dark' | 'light') || 'dark';
     setTheme(savedTheme);
     if (savedTheme === 'dark') {
       document.documentElement.classList.add('dark');
@@ -52,8 +52,8 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
 
     // Verificar sessão do gestor (async encapsulado)
     async function initSession() {
-      const savedGestor = localStorage.getItem('zelify_gestor');
-      const savedCondo = localStorage.getItem('zelify_condominio_gestao');
+      const savedGestor = localStorage.getItem('zelcore_gestor');
+      const savedCondo = localStorage.getItem('zelcore_condominio_gestao');
 
       if (!savedGestor || !savedCondo) {
         router.push('/login');
@@ -91,8 +91,8 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
         setGestor(gestorData);
         setCondominio(condoData);
       } catch (e) {
-        localStorage.removeItem('zelify_gestor');
-        localStorage.removeItem('zelify_condominio_gestao');
+        localStorage.removeItem('zelcore_gestor');
+        localStorage.removeItem('zelcore_condominio_gestao');
         router.push('/login');
       } finally {
         setLoading(false);
@@ -106,7 +106,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   const handleToggleTheme = () => {
     const nextTheme = theme === 'dark' ? 'light' : 'dark';
     setTheme(nextTheme);
-    localStorage.setItem('zelify_theme', nextTheme);
+    localStorage.setItem('zelcore_theme', nextTheme);
     if (nextTheme === 'dark') {
       document.documentElement.classList.add('dark');
     } else {
@@ -132,7 +132,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   // Listener para capturar atualizações de nome/slug nas configurações
   useEffect(() => {
     const handleStorageChange = () => {
-      const savedCondo = localStorage.getItem('zelify_condominio_gestao');
+      const savedCondo = localStorage.getItem('zelcore_condominio_gestao');
       if (savedCondo) {
         try {
           setCondominio(JSON.parse(savedCondo));
@@ -153,16 +153,16 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   // Atualizar título do navegador dinamicamente
   useEffect(() => {
     if (pathname === '/dashboard/kanban') {
-      document.title = "Kanban de Ocorrências | Zelify";
+      document.title = "Kanban de Ocorrências | Zelcore";
     } else {
-      document.title = "Zelify | Gestão Operacional de Condomínios";
+      document.title = "Zelcore | Gestão Operacional de Condomínios";
     }
   }, [pathname]);
 
   const handleLogout = () => {
     if (confirm('Deseja sair do painel administrativo?')) {
-      localStorage.removeItem('zelify_gestor');
-      localStorage.removeItem('zelify_condominio_gestao');
+      localStorage.removeItem('zelcore_gestor');
+      localStorage.removeItem('zelcore_condominio_gestao');
       router.push('/login');
     }
   };
@@ -225,7 +225,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
       {/* MOBILE HEADER */}
       <div className="md:hidden bg-white/90 dark:bg-[#09090b]/90 backdrop-blur-md border-b border-zinc-200 dark:border-white/[0.06] px-4 py-3 flex items-center justify-between z-20">
         <div className="flex items-center space-x-2">
-          <span className="text-lg font-black tracking-tight text-zinc-900 dark:text-white">Zelify<span className="text-[#001CFF]">.</span></span>
+          <span className="text-lg font-black tracking-tight text-zinc-900 dark:text-white">Zelcore<span className="text-[#001CFF]">.</span></span>
           {isPortfolioView ? (
             <span className="text-[10px] bg-[#001CFF]/10 text-[#001CFF] px-1.5 py-0.5 rounded font-bold uppercase border border-[#001CFF]/20">Carteira</span>
           ) : (
@@ -356,7 +356,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
           {/* LOGO E SELETOR DE CONDOMÍNIO */}
           <div className="px-2">
             <div className="flex items-center space-x-1 mb-5">
-              <span className="text-xl font-black tracking-tight text-zinc-900 dark:text-white">Zelify<span className="text-[#001CFF]">.</span></span>
+              <span className="text-xl font-black tracking-tight text-zinc-900 dark:text-white">Zelcore<span className="text-[#001CFF]">.</span></span>
             </div>
             
             {isPortfolioView ? (
@@ -413,7 +413,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                   <span className="truncate">Link do Morador</span>
                 </div>
                 <span className="text-[10px] font-mono text-zinc-400 dark:text-zinc-550 group-hover:text-[#001CFF] truncate max-w-full block mt-1 transition-colors pl-5.5">
-                  zelify.vercel.app/{condominio.slug}
+                  zelcore.vercel.app/{condominio.slug}
                 </span>
               </a>
             </div>

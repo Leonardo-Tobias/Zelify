@@ -15,7 +15,7 @@ export default function LoginPage() {
 
   // Redirecionar se já estiver logado
   useEffect(() => {
-    const savedGestor = localStorage.getItem('zelify_gestor');
+    const savedGestor = localStorage.getItem('zelcore_gestor');
     if (savedGestor) {
       router.push('/dashboard');
     }
@@ -35,8 +35,8 @@ export default function LoginPage() {
       const session = await db.loginGestor(email, password);
       if (session) {
         // Salvar dados do gestor e do condomínio no localStorage para a sessão
-        localStorage.setItem('zelify_gestor', JSON.stringify(session.gestor));
-        localStorage.setItem('zelify_condominio_gestao', JSON.stringify(session.condominio));
+        localStorage.setItem('zelcore_gestor', JSON.stringify(session.gestor));
+        localStorage.setItem('zelcore_condominio_gestao', JSON.stringify(session.condominio));
         router.push('/dashboard');
       } else {
         setError('E-mail ou senha incorretos.');
@@ -62,7 +62,7 @@ export default function LoginPage() {
           <div className="inline-flex items-center justify-center w-12 h-12 bg-zinc-900/40 border border-zinc-800 rounded-xl mb-4 text-[#001CFF] shadow-2xl backdrop-blur-sm">
             <ShieldCheck className="w-6 h-6" />
           </div>
-          <h1 className="text-xl font-bold tracking-tight text-white">Acesse o Zelify Gestor</h1>
+          <h1 className="text-xl font-bold tracking-tight text-white">Acesse o Zelcore Gestor</h1>
           <p className="text-xs text-zinc-400 mt-1 font-medium">
             Painel administrativo para síndicos e zeladores
           </p>

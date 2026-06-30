@@ -132,7 +132,7 @@ export default function MoradorPortal() {
           }
 
           // Verificar se já está autenticado para este condomínio no localStorage
-          const savedAuth = localStorage.getItem(`zelify_auth_${condo.id}`);
+          const savedAuth = localStorage.getItem(`zelcore_auth_${condo.id}`);
           if (savedAuth) {
             try {
               const authData = JSON.parse(savedAuth);
@@ -146,15 +146,15 @@ export default function MoradorPortal() {
                 setValidated(true);
               } else {
                 // Dado inválido ou adulterado — limpar e forçar nova validação
-                localStorage.removeItem(`zelify_auth_${condo.id}`);
+                localStorage.removeItem(`zelcore_auth_${condo.id}`);
               }
             } catch (e) {
-              localStorage.removeItem(`zelify_auth_${condo.id}`);
+              localStorage.removeItem(`zelcore_auth_${condo.id}`);
             }
           }
           
           // Carregar IDs de chamados criados localmente
-          const savedIds = localStorage.getItem(`zelify_meus_chamados_${condo.id}`);
+          const savedIds = localStorage.getItem(`zelcore_meus_chamados_${condo.id}`);
           if (savedIds) {
             try {
               const parsedIds = JSON.parse(savedIds);
@@ -162,10 +162,10 @@ export default function MoradorPortal() {
               if (Array.isArray(parsedIds) && parsedIds.every(id => typeof id === 'string')) {
                 setMeusChamadosIds(parsedIds);
               } else {
-                localStorage.removeItem(`zelify_meus_chamados_${condo.id}`);
+                localStorage.removeItem(`zelcore_meus_chamados_${condo.id}`);
               }
             } catch (e) {
-              localStorage.removeItem(`zelify_meus_chamados_${condo.id}`);
+              localStorage.removeItem(`zelcore_meus_chamados_${condo.id}`);
             }
           }
         }
@@ -222,7 +222,7 @@ export default function MoradorPortal() {
         setFailedAttempts(0);
         setBlockedUntil(null);
         const authData = { bloco, apartamento };
-        localStorage.setItem(`zelify_auth_${condominio!.id}`, JSON.stringify(authData));
+        localStorage.setItem(`zelcore_auth_${condominio!.id}`, JSON.stringify(authData));
         setValidated(true);
       } else {
         // Incrementar tentativas e bloquear se atingir o limite
@@ -246,7 +246,7 @@ export default function MoradorPortal() {
   // Logout do morador
   const handleLogout = () => {
     if (confirm('Deseja sair do portal do condomínio?')) {
-      localStorage.removeItem(`zelify_auth_${condominio!.id}`);
+      localStorage.removeItem(`zelcore_auth_${condominio!.id}`);
       setValidated(false);
       setCodigoAcesso('');
     }
@@ -304,7 +304,7 @@ export default function MoradorPortal() {
       // Salvar ID localmente para rastrear que foi criado por este morador
       const novosIds = [...meusChamadosIds, novoChamado.id];
       setMeusChamadosIds(novosIds);
-      localStorage.setItem(`zelify_meus_chamados_${condominio!.id}`, JSON.stringify(novosIds));
+      localStorage.setItem(`zelcore_meus_chamados_${condominio!.id}`, JSON.stringify(novosIds));
 
       setProblemaSuccess(true);
       setTimeout(() => {
@@ -378,7 +378,7 @@ export default function MoradorPortal() {
             <Building className="h-8 w-8 text-[#001CFF] relative z-10" />
           </div>
           
-          <h2 className="text-xl font-bold text-white tracking-tight">Zelify</h2>
+          <h2 className="text-xl font-bold text-white tracking-tight">Zelcore</h2>
           <p className="mt-2 text-zinc-400 text-sm font-medium flex items-center gap-2">
             <Loader2 className="h-4 w-4 text-[#001CFF] animate-spin" />
             Carregando o condomínio...
@@ -388,7 +388,7 @@ export default function MoradorPortal() {
         {/* PAINEL DE DIAGNÓSTICO PARA DEBUG (Apenas com ?debug=true na URL) */}
         {showDebug && (
           <div className="mt-4 p-4 bg-[#0c0c0e]/60 border border-white/[0.05] rounded-xl text-left max-w-xs w-full text-xs font-mono space-y-2 text-zinc-400 shadow-2xl backdrop-blur-md relative z-10">
-            <div className="font-bold text-white border-b border-white/[0.05] pb-1">Diagnóstico Zelify</div>
+            <div className="font-bold text-white border-b border-white/[0.05] pb-1">Diagnóstico Zelcore</div>
             <div>Slug da URL: <span className="text-white font-bold">"{slug || 'Aguardando router...'}"</span></div>
             <div>Params Router: {JSON.stringify(params)}</div>
             <div>Supabase Ativo: <span className="text-white font-bold">{String(isSupabaseConfigured)}</span></div>
@@ -463,7 +463,7 @@ export default function MoradorPortal() {
           <div className="absolute inset-x-0 -top-px h-px bg-gradient-to-r from-transparent via-[#001CFF]/40 to-transparent"></div>
           
           <div className="flex items-center space-x-2 mb-6">
-            <span className="text-2xl font-black tracking-tight text-white">Zelify<span className="text-[#001CFF]">.</span></span>
+            <span className="text-2xl font-black tracking-tight text-white">Zelcore<span className="text-[#001CFF]">.</span></span>
           </div>
           
           <div className="mb-6">
@@ -569,7 +569,7 @@ export default function MoradorPortal() {
         <div className="max-w-md mx-auto flex items-center justify-between">
           <div>
             <div className="flex items-center space-x-1.5">
-              <span className="text-lg font-black tracking-tight text-white">Zelify<span className="text-[#001CFF]">.</span></span>
+              <span className="text-lg font-black tracking-tight text-white">Zelcore<span className="text-[#001CFF]">.</span></span>
               <span className="text-zinc-700 text-xs">|</span>
               <span className="text-xs font-semibold text-zinc-400 truncate max-w-[140px]">{condominio.nome}</span>
             </div>
@@ -967,9 +967,9 @@ export default function MoradorPortal() {
                         <AlertCircle className="w-4 h-4 shrink-0 text-red-400 mt-0.5" />
                         <span>
                           {condominio.subscription_status !== 'active' ? (
-                            'O portal deste condomínio está temporariamente suspenso devido a pendências financeiras na assinatura. Se você for o síndico, acesse o seu painel do Zelify para regularizar o pagamento.'
+                            'O portal deste condomínio está temporariamente suspenso devido a pendências financeiras na assinatura. Se você for o síndico, acesse o seu painel do Zelcore para regularizar o pagamento.'
                           ) : (
-                            'Limite de alertas mensais atingido para este condomínio. A administração do prédio já foi notificada para realizar a atualização do plano. Se você for o síndico, acesse o seu painel do Zelify para liberar novos chamados.'
+                            'Limite de alertas mensais atingido para este condomínio. A administração do prédio já foi notificada para realizar a atualização do plano. Se você for o síndico, acesse o seu painel do Zelcore para liberar novos chamados.'
                           )}
                         </span>
                       </div>
@@ -1103,7 +1103,7 @@ export default function MoradorPortal() {
                       <div className="p-3.5 bg-red-500/10 border border-red-500/20 text-red-405 rounded-lg text-xs font-semibold leading-relaxed flex items-start space-x-2 animate-in fade-in duration-200 text-left">
                         <AlertCircle className="w-4 h-4 shrink-0 text-red-400 mt-0.5" />
                         <span>
-                          Limite de alertas mensais atingido para este condomínio. A administração do prédio já foi notificada para realizar a atualização do plano. Se você for o síndico, acesse o seu painel do Zelify para liberar novos chamados.
+                          Limite de alertas mensais atingido para este condomínio. A administração do prédio já foi notificada para realizar a atualização do plano. Se você for o síndico, acesse o seu painel do Zelcore para liberar novos chamados.
                         </span>
                       </div>
                       <button

@@ -7,7 +7,7 @@ export default function Home() {
   const router = useRouter();
 
   useEffect(() => {
-    const savedGestor = localStorage.getItem('zelify_gestor');
+    const savedGestor = localStorage.getItem('zelcore_gestor');
     if (savedGestor) {
       router.push('/dashboard');
     } else {

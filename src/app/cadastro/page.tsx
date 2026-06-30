@@ -15,7 +15,7 @@ export default function CadastroPage() {
     if (typeof window !== 'undefined') {
       const planParam = new URLSearchParams(window.location.search).get('plan');
       if (planParam === 'pro' || planParam === 'corporate') {
-        localStorage.setItem('zelify_selected_plan_on_signup', planParam);
+        localStorage.setItem('zelcore_selected_plan_on_signup', planParam);
       }
     }
   }, []);
@@ -110,8 +110,8 @@ export default function CadastroPage() {
       });
 
       // 3. Salvar dados de login no localStorage e redirecionar
-      localStorage.setItem('zelify_gestor', JSON.stringify(session.gestor));
-      localStorage.setItem('zelify_condominio_gestao', JSON.stringify(session.condominio));
+      localStorage.setItem('zelcore_gestor', JSON.stringify(session.gestor));
+      localStorage.setItem('zelcore_condominio_gestao', JSON.stringify(session.condominio));
       router.push('/dashboard');
     } catch (err: any) {
       setError(err?.message || 'Falha ao efetuar o cadastro. Verifique os dados ou tente novamente.');
@@ -134,7 +134,7 @@ export default function CadastroPage() {
           <div className="inline-flex items-center justify-center w-12 h-12 bg-zinc-900/40 border border-zinc-800 rounded-xl mb-4 text-[#001CFF] shadow-2xl backdrop-blur-sm">
             <ShieldCheck className="w-6 h-6" />
           </div>
-          <h1 className="text-xl font-bold tracking-tight text-white">Comece com o Zelify</h1>
+          <h1 className="text-xl font-bold tracking-tight text-white">Comece com o Zelcore</h1>
           <p className="text-sm text-zinc-300 mt-1 font-medium">
             Cadastre seu condomínio e crie sua conta de síndico
           </p>

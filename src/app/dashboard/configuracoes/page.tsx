@@ -68,7 +68,7 @@ export default function ConfiguracoesPage() {
   const [processingCheckout, setProcessingCheckout] = useState(false);
 
   useEffect(() => {
-    const savedCondo = localStorage.getItem('zelify_condominio_gestao');
+    const savedCondo = localStorage.getItem('zelcore_condominio_gestao');
     if (!savedCondo) {
       router.push('/login');
       return;
@@ -87,7 +87,7 @@ export default function ConfiguracoesPage() {
         const fresh = await db.getCondominioBySlug(condo.slug);
         if (fresh) {
           setCondominio(fresh);
-          localStorage.setItem('zelify_condominio_gestao', JSON.stringify(fresh));
+          localStorage.setItem('zelcore_condominio_gestao', JSON.stringify(fresh));
         }
       } catch (err) {
         console.error('Erro ao atualizar condomínio com dados do banco:', err);
@@ -150,7 +150,7 @@ export default function ConfiguracoesPage() {
 
   const handleCopyLink = () => {
     if (!condominio) return;
-    const fullUrl = `https://zelify.vercel.app/${condominio.slug}`;
+    const fullUrl = `https://zelcore.vercel.app/${condominio.slug}`;
     
     navigator.clipboard.writeText(fullUrl);
     setCopied(true);
@@ -160,7 +160,7 @@ export default function ConfiguracoesPage() {
   const handleDownloadQR = async () => {
     try {
       if (!condominio) return;
-      const targetUrl = `https://zelify.vercel.app/${condominio.slug}`;
+      const targetUrl = `https://zelcore.vercel.app/${condominio.slug}`;
       const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=${encodeURIComponent(targetUrl)}`;
       const response = await fetch(qrUrl);
       const blob = await response.blob();
@@ -205,7 +205,7 @@ export default function ConfiguracoesPage() {
       if (updated) {
         setCondominio(updated);
         // Atualizar localStorage para refletir na navegação do layout
-        localStorage.setItem('zelify_condominio_gestao', JSON.stringify(updated));
+        localStorage.setItem('zelcore_condominio_gestao', JSON.stringify(updated));
         
         // Disparar evento para atualizar outros componentes ouvindo storage
         if (typeof window !== 'undefined') {
@@ -263,7 +263,7 @@ export default function ConfiguracoesPage() {
       if (updated) {
         setCondominio(updated);
         // Atualiza local storage
-        localStorage.setItem('zelify_condominio_gestao', JSON.stringify(updated));
+        localStorage.setItem('zelcore_condominio_gestao', JSON.stringify(updated));
         
         // Disparar evento para atualizar outros componentes
         if (typeof window !== 'undefined') {
@@ -277,7 +277,7 @@ export default function ConfiguracoesPage() {
         setCardExpiry('');
         setCardCvv('');
         
-        alert(`Assinatura ativada com sucesso! Seu condomínio agora está no plano ${selectedUpgrade === 'pro' ? 'Zelify Pro' : 'Zelify Corporate'}.`);
+        alert(`Assinatura ativada com sucesso! Seu condomínio agora está no plano ${selectedUpgrade === 'pro' ? 'Zelcore Pro' : 'Zelcore Corporate'}.`);
       } else {
         setCheckoutError('Não foi possível processar a assinatura.');
       }
@@ -290,7 +290,7 @@ export default function ConfiguracoesPage() {
   };
 
   const handleCopyPix = () => {
-    const fakePixKey = '00020126580014br.gov.bcb.pix0136kpgmpwthrnlrikkplrul5204000053039865405149.005802BR5914Zelify%20Condominio6009Sao%20Paulo62070503***6304ABCD';
+    const fakePixKey = '00020126580014br.gov.bcb.pix0136kpgmpwthrnlrikkplrul5204000053039865405149.005802BR5914Zelcore%20Condominio6009Sao%20Paulo62070503***6304ABCD';
     navigator.clipboard.writeText(fakePixKey);
     setCopiedPix(true);
     setTimeout(() => setCopiedPix(false), 2000);
@@ -371,7 +371,7 @@ export default function ConfiguracoesPage() {
             <input
               type="text"
               readOnly
-              value={condominio ? `https://zelify.vercel.app/${condominio.slug}` : ''}
+              value={condominio ? `https://zelcore.vercel.app/${condominio.slug}` : ''}
               className="bg-transparent flex-1 text-xs text-zinc-800 dark:text-zinc-300 font-mono focus:outline-none select-all"
             />
             <div className="flex shrink-0 gap-1.5">
@@ -384,7 +384,7 @@ export default function ConfiguracoesPage() {
                 {copied ? <Check className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-450 animate-pulse" /> : <Copy className="w-3.5 h-3.5" />}
               </button>
               <a
-                href={condominio ? `https://zelify.vercel.app/${condominio.slug}` : '#'}
+                href={condominio ? `https://zelcore.vercel.app/${condominio.slug}` : '#'}
                 target="_blank"
                 rel="noreferrer"
                 className="p-2 bg-zinc-100 dark:bg-zinc-900 hover:bg-[#001CFF] border border-zinc-200 dark:border-zinc-800 text-zinc-500 dark:text-zinc-400 hover:text-white rounded-md transition-colors"
@@ -526,7 +526,7 @@ export default function ConfiguracoesPage() {
                       ? 'text-emerald-500' 
                       : 'text-zinc-800'
                   }`} />
-                  <span className="font-bold text-[10px] tracking-widest uppercase">Zelify</span>
+                  <span className="font-bold text-[10px] tracking-widest uppercase">Zelcore</span>
                 </div>
 
                 {/* Nome do Condominio */}
@@ -553,7 +553,7 @@ export default function ConfiguracoesPage() {
                     : 'border-zinc-200'
                 }`}>
                   <img
-                    src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(condominio ? `https://zelify.vercel.app/${condominio.slug}` : '')}`}
+                    src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(condominio ? `https://zelcore.vercel.app/${condominio.slug}` : '')}`}
                     alt="QR Code de Acesso"
                     className="w-24 h-24 object-contain"
                   />
@@ -574,7 +574,7 @@ export default function ConfiguracoesPage() {
                     {codigoAcesso || '----'}
                   </div>
                   <div className="text-[6px] text-zinc-400 font-mono truncate">
-                    {condominio?.slug ? `zelify.vercel.app/${condominio.slug}` : 'link'}
+                    {condominio?.slug ? `zelcore.vercel.app/${condominio.slug}` : 'link'}
                   </div>
                 </div>
               </div>
@@ -629,7 +629,7 @@ export default function ConfiguracoesPage() {
                 </label>
                 <div className="flex rounded-lg border border-zinc-200 dark:border-zinc-800 overflow-hidden bg-zinc-50 dark:bg-zinc-950 focus-within:border-[#001CFF]/50 focus-within:ring-4 focus-within:ring-[#001CFF]/10 transition-all">
                   <span className="flex items-center bg-zinc-100 dark:bg-zinc-900 border-r border-zinc-200 dark:border-zinc-800 px-3 text-zinc-500 dark:text-zinc-400 font-mono text-xs font-semibold select-none">
-                    zelify.vercel.app/
+                    zelcore.vercel.app/
                   </span>
                   <input
                     id="slugCondo"
@@ -642,7 +642,7 @@ export default function ConfiguracoesPage() {
                   />
                 </div>
                 <p className="text-[10px] text-zinc-500 leading-tight font-medium">
-                  Apenas letras minúsculas, números e hífens. O link final ficará: <span className="font-mono">https://zelify.vercel.app/{slug}</span>
+                  Apenas letras minúsculas, números e hífens. O link final ficará: <span className="font-mono">https://zelcore.vercel.app/{slug}</span>
                 </p>
               </div>
 
@@ -708,8 +708,8 @@ export default function ConfiguracoesPage() {
                   <span>Plano Atual</span>
                 </div>
                 <h3 className="text-lg font-black text-zinc-900 dark:text-white uppercase tracking-wider">
-                  {condominio?.plan_type === 'free' ? 'Zelify Starter (Grátis)' : 
-                   condominio?.plan_type === 'pro' ? 'Zelify Pro' : 'Zelify Corporate'}
+                  {condominio?.plan_type === 'free' ? 'Zelcore Starter (Grátis)' : 
+                   condominio?.plan_type === 'pro' ? 'Zelcore Pro' : 'Zelcore Corporate'}
                 </h3>
               </div>
               <div className="flex items-center gap-2">
@@ -796,7 +796,7 @@ export default function ConfiguracoesPage() {
                 <div className="space-y-1">
                   <span className="text-[9px] font-bold text-zinc-550 dark:text-zinc-500 uppercase tracking-widest">Para Síndicos</span>
                   <h4 className="text-base font-black text-zinc-900 dark:text-white uppercase tracking-wider flex items-center">
-                    Zelify Pro
+                    Zelcore Pro
                     <Sparkles className="w-4 h-4 text-[#001CFF] ml-1.5" />
                   </h4>
                 </div>
@@ -879,7 +879,7 @@ export default function ConfiguracoesPage() {
                 <div className="space-y-1">
                   <span className="text-[9px] font-bold text-zinc-555 dark:text-zinc-500 uppercase tracking-widest">Para Administradoras</span>
                   <h4 className="text-base font-black text-zinc-900 dark:text-white uppercase tracking-wider flex items-center">
-                    Zelify Corporate
+                    Zelcore Corporate
                     <Building className="w-4 h-4 text-[#001CFF] ml-1.5" />
                   </h4>
                 </div>
@@ -1008,7 +1008,7 @@ export default function ConfiguracoesPage() {
               <div>
                 <h3 className="text-sm font-bold text-white uppercase tracking-wider">Finalizar Assinatura</h3>
                 <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider mt-0.5">
-                  Simulação de pagamento Zelify
+                  Simulação de pagamento Zelcore
                 </p>
               </div>
               <button 
@@ -1032,7 +1032,7 @@ export default function ConfiguracoesPage() {
               <div className="bg-zinc-950 p-3 rounded-lg border border-zinc-900 flex justify-between items-center text-xs">
                 <div>
                   <p className="font-bold text-white uppercase">
-                    {selectedUpgrade === 'pro' ? 'Plano Zelify Pro' : 'Plano Zelify Corporate'}
+                    {selectedUpgrade === 'pro' ? 'Plano Zelcore Pro' : 'Plano Zelcore Corporate'}
                   </p>
                   <p className="text-[10px] text-zinc-550 mt-0.5">
                     {isAnnual ? 'Renovação anual automática' : 'Renovação mensal automática'}
@@ -1267,7 +1267,7 @@ export default function ConfiguracoesPage() {
               ? 'text-emerald-500' 
               : 'text-zinc-900'
           }`} />
-          <span className="font-black text-3xl tracking-widest uppercase">Zelify</span>
+          <span className="font-black text-3xl tracking-widest uppercase">Zelcore</span>
         </div>
 
         <div className="space-y-4">
@@ -1293,7 +1293,7 @@ export default function ConfiguracoesPage() {
             : 'border-zinc-300'
         }`}>
           <img
-            src={`https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(condominio ? `https://zelify.vercel.app/${condominio.slug}` : '')}`}
+            src={`https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(condominio ? `https://zelcore.vercel.app/${condominio.slug}` : '')}`}
             alt="QR Code de Acesso"
             className="w-64 h-64 object-contain mx-auto"
           />
@@ -1314,12 +1314,12 @@ export default function ConfiguracoesPage() {
             {codigoAcesso || '----'}
           </div>
           <div className="text-sm text-zinc-500 font-mono pt-1">
-            Link de Acesso: <span className="font-bold underline">https://zelify.vercel.app/{condominio?.slug || ''}</span>
+            Link de Acesso: <span className="font-bold underline">https://zelcore.vercel.app/{condominio?.slug || ''}</span>
           </div>
         </div>
 
         <div className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest mb-4">
-          Gerado automaticamente pelo Zelify
+          Gerado automaticamente pelo Zelcore
         </div>
       </div>
 

@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Zelify | Gestão Operacional de Condomínios",
+  title: "Zelcore | Gestão Operacional de Condomínios",
   description: "Plataforma mobile-first para moradores e gestores controlarem manutenções, achados e perdidos e rotinas do condomínio.",
 };
 
@@ -40,7 +40,7 @@ export default function RootLayout({
           __html: `
             (function() {
               try {
-                var t = localStorage.getItem('zelify_theme');
+                var t = localStorage.getItem('zelcore_theme');
                 if (t === 'light') {
                   document.documentElement.classList.remove('dark');
                 }

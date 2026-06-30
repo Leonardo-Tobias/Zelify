@@ -52,7 +52,7 @@ function DashboardHomeContent() {
 
   // Verificar sessão do gestor e condomínio ativo
   useEffect(() => {
-    const savedGestor = localStorage.getItem('zelify_gestor');
+    const savedGestor = localStorage.getItem('zelcore_gestor');
     if (!savedGestor) {
       router.push('/login');
       return;
@@ -60,9 +60,9 @@ function DashboardHomeContent() {
 
     // Se o usuário selecionou um plano no cadastro (vindo da LP), redireciona direto para faturamento
     if (typeof window !== 'undefined') {
-      const selectedPlan = localStorage.getItem('zelify_selected_plan_on_signup');
+      const selectedPlan = localStorage.getItem('zelcore_selected_plan_on_signup');
       if (selectedPlan) {
-        localStorage.removeItem('zelify_selected_plan_on_signup');
+        localStorage.removeItem('zelcore_selected_plan_on_signup');
         router.push(`/dashboard/configuracoes?tab=faturamento&plan=${selectedPlan}`);
         return;
       }
@@ -71,7 +71,7 @@ function DashboardHomeContent() {
     const parsedGestor = JSON.parse(savedGestor) as UsuarioGestor;
     setGestor(parsedGestor);
 
-    const savedCondo = localStorage.getItem('zelify_condominio_gestao');
+    const savedCondo = localStorage.getItem('zelcore_condominio_gestao');
     let currentCondo = savedCondo ? (JSON.parse(savedCondo) as Condominio) : null;
     setCondominio(currentCondo);
 
@@ -85,7 +85,7 @@ function DashboardHomeContent() {
           if (freshCondo) {
             currentCondo = freshCondo;
             setCondominio(freshCondo);
-            localStorage.setItem('zelify_condominio_gestao', JSON.stringify(freshCondo));
+            localStorage.setItem('zelcore_condominio_gestao', JSON.stringify(freshCondo));
           }
         }
 
@@ -142,7 +142,7 @@ function DashboardHomeContent() {
       const list = await db.getCondominiosByGestorUser(gestor.user_id);
       const target = list.find(c => c.id === condoId);
       if (target) {
-        localStorage.setItem('zelify_condominio_gestao', JSON.stringify(target));
+        localStorage.setItem('zelcore_condominio_gestao', JSON.stringify(target));
         window.dispatchEvent(new Event('storage'));
         router.push('/dashboard');
       }
@@ -201,7 +201,7 @@ function DashboardHomeContent() {
         format: 'a4'
       });
       
-      const primaryColor = [0, 51, 255]; // #001CFF Zelify Blue
+      const primaryColor = [0, 51, 255]; // #001CFF Zelcore Blue
       const darkColor = [39, 39, 42];    // zinc-800
       const lightGray = [228, 228, 231]; // zinc-200
       
@@ -215,7 +215,7 @@ function DashboardHomeContent() {
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(22);
       doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-      doc.text('Zelify', 20, 20);
+      doc.text('Zelcore', 20, 20);
       
       doc.setFontSize(10);
       doc.setTextColor(115, 115, 115);
@@ -334,7 +334,7 @@ function DashboardHomeContent() {
           doc.setFont('helvetica', 'normal');
           doc.setFontSize(8);
           doc.setTextColor(115, 115, 115);
-          doc.text(`Zelify - Gestão Inteligente de Condomínios`, 20, doc.internal.pageSize.height - 10);
+          doc.text(`Zelcore - Gestão Inteligente de Condomínios`, 20, doc.internal.pageSize.height - 10);
           
           const str = `Página ${data.pageNumber}`;
           doc.text(str, doc.internal.pageSize.width - 20 - doc.getTextWidth(str), doc.internal.pageSize.height - 10);
@@ -388,7 +388,7 @@ function DashboardHomeContent() {
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(22);
       doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-      doc.text('Zelify', 20, 20);
+      doc.text('Zelcore', 20, 20);
       
       doc.setFontSize(10);
       doc.setTextColor(115, 115, 115);
@@ -402,7 +402,7 @@ function DashboardHomeContent() {
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(14);
       doc.setTextColor(darkColor[0], darkColor[1], darkColor[2]);
-      doc.text('Relatório Consolidado de Carteira - Zelify Corporate', 20, 36);
+      doc.text('Relatório Consolidado de Carteira - Zelcore Corporate', 20, 36);
       
       doc.setFontSize(10);
       doc.setFont('helvetica', 'normal');
@@ -444,7 +444,7 @@ function DashboardHomeContent() {
           doc.setFont('helvetica', 'normal');
           doc.setFontSize(8);
           doc.setTextColor(115, 115, 115);
-          doc.text(`Zelify - Painel Consolidado Multi-Condomínios`, 20, doc.internal.pageSize.height - 10);
+          doc.text(`Zelcore - Painel Consolidado Multi-Condomínios`, 20, doc.internal.pageSize.height - 10);
           
           const str = `Página ${data.pageNumber}`;
           doc.text(str, doc.internal.pageSize.width - 20 - doc.getTextWidth(str), doc.internal.pageSize.height - 10);

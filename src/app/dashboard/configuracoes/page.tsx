@@ -286,6 +286,7 @@ export default function ConfiguracoesPage() {
           expiryYear: `20${expYear}`,
           ccv: cardCvv,
         };
+        body.cpfCnpj = cardCpf.replace(/\D/g, '');
         body.holderInfo = {
           name: cardName,
           email: cardEmail,

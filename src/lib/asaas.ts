@@ -44,7 +44,12 @@ const api = {
   },
 
   async createCustomer(name: string, email: string, cpfCnpj?: string, phone?: string): Promise<AsaasCustomer> {
-    return this.request<AsaasCustomer>('POST', '/customers', { name, email, cpfCnpj, mobilePhone: phone })
+    const params: Record<string, string | undefined> = { name, email, cpfCnpj }
+    if (phone) {
+      params.mobilePhone = phone
+      params.phone = phone // Asaas aceita ambos
+    }
+    return this.request<AsaasCustomer>('POST', '/customers', params)
   },
 
   async getCustomer(id: string): Promise<AsaasCustomer> {

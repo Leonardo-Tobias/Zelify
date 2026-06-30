@@ -148,6 +148,22 @@ export async function createAsaasSubscription(
 }
 
 export async function getPixPaymentData(subscriptionId: string) {
+  // Aguarda o pagamento ser gerado (pode levar alguns segundos)
+  for (let i = 0; i < 10; i++) {
+    const result = await api.listPaymentsBySubscription(subscriptionId)
+    const payment = result.data?.[0]
+    if (payment && (payment.pixQrCode || payment.pixCopyPaste || payment.invoiceUrl)) {
+      return {
+        qrCode: payment.pixQrCode,
+        copyPaste: payment.pixCopyPaste,
+        invoiceUrl: payment.invoiceUrl,
+        status: payment.status,
+      }
+    }
+    // Espera 1 segundo antes de tentar de novo
+    await new Promise(resolve => setTimeout(resolve, 1000))
+  }
+  // Última tentativa, retorna o que tiver
   const result = await api.listPaymentsBySubscription(subscriptionId)
   const payment = result.data?.[0]
   if (!payment) return null

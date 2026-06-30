@@ -64,6 +64,8 @@ export default function ConfiguracoesPage() {
   const [cardName, setCardName] = useState('');
   const [cardExpiry, setCardExpiry] = useState('');
   const [cardCvv, setCardCvv] = useState('');
+  const [cardEmail, setCardEmail] = useState('');
+  const [cardCpf, setCardCpf] = useState('');
   const [checkoutError, setCheckoutError] = useState('');
   const [processingCheckout, setProcessingCheckout] = useState(false);
 
@@ -236,8 +238,8 @@ export default function ConfiguracoesPage() {
     setCheckoutError('');
 
     if (checkoutTab === 'card') {
-      if (!cardNumber || !cardName || !cardExpiry || !cardCvv) {
-        setCheckoutError('Por favor, preencha todos os campos do cartão.');
+      if (!cardNumber || !cardName || !cardExpiry || !cardCvv || !cardEmail || !cardCpf) {
+        setCheckoutError('Preencha todos os campos do cartão (nome, número, validade, CVV, e-mail e CPF).');
         return;
       }
       if (cardNumber.replace(/\s/g, '').length < 16) {
@@ -250,6 +252,10 @@ export default function ConfiguracoesPage() {
       }
       if (cardCvv.length < 3) {
         setCheckoutError('Código CVV inválido.');
+        return;
+      }
+      if (cardCpf.replace(/\D/g, '').length !== 11) {
+        setCheckoutError('CPF inválido. Digite 11 dígitos.');
         return;
       }
     }
@@ -282,8 +288,8 @@ export default function ConfiguracoesPage() {
         };
         body.holderInfo = {
           name: cardName,
-          email: localStorage.getItem('zelcore_user_email') || '',
-          cpfCnpj: '',
+          email: cardEmail,
+          cpfCnpj: cardCpf.replace(/\D/g, ''),
         };
       }
 
@@ -320,7 +326,7 @@ export default function ConfiguracoesPage() {
       localStorage.setItem('zelcore_condominio_gestao', JSON.stringify(updated));
       window.dispatchEvent(new Event('storage'));
       setShowCheckoutModal(false);
-      setCardNumber(''); setCardName(''); setCardExpiry(''); setCardCvv('');
+      setCardNumber(''); setCardName(''); setCardExpiry(''); setCardCvv(''); setCardEmail(''); setCardCpf('');
       alert(`Assinatura ativada com sucesso! Seu condomínio agora está no plano ${selectedUpgrade === 'pro' ? 'Zelcore Pro' : 'Zelcore Corporate'}.`);
     } catch (err) {
       console.error(err);
@@ -1218,6 +1224,38 @@ export default function ConfiguracoesPage() {
                       placeholder="Ex: CARLOS S SANTOS"
                       value={cardName}
                       onChange={(e) => setCardName(e.target.value.toUpperCase())}
+                      className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-white placeholder-zinc-705 focus:outline-none focus:border-[#001CFF]/50 font-semibold"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[9px] font-bold uppercase tracking-wider text-zinc-500 mb-1">
+                      E-mail do Titular
+                    </label>
+                    <input
+                      type="email"
+                      required
+                      placeholder="email@condominio.com"
+                      value={cardEmail}
+                      onChange={(e) => setCardEmail(e.target.value)}
+                      className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-white placeholder-zinc-705 focus:outline-none focus:border-[#001CFF]/50 font-semibold"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[9px] font-bold uppercase tracking-wider text-zinc-500 mb-1">
+                      CPF do Titular
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      maxLength={14}
+                      placeholder="000.000.000-00"
+                      value={cardCpf}
+                      onChange={(e) => {
+                        const v = e.target.value.replace(/\D/g, '').replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4').substring(0, 14);
+                        setCardCpf(v);
+                      }}
                       className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-white placeholder-zinc-705 focus:outline-none focus:border-[#001CFF]/50 font-semibold"
                     />
                   </div>

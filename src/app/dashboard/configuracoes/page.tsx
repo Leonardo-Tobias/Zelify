@@ -156,7 +156,7 @@ export default function ConfiguracoesPage() {
 
   const handleCopyLink = () => {
     if (!condominio) return;
-    const fullUrl = `https://zelcore.vercel.app/${condominio.slug}`;
+    const fullUrl = `https://zelify.vercel.app/${condominio.slug}`;
     
     navigator.clipboard.writeText(fullUrl);
     setCopied(true);
@@ -166,7 +166,7 @@ export default function ConfiguracoesPage() {
   const handleDownloadQR = async () => {
     try {
       if (!condominio) return;
-      const targetUrl = `https://zelcore.vercel.app/${condominio.slug}`;
+      const targetUrl = `https://zelify.vercel.app/${condominio.slug}`;
       const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=${encodeURIComponent(targetUrl)}`;
       const response = await fetch(qrUrl);
       const blob = await response.blob();
@@ -439,7 +439,7 @@ export default function ConfiguracoesPage() {
             <input
               type="text"
               readOnly
-              value={condominio ? `https://zelcore.vercel.app/${condominio.slug}` : ''}
+              value={condominio ? `https://zelify.vercel.app/${condominio.slug}` : ''}
               className="bg-transparent flex-1 text-xs text-zinc-800 dark:text-zinc-300 font-mono focus:outline-none select-all"
             />
             <div className="flex shrink-0 gap-1.5">
@@ -452,7 +452,7 @@ export default function ConfiguracoesPage() {
                 {copied ? <Check className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-450 animate-pulse" /> : <Copy className="w-3.5 h-3.5" />}
               </button>
               <a
-                href={condominio ? `https://zelcore.vercel.app/${condominio.slug}` : '#'}
+                href={condominio ? `https://zelify.vercel.app/${condominio.slug}` : '#'}
                 target="_blank"
                 rel="noreferrer"
                 className="p-2 bg-zinc-100 dark:bg-zinc-900 hover:bg-[#001CFF] border border-zinc-200 dark:border-zinc-800 text-zinc-500 dark:text-zinc-400 hover:text-white rounded-md transition-colors"
@@ -621,7 +621,7 @@ export default function ConfiguracoesPage() {
                     : 'border-zinc-200'
                 }`}>
                   <img
-                    src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(condominio ? `https://zelcore.vercel.app/${condominio.slug}` : '')}`}
+                    src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(condominio ? `https://zelify.vercel.app/${condominio.slug}` : '')}`}
                     alt="QR Code de Acesso"
                     className="w-24 h-24 object-contain"
                   />
@@ -642,7 +642,7 @@ export default function ConfiguracoesPage() {
                     {codigoAcesso || '----'}
                   </div>
                   <div className="text-[6px] text-zinc-400 font-mono truncate">
-                    {condominio?.slug ? `zelcore.vercel.app/${condominio.slug}` : 'link'}
+                    {condominio?.slug ? `zelify.vercel.app/${condominio.slug}` : 'link'}
                   </div>
                 </div>
               </div>
@@ -697,7 +697,7 @@ export default function ConfiguracoesPage() {
                 </label>
                 <div className="flex rounded-lg border border-zinc-200 dark:border-zinc-800 overflow-hidden bg-zinc-50 dark:bg-zinc-950 focus-within:border-[#001CFF]/50 focus-within:ring-4 focus-within:ring-[#001CFF]/10 transition-all">
                   <span className="flex items-center bg-zinc-100 dark:bg-zinc-900 border-r border-zinc-200 dark:border-zinc-800 px-3 text-zinc-500 dark:text-zinc-400 font-mono text-xs font-semibold select-none">
-                    zelcore.vercel.app/
+                    zelify.vercel.app/
                   </span>
                   <input
                     id="slugCondo"
@@ -710,7 +710,7 @@ export default function ConfiguracoesPage() {
                   />
                 </div>
                 <p className="text-[10px] text-zinc-500 leading-tight font-medium">
-                  Apenas letras minúsculas, números e hífens. O link final ficará: <span className="font-mono">https://zelcore.vercel.app/{slug}</span>
+                  Apenas letras minúsculas, números e hífens. O link final ficará: <span className="font-mono">https://zelify.vercel.app/{slug}</span>
                 </p>
               </div>
 
@@ -1353,7 +1353,7 @@ export default function ConfiguracoesPage() {
             : 'border-zinc-300'
         }`}>
           <img
-            src={`https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(condominio ? `https://zelcore.vercel.app/${condominio.slug}` : '')}`}
+            src={`https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(condominio ? `https://zelify.vercel.app/${condominio.slug}` : '')}`}
             alt="QR Code de Acesso"
             className="w-64 h-64 object-contain mx-auto"
           />
@@ -1374,7 +1374,7 @@ export default function ConfiguracoesPage() {
             {codigoAcesso || '----'}
           </div>
           <div className="text-sm text-zinc-500 font-mono pt-1">
-            Link de Acesso: <span className="font-bold underline">https://zelcore.vercel.app/{condominio?.slug || ''}</span>
+            Link de Acesso: <span className="font-bold underline">https://zelify.vercel.app/{condominio?.slug || ''}</span>
           </div>
         </div>
 

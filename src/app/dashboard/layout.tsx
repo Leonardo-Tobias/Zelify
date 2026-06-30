@@ -413,7 +413,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                   <span className="truncate">Link do Morador</span>
                 </div>
                 <span className="text-[10px] font-mono text-zinc-400 dark:text-zinc-550 group-hover:text-[#001CFF] truncate max-w-full block mt-1 transition-colors pl-5.5">
-                  zelcore.vercel.app/{condominio.slug}
+                  zelify.vercel.app/{condominio.slug}
                 </span>
               </a>
             </div>

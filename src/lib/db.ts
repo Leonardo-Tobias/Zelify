@@ -526,22 +526,17 @@ export const db = {
       
       if (gestorError || !gestorRows?.length) return null;
 
-      // Se tiver múltiplos vínculos, prioriza: sindico > admin > zelador, e evita container (slug null)
-      let best = gestorRows[0]
-      for (const row of gestorRows) {
-        const condo = (row as any).condominios
-        // Prefere quem não é container (tem slug)
-        if (!condo?.slug && best !== row) continue // pula container se tiver outra opção
-        if (condo?.slug) {
-          // Prefere sindico > admin > zelador
-          const papelOrder = { sindico: 0, admin: 1, zelador: 2 }
-          const currentScore = papelOrder[row.papel as keyof typeof papelOrder] ?? 99
-          const bestScore = papelOrder[best.papel as keyof typeof papelOrder] ?? 99
-          if (currentScore < bestScore) {
-            best = row
-          }
-        }
-      }
+      // Se tiver múltiplos vínculos, prioriza quem tem slug (não é container)
+      const filtered = gestorRows.filter((r: any) => (r as any).condominios?.slug)
+      if (filtered.length === 0) return null // só tem container, não faz sentido logar
+      // Pega o melhor papel: sindico > admin > zelador
+      const papelOrder: Record<string, number> = { sindico: 0, admin: 1, zelador: 2 }
+      const sorted = [...filtered].sort((a: any, b: any) => {
+        const aScore = papelOrder[a.papel] ?? 99
+        const bScore = papelOrder[b.papel] ?? 99
+        return aScore - bScore
+      })
+      const best = sorted[0]
       
       const { condominios: condo, ...gestor } = best as any;
       return {

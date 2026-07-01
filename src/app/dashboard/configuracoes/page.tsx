@@ -409,6 +409,41 @@ export default function ConfiguracoesPage() {
     }
   };
 
+  const handleCancelSubscription = async () => {
+    if (!condominio) return;
+
+    const confirmed = window.confirm('Tem certeza que deseja cancelar a assinatura? Seu condomínio voltará para o plano gratuito.');
+
+    if (!confirmed) return;
+
+    setProcessingCheckout(true);
+    try {
+      const res = await fetch('/api/asaas/cancel', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ condominioId: condominio.id }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Erro ao cancelar assinatura');
+      }
+
+      const updated = await db.resetToFreePlan(condominio.id);
+      if (updated) {
+        setCondominio(updated);
+        localStorage.setItem('zelcore_condominio_gestao', JSON.stringify(updated));
+        window.dispatchEvent(new Event('storage'));
+        setToast({ message: 'Assinatura cancelada. Seu condomínio agora está no plano gratuito.' });
+      }
+    } catch (err) {
+      console.error(err);
+      setCheckoutError(err instanceof Error ? err.message : 'Erro ao cancelar assinatura');
+    } finally {
+      setProcessingCheckout(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="h-full flex items-center justify-center py-20 text-zinc-500">
@@ -1331,9 +1366,33 @@ export default function ConfiguracoesPage() {
                               onChange={(e) => setCardAddressComplement(e.target.value)}
                               className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-white placeholder-zinc-705 focus:outline-none focus:border-[#001CFF]/50 font-semibold"
                             />
-                          </div>
-                        </div>
-                      )}
+          </div>
+
+          {/* CANCELAR ASSINATURA */}
+          {condominio?.plan_type !== 'free' && (
+            <div className="bg-white dark:bg-zinc-900 border border-red-500/20 p-6 rounded-xl shadow-sm dark:shadow-xl">
+              <div className="flex items-center justify-between flex-wrap gap-4">
+                <div className="space-y-1">
+                  <h4 className="text-xs font-bold text-red-500 uppercase tracking-wider flex items-center">
+                    <AlertCircle className="w-3.5 h-3.5 mr-1.5" />
+                    Cancelar Assinatura
+                  </h4>
+                  <p className="text-[10px] text-zinc-500 font-medium leading-relaxed max-w-md">
+                    Ao cancelar, sua assinatura será encerrada e seu condomínio voltará para o plano gratuito (Zelcore Starter). Os dados serão mantidos.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleCancelSubscription}
+                  className="text-[11px] font-bold bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-lg transition-all active:scale-[0.97] cursor-pointer shrink-0"
+                >
+                  Cancelar Assinatura
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
                     </>
                   )}
                 </div>

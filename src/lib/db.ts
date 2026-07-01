@@ -873,6 +873,43 @@ export const db = {
       const condominios = localDB.getCondominios();
       return condominios.filter(c => condoIds.includes(c.id));
     }
+  },
+
+  async resetToFreePlan(id: string): Promise<Condominio | null> {
+    if (supabase) {
+      const { data, error } = await supabase
+        .from('condominios')
+        .update({
+          plan_type: 'free',
+          subscription_status: 'active',
+          billing_type: null,
+          current_period_end: null,
+          asaas_customer_id: null,
+          asaas_subscription_id: null,
+        })
+        .eq('id', id)
+        .select()
+        .maybeSingle();
+
+      if (error) throw error;
+      return data as Condominio;
+    } else {
+      const condominios = localDB.getCondominios();
+      const index = condominios.findIndex(c => c.id === id);
+      if (index === -1) return null;
+
+      condominios[index] = {
+        ...condominios[index],
+        plan_type: 'free',
+        subscription_status: 'active',
+        billing_type: null,
+        current_period_end: null,
+        asaas_customer_id: null,
+        asaas_subscription_id: null,
+      };
+      localDB.saveCondominios(condominios);
+      return condominios[index];
+    }
   }
 };
 

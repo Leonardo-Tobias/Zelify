@@ -129,7 +129,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
       db.getCondominiosByGestorUser(gestor.user_id)
         .then((list) => {
           // Remove apenas o container corporate (plan_type corporate sem parent), mantém tudo resto
-          const containerId = list.find(c => c.plan_type === 'corporate' && !c.parent_condominio_id)?.id
+          const containerId = list.find(c => c.plan_type === 'corporate' && !c.parent_condominio_id && !c.slug)?.id
           const instances = list.filter(c => c.id !== containerId)
           setCondominios(instances);
 

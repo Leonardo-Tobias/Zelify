@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
     // Verifica se é uma instância corporate (tem parent)
     const { data: condo } = await supabase
       .from('condominios')
-      .select('id, parent_condominio_id, nome')
+      .select('id, parent_condominio_id, nome, slug')
       .eq('id', condominioId)
       .single()
 
@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Condomínio não encontrado.' }, { status: 404 })
     }
 
-    if (!condo.parent_condominio_id) {
+    if (!condo.parent_condominio_id && !condo.slug) {
       return NextResponse.json({ error: 'Não é possível excluir o container corporate.' }, { status: 400 })
     }
 

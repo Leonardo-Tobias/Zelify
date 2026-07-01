@@ -95,7 +95,7 @@ function DashboardHomeContent() {
 
         // Auto-seleciona o primeiro condomínio se nenhum estiver selecionado
         if (isCorp && !currentCondo && list.length > 0) {
-          const first = list.find(c => !(c.plan_type === 'corporate' && !c.parent_condominio_id)) || list[0]
+          const first = list.find(c => !(c.plan_type === 'corporate' && !c.parent_condominio_id && !c.slug)) || list[0]
           currentCondo = first
           setCondominio(first)
           localStorage.setItem('zelcore_condominio_gestao', JSON.stringify(first))
@@ -103,7 +103,7 @@ function DashboardHomeContent() {
 
         if (isCorp && (isPortfolioView || !currentCondo)) {
           // Carregar dados do portfólio — remove apenas o container corporate
-          const containerIdDrop = list.find(c => c.plan_type === 'corporate' && !c.parent_condominio_id)?.id
+          const containerIdDrop = list.find(c => c.plan_type === 'corporate' && !c.parent_condominio_id && !c.slug)?.id
           const listItems = list.filter(c => c.id !== containerIdDrop)
           const data = await Promise.all(listItems.map(async (condo) => {
             const tickets = await db.getChamados(condo.id);

@@ -115,7 +115,7 @@ export default function ConfiguracoesPage() {
           setMaxInstances(container.max_instances);
           // Carrega lista de instâncias
           const condos = await db.getCondominiosByGestorUser(gestor.user_id);
-          const containerId = condos.find(c => c.plan_type === 'corporate' && !c.parent_condominio_id)?.id;
+          const containerId = condos.find(c => c.plan_type === 'corporate' && !c.parent_condominio_id && !c.slug)?.id;
           const list = condos.filter(c => c.id !== containerId);
           setInstanciaList(list);
           setInstanciaCount(list.length);

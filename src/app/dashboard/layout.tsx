@@ -199,7 +199,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-white dark:bg-zinc-950 text-zinc-400">
-        <Loader2 className="h-8 w-8 text-[#001CFF] animate-spin" />
+        <Loader2 className="h-8 w-8 text-brand animate-spin" />
         <p className="mt-4 text-xs font-semibold uppercase tracking-wider text-zinc-500">Verificando Credenciais...</p>
       </div>
     );
@@ -245,9 +245,9 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
       {/* MOBILE HEADER */}
       <div className="md:hidden bg-white/90 dark:bg-[#09090b]/90 backdrop-blur-md border-b border-zinc-200 dark:border-white/[0.06] px-4 py-3 flex items-center justify-between z-20">
         <div className="flex items-center space-x-2">
-          <span className="text-lg font-black tracking-tight text-zinc-900 dark:text-white">Zelcore<span className="text-[#001CFF]">.</span></span>
+          <span className="text-lg font-black tracking-tight text-zinc-900 dark:text-white">Zelcore<span className="text-brand">.</span></span>
           {isPortfolioView ? (
-            <span className="text-[10px] bg-[#001CFF]/10 text-[#001CFF] px-1.5 py-0.5 rounded font-bold uppercase border border-[#001CFF]/20">Carteira</span>
+            <span className="text-[10px] bg-brand/10 text-brand px-1.5 py-0.5 rounded font-bold uppercase border border-brand/20">Carteira</span>
           ) : (
             <span className="text-[10px] bg-zinc-100 dark:bg-white/[0.04] text-zinc-500 dark:text-zinc-400 px-1.5 py-0.5 rounded font-bold uppercase border border-zinc-200 dark:border-white/[0.06]">{condominio.nome}</span>
           )}
@@ -281,7 +281,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                   href={`/${condominio.slug}`} 
                   target="_blank" 
                   rel="noreferrer" 
-                  className="text-[#001CFF] font-bold flex items-center space-x-0.5 hover:underline"
+                  className="text-brand font-bold flex items-center space-x-0.5 hover:underline"
                 >
                   <span>/{condominio.slug}</span>
                   <ExternalLink className="w-3.5 h-3.5 ml-1" />
@@ -306,7 +306,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                         : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/[0.03] font-medium'
                     }`}
                   >
-                    <div className="w-5 h-5 rounded bg-[#001CFF]/10 border border-[#001CFF]/20 flex items-center justify-center text-[#001CFF] text-[8px] font-extrabold shrink-0">
+                    <div className="w-5 h-5 rounded bg-brand/10 border border-brand/20 flex items-center justify-center text-brand text-[8px] font-extrabold shrink-0">
                       {c.nome.charAt(0)}
                     </div>
                     <span className="truncate">{c.nome}</span>
@@ -318,7 +318,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                       setMobileMenuOpen(false);
                       router.push('/dashboard/configuracoes?tab=faturamento&addCondo=true');
                     }}
-                    className="w-full flex items-center space-x-2 px-3 py-2 text-xs text-[#001CFF] font-semibold hover:bg-zinc-50 dark:hover:bg-white/[0.03] rounded-lg transition-colors"
+                    className="w-full flex items-center space-x-2 px-3 py-2 text-xs text-brand font-semibold hover:bg-zinc-50 dark:hover:bg-white/[0.03] rounded-lg transition-colors"
                   >
                     <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -347,7 +347,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                           : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/[0.03] font-medium'
                     }`}
                   >
-                    <item.icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-[#001CFF]' : 'text-zinc-500'}`} />
+                    <item.icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-brand' : 'text-zinc-500'}`} />
                     <span>{item.name}</span>
                     {item.disabled && (
                       <Lock className="w-3.5 h-3.5 text-zinc-450 ml-auto shrink-0" />
@@ -362,10 +362,10 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
           <div className="space-y-4 pt-4 mt-auto">
             {/* UPGRADE CARD FOR FREE PLAN (MOBILE) */}
             {!isPortfolioView && condominio?.plan_type === 'free' && (
-              <div className="p-4 rounded-xl bg-gradient-to-br from-[#001CFF]/15 via-[#001CFF]/5 to-transparent border border-[#001CFF]/20 relative overflow-hidden shadow-sm animate-in fade-in duration-300">
-                <div className="absolute -right-4 -bottom-4 w-16 h-16 bg-[#001CFF]/10 blur-[20px] rounded-full pointer-events-none"></div>
-                <div className="flex items-center space-x-2 text-[10px] font-bold text-[#001CFF] uppercase tracking-wider mb-1.5">
-                  <Sparkles className="w-3.5 h-3.5 text-[#001CFF] animate-pulse" />
+              <div className="p-4 rounded-xl bg-gradient-to-br from-brand/15 via-brand/5 to-transparent border border-brand/20 relative overflow-hidden shadow-sm animate-in fade-in duration-300">
+                <div className="absolute -right-4 -bottom-4 w-16 h-16 bg-brand/10 blur-[20px] rounded-full pointer-events-none"></div>
+                <div className="flex items-center space-x-2 text-[10px] font-bold text-brand uppercase tracking-wider mb-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-brand animate-pulse" />
                   <span>Plano Grátis</span>
                 </div>
                 <p className="text-[11px] font-bold text-zinc-900 dark:text-white leading-tight">Limite de 15 Chamados/mês</p>
@@ -377,7 +377,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                     setMobileMenuOpen(false);
                     router.push('/dashboard/configuracoes?tab=faturamento');
                   }}
-                  className="w-full mt-3 py-1.5 bg-[#001CFF] hover:bg-[#001CFF]/90 text-white text-[10px] font-bold rounded-lg transition-all active:scale-[0.97] cursor-pointer text-center block shadow-[0_2px_8px_rgba(0,51,255,0.2)]"
+                  className="w-full mt-3 py-1.5 bg-brand hover:bg-brand/90 text-white text-[10px] font-bold rounded-lg transition-all active:scale-[0.97] cursor-pointer text-center block shadow-[0_2px_8px_rgba(0,51,255,0.2)]"
                 >
                   Fazer Upgrade
                 </button>
@@ -386,7 +386,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
 
             <div className="border-t border-zinc-200 dark:border-white/[0.06] pt-4 space-y-3">
             <div className="flex items-center space-x-3 px-2">
-              <div className="w-8 h-8 rounded-full bg-[#001CFF]/10 border border-[#001CFF]/20 flex items-center justify-center text-[#001CFF] font-bold">
+              <div className="w-8 h-8 rounded-full bg-brand/10 border border-brand/20 flex items-center justify-center text-brand font-bold">
                 {gestor.nome.charAt(0)}
               </div>
               <div className="min-w-0">
@@ -415,7 +415,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
           {/* LOGO E SELETOR DE CONDOMÍNIO */}
           <div className="px-2">
             <div className="flex items-center space-x-1 mb-5">
-              <span className="text-xl font-black tracking-tight text-zinc-900 dark:text-white">Zelcore<span className="text-[#001CFF]">.</span></span>
+              <span className="text-xl font-black tracking-tight text-zinc-900 dark:text-white">Zelcore<span className="text-brand">.</span></span>
             </div>
             
             {/* DROPDOWN DE CONDOMÍNIOS */}
@@ -426,7 +426,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                 className="w-full flex items-center justify-between p-2.5 rounded-xl text-left transition-all shadow-sm border bg-zinc-100 dark:bg-white/[0.04] border-zinc-200 dark:border-white/[0.06] hover:border-zinc-300 dark:hover:border-white/[0.12]"
               >
                 <div className="flex items-center space-x-2.5 min-w-0 flex-1">
-                  <div className="w-6 h-6 rounded flex items-center justify-center text-[10px] font-extrabold shrink-0 border bg-[#001CFF]/10 border-[#001CFF]/20 text-[#001CFF]">
+                  <div className="w-6 h-6 rounded flex items-center justify-center text-[10px] font-extrabold shrink-0 border bg-brand/10 border-brand/20 text-brand">
                     {condominio.nome.charAt(0)}
                   </div>
                   <div className="min-w-0 flex-1">
@@ -464,7 +464,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                         >
                           <div className={`w-5 h-5 rounded flex items-center justify-center text-[8px] font-extrabold shrink-0 border ${
                             isActive
-                              ? 'bg-[#001CFF]/20 border-[#001CFF]/40 text-[#001CFF]'
+                              ? 'bg-brand/20 border-brand/40 text-brand'
                               : 'bg-zinc-800 border-zinc-700 text-zinc-500'
                           }`}>
                             {c.nome.charAt(0)}
@@ -474,7 +474,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                             <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded uppercase ml-auto shrink-0 ${
                               c.plan_type === 'corporate'
                                 ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20'
-                                : 'bg-[#001CFF]/10 text-[#001CFF] border border-[#001CFF]/20'
+                                : 'bg-brand/10 text-brand border border-brand/20'
                             }`}>
                               {c.plan_type === 'corporate' ? 'Corp' : 'Pro'}
                             </span>
@@ -495,7 +495,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                       setCondoDropdownOpen(false);
                       router.push('/dashboard/configuracoes?tab=faturamento&addCondo=true');
                     }}
-                    className="w-full flex items-center space-x-2 px-3 py-2.5 text-xs text-[#001CFF] hover:bg-zinc-800/60 font-semibold transition-colors"
+                    className="w-full flex items-center space-x-2 px-3 py-2.5 text-xs text-brand hover:bg-zinc-800/60 font-semibold transition-colors"
                   >
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -516,11 +516,11 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                 rel="noreferrer" 
                 className="w-full flex flex-col p-2.5 bg-zinc-100 dark:bg-white/[0.04] border border-zinc-200 dark:border-white/[0.06] rounded-xl text-left hover:text-zinc-900 dark:hover:text-white transition-all group hover:border-zinc-300 dark:hover:border-white/[0.12] shadow-sm"
               >
-                <div className="flex items-center space-x-2 text-[11px] font-bold text-zinc-600 dark:text-zinc-300 group-hover:text-[#001CFF] transition-colors w-full">
-                  <ExternalLink className="w-3.5 h-3.5 text-zinc-500 group-hover:text-[#001CFF] shrink-0 transition-colors" />
+                <div className="flex items-center space-x-2 text-[11px] font-bold text-zinc-600 dark:text-zinc-300 group-hover:text-brand transition-colors w-full">
+                  <ExternalLink className="w-3.5 h-3.5 text-zinc-500 group-hover:text-brand shrink-0 transition-colors" />
                   <span className="truncate">Link do Morador</span>
                 </div>
-                <span className="text-[10px] font-mono text-zinc-400 dark:text-zinc-550 group-hover:text-[#001CFF] truncate max-w-full block mt-1 transition-colors pl-5.5">
+                <span className="text-[10px] font-mono text-zinc-400 dark:text-zinc-550 group-hover:text-brand truncate max-w-full block mt-1 transition-colors pl-5.5">
                   zelify.vercel.app/{condominio.slug}
                 </span>
               </a>
@@ -544,7 +544,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                         : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/[0.03] font-medium'
                   }`}
                 >
-                  <item.icon className={`w-4 h-4 shrink-0 transition-colors ${isActive ? 'text-[#001CFF]' : 'text-zinc-500'}`} />
+                  <item.icon className={`w-4 h-4 shrink-0 transition-colors ${isActive ? 'text-brand' : 'text-zinc-500'}`} />
                   <span>{item.name}</span>
                   {item.disabled && (
                     <Lock className="w-3 h-3 text-zinc-400 dark:text-zinc-600 ml-auto shrink-0" />
@@ -559,10 +559,10 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
         <div className="space-y-4 pt-4 mt-auto">
           {/* UPGRADE CARD FOR FREE PLAN */}
           {!isPortfolioView && condominio?.plan_type === 'free' && (
-            <div className="mx-1 p-4 rounded-xl bg-gradient-to-br from-[#001CFF]/15 via-[#001CFF]/5 to-transparent border border-[#001CFF]/20 relative overflow-hidden shadow-sm animate-in fade-in duration-300">
-              <div className="absolute -right-4 -bottom-4 w-16 h-16 bg-[#001CFF]/10 blur-[20px] rounded-full pointer-events-none"></div>
-              <div className="flex items-center space-x-2 text-[10px] font-bold text-[#001CFF] uppercase tracking-wider mb-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-[#001CFF] animate-pulse" />
+            <div className="mx-1 p-4 rounded-xl bg-gradient-to-br from-brand/15 via-brand/5 to-transparent border border-brand/20 relative overflow-hidden shadow-sm animate-in fade-in duration-300">
+              <div className="absolute -right-4 -bottom-4 w-16 h-16 bg-brand/10 blur-[20px] rounded-full pointer-events-none"></div>
+              <div className="flex items-center space-x-2 text-[10px] font-bold text-brand uppercase tracking-wider mb-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-brand animate-pulse" />
                 <span>Plano Grátis</span>
               </div>
               <p className="text-[11px] font-bold text-zinc-900 dark:text-white leading-tight">Limite de 15 Chamados/mês</p>
@@ -571,7 +571,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
               </p>
               <button
                 onClick={() => router.push('/dashboard/configuracoes?tab=faturamento')}
-                className="w-full mt-3 py-1.5 bg-[#001CFF] hover:bg-[#001CFF]/90 text-white text-[10px] font-bold rounded-lg transition-all active:scale-[0.97] cursor-pointer text-center block shadow-[0_2px_8px_rgba(0,51,255,0.2)]"
+                className="w-full mt-3 py-1.5 bg-brand hover:bg-brand/90 text-white text-[10px] font-bold rounded-lg transition-all active:scale-[0.97] cursor-pointer text-center block shadow-[0_2px_8px_rgba(0,51,255,0.2)]"
               >
                 Fazer Upgrade
               </button>
@@ -581,7 +581,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
           {/* PROFILE/FOOTER */}
           <div className="border-t border-zinc-200 dark:border-white/[0.06] pt-4 flex items-center justify-between px-2">
             <div className="flex items-center space-x-2.5 min-w-0">
-              <div className="w-7 h-7 rounded-full bg-[#001CFF]/10 border border-[#001CFF]/20 flex items-center justify-center text-[#001CFF] shrink-0 text-xs font-semibold">
+              <div className="w-7 h-7 rounded-full bg-brand/10 border border-brand/20 flex items-center justify-center text-brand shrink-0 text-xs font-semibold">
                 {gestor.nome.charAt(0)}
               </div>
               <div className="min-w-0">
@@ -605,7 +605,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
       {/* CONTAINER DO CONTEÚDO PRINCIPAL */}
       <main className="flex-1 flex flex-col min-w-0 bg-zinc-100 dark:bg-zinc-950 overflow-y-auto max-h-screen relative transition-colors duration-200">
         {/* Subtle glow background */}
-        <div className="absolute top-0 left-1/4 right-1/4 h-[250px] bg-[#001CFF]/4 blur-[120px] rounded-full pointer-events-none z-0"></div>
+        <div className="absolute top-0 left-1/4 right-1/4 h-[250px] bg-brand/4 blur-[120px] rounded-full pointer-events-none z-0"></div>
 
         {/* DESKTOP TOP HEADER */}
         <header className="hidden md:flex items-center justify-between border-b border-zinc-200 dark:border-white/[0.06] px-6 py-3.5 z-30 shrink-0 bg-white/85 dark:bg-[#09090b]/85 backdrop-blur-md sticky top-0 transition-colors duration-200">
@@ -642,7 +642,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   return (
     <React.Suspense fallback={
       <div className="flex flex-col items-center justify-center min-h-screen bg-zinc-100 dark:bg-[#09090b] text-zinc-400">
-        <Loader2 className="h-8 w-8 text-[#001CFF] animate-spin" />
+        <Loader2 className="h-8 w-8 text-brand animate-spin" />
         <p className="mt-4 text-xs font-semibold uppercase tracking-wider text-zinc-500">Carregando...</p>
       </div>
     }>

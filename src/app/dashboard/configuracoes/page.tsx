@@ -668,7 +668,7 @@ export default function ConfiguracoesPage() {
           onClick={() => setActiveTab('geral')}
           className={`pb-3 text-xs font-bold uppercase tracking-wider transition-all border-b-2 cursor-pointer ${
             activeTab === 'geral'
-              ? 'border-[#001CFF] text-[#001CFF] dark:text-[#3b82f6]'
+              ? 'border-brand text-brand dark:text-[#3b82f6]'
               : 'border-transparent text-zinc-550 dark:text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-300'
           }`}
         >
@@ -679,7 +679,7 @@ export default function ConfiguracoesPage() {
           onClick={() => setActiveTab('faturamento')}
           className={`pb-3 text-xs font-bold uppercase tracking-wider transition-all border-b-2 cursor-pointer ${
             activeTab === 'faturamento'
-              ? 'border-[#001CFF] text-[#001CFF] dark:text-[#3b82f6]'
+              ? 'border-brand text-brand dark:text-[#3b82f6]'
               : 'border-transparent text-zinc-550 dark:text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-300'
           }`}
         >
@@ -693,7 +693,7 @@ export default function ConfiguracoesPage() {
         {/* BOX DO LINK PÚBLICO */}
         <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-6 rounded-xl space-y-4 shadow-sm">
           <div className="flex items-center space-x-2 text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-widest">
-            <Compass className="w-4 h-4 text-[#001CFF]" />
+            <Compass className="w-4 h-4 text-brand" />
             <span>Endereço de Acesso Público</span>
           </div>
           
@@ -712,7 +712,7 @@ export default function ConfiguracoesPage() {
               <button
                 type="button"
                 onClick={handleCopyLink}
-                className="p-2 bg-zinc-100 dark:bg-zinc-900 hover:bg-[#001CFF] border border-zinc-200 dark:border-zinc-800 text-zinc-500 dark:text-zinc-400 hover:text-white rounded-md transition-colors cursor-pointer"
+                className="p-2 bg-zinc-100 dark:bg-zinc-900 hover:bg-brand border border-zinc-200 dark:border-zinc-800 text-zinc-500 dark:text-zinc-400 hover:text-white rounded-md transition-colors cursor-pointer"
                 title="Copiar URL"
               >
                 {copied ? <Check className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-450 animate-pulse" /> : <Copy className="w-3.5 h-3.5" />}
@@ -721,7 +721,7 @@ export default function ConfiguracoesPage() {
                 href={condominio ? `https://zelify.vercel.app/${condominio.slug}` : '#'}
                 target="_blank"
                 rel="noreferrer"
-                className="p-2 bg-zinc-100 dark:bg-zinc-900 hover:bg-[#001CFF] border border-zinc-200 dark:border-zinc-800 text-zinc-500 dark:text-zinc-400 hover:text-white rounded-md transition-colors"
+                className="p-2 bg-zinc-100 dark:bg-zinc-900 hover:bg-brand border border-zinc-200 dark:border-zinc-800 text-zinc-500 dark:text-zinc-400 hover:text-white rounded-md transition-colors"
                 title="Visualizar Página Pública"
               >
                 <ExternalLink className="w-3.5 h-3.5" />
@@ -733,7 +733,7 @@ export default function ConfiguracoesPage() {
         {/* GERADOR DE PLACA INFORMATIVA E QR CODE */}
         <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6 shadow-sm space-y-6">
           <div className="flex items-center space-x-2 text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-widest">
-            <QrCode className="w-4 h-4 text-[#001CFF]" />
+            <QrCode className="w-4 h-4 text-brand" />
             <span>Placa Informativa & QR Code</span>
           </div>
 
@@ -752,7 +752,7 @@ export default function ConfiguracoesPage() {
                   type="text"
                   value={posterTitle}
                   onChange={(e) => setPosterTitle(e.target.value)}
-                  className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg text-xs text-zinc-900 dark:text-white focus:outline-none focus:border-[#001CFF]/50 font-semibold"
+                  className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg text-xs text-zinc-900 dark:text-white focus:outline-none focus:border-brand/50 font-semibold"
                   placeholder="Ex: Portal do Morador"
                 />
               </div>
@@ -765,7 +765,7 @@ export default function ConfiguracoesPage() {
                   value={posterInstructions}
                   onChange={(e) => setPosterInstructions(e.target.value)}
                   rows={3}
-                  className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg text-xs text-zinc-900 dark:text-white focus:outline-none focus:border-[#001CFF]/50 font-medium resize-none leading-relaxed"
+                  className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg text-xs text-zinc-900 dark:text-white focus:outline-none focus:border-brand/50 font-medium resize-none leading-relaxed"
                   placeholder="Instruções para os moradores..."
                 />
               </div>
@@ -780,11 +780,11 @@ export default function ConfiguracoesPage() {
                     onClick={() => setPosterTheme('blue')}
                     className={`flex-1 py-1.5 rounded-lg border text-xs font-semibold flex items-center justify-center space-x-1 transition-all cursor-pointer ${
                       posterTheme === 'blue'
-                        ? 'bg-[#001CFF]/10 border-[#001CFF] text-[#001CFF]'
+                        ? 'bg-brand/10 border-brand text-brand'
                         : 'bg-zinc-50 dark:bg-zinc-950 border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400'
                     }`}
                   >
-                    <span className="w-2.5 h-2.5 rounded-full bg-[#001CFF] inline-block mr-1"></span>
+                    <span className="w-2.5 h-2.5 rounded-full bg-brand inline-block mr-1"></span>
                     Azul
                   </button>
                   <button
@@ -845,7 +845,7 @@ export default function ConfiguracoesPage() {
                 id="preview-poster" 
                 className={`w-full max-w-[240px] bg-white rounded-lg border-2 p-5 shadow-md flex flex-col items-center justify-between text-zinc-800 ${
                   posterTheme === 'blue' 
-                    ? 'border-[#001CFF]' 
+                    ? 'border-brand' 
                     : posterTheme === 'emerald' 
                     ? 'border-emerald-500' 
                     : 'border-zinc-800'
@@ -855,7 +855,7 @@ export default function ConfiguracoesPage() {
                 <div className="flex items-center space-x-1.5 mb-3">
                   <Building className={`w-4 h-4 ${
                     posterTheme === 'blue' 
-                      ? 'text-[#001CFF]' 
+                      ? 'text-brand' 
                       : posterTheme === 'emerald' 
                       ? 'text-emerald-500' 
                       : 'text-zinc-800'
@@ -881,7 +881,7 @@ export default function ConfiguracoesPage() {
                 {/* QR Code Frame */}
                 <div className={`p-2 border rounded-lg bg-zinc-50 mb-3 shadow-inner ${
                   posterTheme === 'blue' 
-                    ? 'border-[#001CFF]/20' 
+                    ? 'border-brand/20' 
                     : posterTheme === 'emerald' 
                     ? 'border-emerald-500/20' 
                     : 'border-zinc-200'
@@ -900,7 +900,7 @@ export default function ConfiguracoesPage() {
                   </div>
                   <div className={`text-xs font-black tracking-widest ${
                     posterTheme === 'blue' 
-                      ? 'text-[#001CFF]' 
+                      ? 'text-brand' 
                       : posterTheme === 'emerald' 
                       ? 'text-emerald-600' 
                       : 'text-zinc-800'
@@ -950,7 +950,7 @@ export default function ConfiguracoesPage() {
                     placeholder="Ex: Residencial Viver Bem"
                     value={nome}
                     onChange={(e) => setNome(e.target.value)}
-                    className="w-full pl-9 pr-3 py-2 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg text-xs text-zinc-900 dark:text-white focus:outline-none focus:border-[#001CFF]/50 focus:ring-4 focus:ring-[#001CFF]/10 font-semibold"
+                    className="w-full pl-9 pr-3 py-2 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg text-xs text-zinc-900 dark:text-white focus:outline-none focus:border-brand/50 focus:ring-4 focus:ring-brand/10 font-semibold"
                     required
                   />
                 </div>
@@ -961,7 +961,7 @@ export default function ConfiguracoesPage() {
                 <label htmlFor="slugCondo" className="block text-[10px] font-bold uppercase tracking-wider text-zinc-500">
                   Slug da URL (Endereço Público)
                 </label>
-                <div className="flex rounded-lg border border-zinc-200 dark:border-zinc-800 overflow-hidden bg-zinc-50 dark:bg-zinc-950 focus-within:border-[#001CFF]/50 focus-within:ring-4 focus-within:ring-[#001CFF]/10 transition-all">
+                <div className="flex rounded-lg border border-zinc-200 dark:border-zinc-800 overflow-hidden bg-zinc-50 dark:bg-zinc-950 focus-within:border-brand/50 focus-within:ring-4 focus-within:ring-brand/10 transition-all">
                   <span className="flex items-center bg-zinc-100 dark:bg-zinc-900 border-r border-zinc-200 dark:border-zinc-800 px-3 text-zinc-500 dark:text-zinc-400 font-mono text-xs font-semibold select-none">
                     zelify.vercel.app/
                   </span>
@@ -996,7 +996,7 @@ export default function ConfiguracoesPage() {
                     placeholder="Ex: 1234"
                     value={codigoAcesso}
                     onChange={(e) => setCodigoAcesso(e.target.value.replace(/\D/g, ''))}
-                    className="w-full pl-9 pr-3 py-2 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg text-xs text-zinc-900 dark:text-white text-left tracking-widest focus:outline-none focus:border-[#001CFF]/50 focus:ring-4 focus:ring-[#001CFF]/10 font-bold"
+                    className="w-full pl-9 pr-3 py-2 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg text-xs text-zinc-900 dark:text-white text-left tracking-widest focus:outline-none focus:border-brand/50 focus:ring-4 focus:ring-brand/10 font-bold"
                     required
                   />
                 </div>
@@ -1011,7 +1011,7 @@ export default function ConfiguracoesPage() {
               <button
                 type="submit"
                 disabled={saving}
-                className="bg-[#001CFF] hover:bg-[#001CFF]/90 text-white text-xs font-bold px-4 py-2 rounded-lg flex items-center space-x-1.5 transition-all shadow-[0_4px_20px_rgba(0,51,255,0.20)] active:scale-[0.98] disabled:opacity-50 cursor-pointer"
+                className="bg-brand hover:bg-brand/90 text-white text-xs font-bold px-4 py-2 rounded-lg flex items-center space-x-1.5 transition-all shadow-[0_4px_20px_rgba(0,51,255,0.20)] active:scale-[0.98] disabled:opacity-50 cursor-pointer"
               >
                 {saving ? (
                   <>
@@ -1033,12 +1033,12 @@ export default function ConfiguracoesPage() {
         <div className="space-y-6 animate-in fade-in duration-200">
           {/* CARD DE STATUS DO PLANO ATUAL */}
           <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-6 rounded-xl space-y-4 shadow-sm relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-[200px] h-[200px] bg-[#001CFF]/5 blur-[60px] rounded-full pointer-events-none"></div>
+            <div className="absolute top-0 right-0 w-[200px] h-[200px] bg-brand/5 blur-[60px] rounded-full pointer-events-none"></div>
             
             <div className="flex items-center justify-between flex-wrap gap-3">
               <div className="space-y-1">
                 <div className="flex items-center space-x-2 text-[10px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-widest">
-                  <Layers className="w-3.5 h-3.5 text-[#001CFF]" />
+                  <Layers className="w-3.5 h-3.5 text-brand" />
                   <span>Plano Atual</span>
                 </div>
                 <h3 className="text-lg font-black text-zinc-900 dark:text-white uppercase tracking-wider">
@@ -1097,7 +1097,7 @@ export default function ConfiguracoesPage() {
                   <div 
                     className={`h-full transition-all duration-500 ${
                       monthlyChamadosCount >= 15 ? 'bg-red-500' : 
-                      monthlyChamadosCount >= 12 ? 'bg-amber-550' : 'bg-[#001CFF]'
+                      monthlyChamadosCount >= 12 ? 'bg-amber-550' : 'bg-brand'
                     }`}
                     style={{ width: `${Math.min((monthlyChamadosCount / 15) * 100, 100)}%` }}
                   ></div>
@@ -1117,11 +1117,11 @@ export default function ConfiguracoesPage() {
             {/* PLANO PRO */}
             <div className={`bg-white dark:bg-zinc-900 border p-6 rounded-2xl flex flex-col justify-between shadow-sm dark:shadow-xl transition-all relative ${
               condominio?.plan_type === 'pro' 
-                ? 'border-[#001CFF]' 
+                ? 'border-brand' 
                 : 'border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700'
             }`}>
               {condominio?.plan_type === 'pro' && (
-                <div className="absolute top-3 right-3 text-[8px] bg-[#001CFF]/10 text-[#001CFF] border border-[#001CFF]/20 px-2 py-0.5 rounded-full font-black uppercase tracking-wider">
+                <div className="absolute top-3 right-3 text-[8px] bg-brand/10 text-brand border border-brand/20 px-2 py-0.5 rounded-full font-black uppercase tracking-wider">
                   Plano Ativo
                 </div>
               )}
@@ -1131,7 +1131,7 @@ export default function ConfiguracoesPage() {
                   <span className="text-[9px] font-bold text-zinc-550 dark:text-zinc-500 uppercase tracking-widest">Para Síndicos</span>
                   <h4 className="text-base font-black text-zinc-900 dark:text-white uppercase tracking-wider flex items-center">
                     Zelcore Pro
-                    <Sparkles className="w-4 h-4 text-[#001CFF] ml-1.5" />
+                    <Sparkles className="w-4 h-4 text-brand ml-1.5" />
                   </h4>
                 </div>
                 
@@ -1184,7 +1184,7 @@ export default function ConfiguracoesPage() {
                   className={`w-full text-xs font-bold py-2.5 rounded-lg transition-all text-center flex items-center justify-center space-x-1.5 ${
                     condominio?.plan_type === 'pro' && condominio?.subscription_status === 'active'
                       ? 'bg-zinc-100 dark:bg-zinc-950 text-zinc-400 border border-zinc-200 dark:border-zinc-800 cursor-not-allowed'
-                      : 'bg-[#001CFF] hover:bg-[#001CFF]/90 text-white shadow-[0_4px_15px_rgba(0,51,255,0.2)] active:scale-[0.98] cursor-pointer'
+                      : 'bg-brand hover:bg-brand/90 text-white shadow-[0_4px_15px_rgba(0,51,255,0.2)] active:scale-[0.98] cursor-pointer'
                   }`}
                 >
                   <CreditCard className="w-3.5 h-3.5" />
@@ -1200,11 +1200,11 @@ export default function ConfiguracoesPage() {
             {/* PLANO CORPORATIVO (SIMULADOR) */}
             <div className={`bg-white dark:bg-zinc-900 border p-6 rounded-2xl flex flex-col justify-between shadow-sm dark:shadow-xl transition-all relative ${
               condominio?.plan_type === 'corporate' 
-                ? 'border-[#001CFF]' 
+                ? 'border-brand' 
                 : 'border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700'
             }`}>
               {condominio?.plan_type === 'corporate' && (
-                <div className="absolute top-3 right-3 text-[8px] bg-[#001CFF]/10 text-[#001CFF] border border-[#001CFF]/20 px-2 py-0.5 rounded-full font-black uppercase tracking-wider">
+                <div className="absolute top-3 right-3 text-[8px] bg-brand/10 text-brand border border-brand/20 px-2 py-0.5 rounded-full font-black uppercase tracking-wider">
                   Plano Ativo
                 </div>
               )}
@@ -1214,7 +1214,7 @@ export default function ConfiguracoesPage() {
                   <span className="text-[9px] font-bold text-zinc-555 dark:text-zinc-500 uppercase tracking-widest">Para Administradoras</span>
                   <h4 className="text-base font-black text-zinc-900 dark:text-white uppercase tracking-wider flex items-center">
                     Zelcore Corporate
-                    <Building className="w-4 h-4 text-[#001CFF] ml-1.5" />
+                    <Building className="w-4 h-4 text-brand ml-1.5" />
                   </h4>
                 </div>
 
@@ -1245,7 +1245,7 @@ export default function ConfiguracoesPage() {
                         <button
                           type="button"
                           onClick={() => setNumCondos(prev => Math.min(500, prev + 1))}
-                          className="w-6 h-6 rounded bg-[#001CFF] hover:bg-[#001CFF]/90 hover:shadow-[0_0_8px_rgba(0,51,255,0.4)] active:scale-[0.92] text-white flex items-center justify-center font-bold transition-all border border-[#001CFF]/45 cursor-pointer text-xs select-none"
+                          className="w-6 h-6 rounded bg-brand hover:bg-brand/90 hover:shadow-[0_0_8px_rgba(0,51,255,0.4)] active:scale-[0.92] text-white flex items-center justify-center font-bold transition-all border border-brand/45 cursor-pointer text-xs select-none"
                         >
                           +
                         </button>
@@ -1267,7 +1267,7 @@ export default function ConfiguracoesPage() {
                     <span className="text-xs font-bold text-zinc-700 dark:text-zinc-350">Mensalidade Total:</span>
                     <div className="flex flex-col items-end">
                       <div className="flex items-baseline">
-                        <span className="text-lg font-black text-[#001CFF]">
+                        <span className="text-lg font-black text-brand">
                           R$ {totalCorporatePrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                         </span>
                         <span className="text-zinc-500 text-[10px] font-semibold ml-0.5">/mês</span>
@@ -1314,7 +1314,7 @@ export default function ConfiguracoesPage() {
                   className={`w-full text-xs font-bold py-2.5 rounded-lg transition-all text-center flex items-center justify-center space-x-1.5 ${
                     condominio?.plan_type === 'corporate' && condominio?.subscription_status === 'active'
                       ? 'bg-zinc-100 dark:bg-zinc-950 text-zinc-400 border border-zinc-200 dark:border-zinc-800 cursor-not-allowed'
-                      : 'bg-[#001CFF] hover:bg-[#001CFF]/90 text-white shadow-[0_4px_15px_rgba(0,51,255,0.2)] active:scale-[0.98] cursor-pointer'
+                      : 'bg-brand hover:bg-brand/90 text-white shadow-[0_4px_15px_rgba(0,51,255,0.2)] active:scale-[0.98] cursor-pointer'
                   }`}
                 >
                   <Calculator className="w-3.5 h-3.5" />
@@ -1333,7 +1333,7 @@ export default function ConfiguracoesPage() {
             <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-6 rounded-xl shadow-sm dark:shadow-xl space-y-4">
               <div className="flex items-center justify-between">
                 <h4 className="text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider flex items-center">
-                  <Building2 className="w-3.5 h-3.5 mr-1.5 text-[#001CFF]" />
+                  <Building2 className="w-3.5 h-3.5 mr-1.5 text-brand" />
                   Condomínios da Carteira
                 </h4>
                 <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
@@ -1349,7 +1349,7 @@ export default function ConfiguracoesPage() {
               <div className="w-full bg-zinc-100 dark:bg-zinc-950 rounded-full h-2 overflow-hidden border border-zinc-200 dark:border-zinc-800">
                 <div
                   className={`h-full transition-all duration-500 ${
-                    instanciaCount >= maxInstances ? 'bg-red-500' : 'bg-[#001CFF]'
+                    instanciaCount >= maxInstances ? 'bg-red-500' : 'bg-brand'
                   }`}
                   style={{ width: `${Math.min((instanciaCount / maxInstances) * 100, 100)}%` }}
                 ></div>
@@ -1368,7 +1368,7 @@ export default function ConfiguracoesPage() {
                   {instanciaList.map((c) => (
                     <div key={c.id} className="flex items-center justify-between py-1.5 px-2.5 bg-zinc-50 dark:bg-zinc-950/60 rounded-lg border border-zinc-200 dark:border-zinc-800/50">
                       <div className="flex items-center space-x-2.5 min-w-0">
-                        <div className="w-5 h-5 rounded bg-[#001CFF]/10 border border-[#001CFF]/20 flex items-center justify-center text-[#001CFF] text-[8px] font-extrabold shrink-0">
+                        <div className="w-5 h-5 rounded bg-brand/10 border border-brand/20 flex items-center justify-center text-brand text-[8px] font-extrabold shrink-0">
                           {c.nome.charAt(0)}
                         </div>
                         <span className="text-xs font-semibold text-zinc-800 dark:text-zinc-200 truncate">{c.nome}</span>
@@ -1390,7 +1390,7 @@ export default function ConfiguracoesPage() {
                 <button
                   type="button"
                   onClick={() => setShowAddCondoModal(true)}
-                  className="text-[11px] font-bold bg-[#001CFF] hover:bg-[#001CFF]/90 text-white px-4 py-2 rounded-lg transition-all active:scale-[0.97] cursor-pointer flex items-center space-x-1.5"
+                  className="text-[11px] font-bold bg-brand hover:bg-brand/90 text-white px-4 py-2 rounded-lg transition-all active:scale-[0.97] cursor-pointer flex items-center space-x-1.5"
                 >
                   <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -1439,7 +1439,7 @@ export default function ConfiguracoesPage() {
       {showCheckoutModal && (
         <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 backdrop-blur-md animate-in fade-in duration-200">
           <div className="bg-[#0c0c0e] border border-zinc-800/80 rounded-2xl w-full max-w-[820px] shadow-2xl relative flex flex-col max-h-[85vh]">
-            <div className="h-1 bg-[#001CFF] shrink-0 rounded-t-2xl"></div>
+            <div className="h-1 bg-brand shrink-0 rounded-t-2xl"></div>
 
             <div className="px-7 py-5 border-b border-zinc-800/60 flex justify-between items-center sticky top-0 bg-[#0c0c0e] z-20">
               <div>
@@ -1571,7 +1571,7 @@ export default function ConfiguracoesPage() {
                                       const v = e.target.value.replace(/\D/g, '').replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4').substring(0, 14);
                                       setCardCpf(v);
                                     }}
-                                    className="w-full px-3.5 py-2.5 bg-zinc-900/60 border border-zinc-800 rounded-xl text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-[#001CFF]/60 focus:ring-1 focus:ring-[#001CFF]/20 transition-all"
+                                    className="w-full px-3.5 py-2.5 bg-zinc-900/60 border border-zinc-800 rounded-xl text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-brand/60 focus:ring-1 focus:ring-brand/20 transition-all"
                                   />
                                 </div>
                                 <div>
@@ -1585,7 +1585,7 @@ export default function ConfiguracoesPage() {
                                       const v = e.target.value.replace(/\D/g, '').replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3').substring(0, 15);
                                       setCardPhone(v);
                                     }}
-                                    className="w-full px-3.5 py-2.5 bg-zinc-900/60 border border-zinc-800 rounded-xl text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-[#001CFF]/60 focus:ring-1 focus:ring-[#001CFF]/20 transition-all"
+                                    className="w-full px-3.5 py-2.5 bg-zinc-900/60 border border-zinc-800 rounded-xl text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-brand/60 focus:ring-1 focus:ring-brand/20 transition-all"
                                   />
                                 </div>
                               </div>
@@ -1604,7 +1604,7 @@ export default function ConfiguracoesPage() {
                             placeholder="Como está gravado no cartão"
                             value={cardName}
                             onChange={(e) => setCardName(e.target.value.toUpperCase())}
-                            className="w-full px-3.5 py-2.5 bg-zinc-900/60 border border-zinc-800 rounded-xl text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-[#001CFF]/60 focus:ring-1 focus:ring-[#001CFF]/20 transition-all"
+                            className="w-full px-3.5 py-2.5 bg-zinc-900/60 border border-zinc-800 rounded-xl text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-brand/60 focus:ring-1 focus:ring-brand/20 transition-all"
                           />
                         </div>
                         <div>
@@ -1615,7 +1615,7 @@ export default function ConfiguracoesPage() {
                             placeholder="email@condominio.com"
                             value={cardEmail}
                             onChange={(e) => setCardEmail(e.target.value)}
-                            className="w-full px-3.5 py-2.5 bg-zinc-900/60 border border-zinc-800 rounded-xl text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-[#001CFF]/60 focus:ring-1 focus:ring-[#001CFF]/20 transition-all"
+                            className="w-full px-3.5 py-2.5 bg-zinc-900/60 border border-zinc-800 rounded-xl text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-brand/60 focus:ring-1 focus:ring-brand/20 transition-all"
                           />
                         </div>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -1631,7 +1631,7 @@ export default function ConfiguracoesPage() {
                                 const v = e.target.value.replace(/\D/g, '').replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4').substring(0, 14);
                                 setCardCpf(v);
                               }}
-                              className="w-full px-3.5 py-2.5 bg-zinc-900/60 border border-zinc-800 rounded-xl text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-[#001CFF]/60 focus:ring-1 focus:ring-[#001CFF]/20 transition-all"
+                              className="w-full px-3.5 py-2.5 bg-zinc-900/60 border border-zinc-800 rounded-xl text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-brand/60 focus:ring-1 focus:ring-brand/20 transition-all"
                             />
                           </div>
                           <div>
@@ -1645,7 +1645,7 @@ export default function ConfiguracoesPage() {
                                 const v = e.target.value.replace(/\D/g, '').replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3').substring(0, 15);
                                 setCardPhone(v);
                               }}
-                              className="w-full px-3.5 py-2.5 bg-zinc-900/60 border border-zinc-800 rounded-xl text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-[#001CFF]/60 focus:ring-1 focus:ring-[#001CFF]/20 transition-all"
+                              className="w-full px-3.5 py-2.5 bg-zinc-900/60 border border-zinc-800 rounded-xl text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-brand/60 focus:ring-1 focus:ring-brand/20 transition-all"
                             />
                           </div>
                         </div>
@@ -1664,7 +1664,7 @@ export default function ConfiguracoesPage() {
                                   const v = e.target.value.replace(/\D/g, '').replace(/(\d{5})(\d{3})/, '$1-$2').substring(0, 9);
                                   setCardCep(v);
                                 }}
-                                className="w-full px-3.5 py-2.5 bg-zinc-900/60 border border-zinc-800 rounded-xl text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-[#001CFF]/60 focus:ring-1 focus:ring-[#001CFF]/20 transition-all"
+                                className="w-full px-3.5 py-2.5 bg-zinc-900/60 border border-zinc-800 rounded-xl text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-brand/60 focus:ring-1 focus:ring-brand/20 transition-all"
                               />
                             </div>
                             <div>
@@ -1675,7 +1675,7 @@ export default function ConfiguracoesPage() {
                                 placeholder="Ex: 100"
                                 value={cardAddressNumber}
                                 onChange={(e) => setCardAddressNumber(e.target.value)}
-                                className="w-full px-3.5 py-2.5 bg-zinc-900/60 border border-zinc-800 rounded-xl text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-[#001CFF]/60 focus:ring-1 focus:ring-[#001CFF]/20 transition-all"
+                                className="w-full px-3.5 py-2.5 bg-zinc-900/60 border border-zinc-800 rounded-xl text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-brand/60 focus:ring-1 focus:ring-brand/20 transition-all"
                               />
                             </div>
                           </div>
@@ -1686,7 +1686,7 @@ export default function ConfiguracoesPage() {
                               placeholder="Apt 42, Bloco B"
                               value={cardAddressComplement}
                               onChange={(e) => setCardAddressComplement(e.target.value)}
-                              className="w-full px-3.5 py-2.5 bg-zinc-900/60 border border-zinc-800 rounded-xl text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-[#001CFF]/60 focus:ring-1 focus:ring-[#001CFF]/20 transition-all"
+                              className="w-full px-3.5 py-2.5 bg-zinc-900/60 border border-zinc-800 rounded-xl text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-brand/60 focus:ring-1 focus:ring-brand/20 transition-all"
                             />
                           </div>
                         </div>
@@ -1704,7 +1704,7 @@ export default function ConfiguracoesPage() {
                                 const v = e.target.value.replace(/\D/g, '').replace(/(\d{4})/g, '$1 ').trim();
                                 setCardNumber(v);
                               }}
-                              className="w-full px-3.5 py-2.5 bg-zinc-900/60 border border-zinc-800 rounded-xl text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-[#001CFF]/60 focus:ring-1 focus:ring-[#001CFF]/20 transition-all"
+                              className="w-full px-3.5 py-2.5 bg-zinc-900/60 border border-zinc-800 rounded-xl text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-brand/60 focus:ring-1 focus:ring-brand/20 transition-all"
                             />
                           </div>
                           <div className="grid grid-cols-2 gap-4 mt-4">
@@ -1721,7 +1721,7 @@ export default function ConfiguracoesPage() {
                                   if (v.length > 2) v = `${v.substring(0, 2)}/${v.substring(2, 4)}`;
                                   setCardExpiry(v);
                                 }}
-                                className="w-full px-3.5 py-2.5 bg-zinc-900/60 border border-zinc-800 rounded-xl text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-[#001CFF]/60 focus:ring-1 focus:ring-[#001CFF]/20 transition-all"
+                                className="w-full px-3.5 py-2.5 bg-zinc-900/60 border border-zinc-800 rounded-xl text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-brand/60 focus:ring-1 focus:ring-brand/20 transition-all"
                               />
                             </div>
                             <div>
@@ -1733,7 +1733,7 @@ export default function ConfiguracoesPage() {
                                 placeholder="000"
                                 value={cardCvv}
                                 onChange={(e) => setCardCvv(e.target.value.replace(/\D/g, ''))}
-                                className="w-full px-3.5 py-2.5 bg-zinc-900/60 border border-zinc-800 rounded-xl text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-[#001CFF]/60 focus:ring-1 focus:ring-[#001CFF]/20 transition-all"
+                                className="w-full px-3.5 py-2.5 bg-zinc-900/60 border border-zinc-800 rounded-xl text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-brand/60 focus:ring-1 focus:ring-brand/20 transition-all"
                               />
                             </div>
                           </div>
@@ -1770,7 +1770,7 @@ export default function ConfiguracoesPage() {
                             </p>
                           </div>
                           <div className="text-right">
-                            <span className="text-lg font-black text-[#001CFF]">
+                            <span className="text-lg font-black text-brand">
                               {selectedUpgrade === 'pro'
                                 ? `R$ ${pricePro}`
                                 : `R$ ${Math.round(totalCorporatePrice)}`}
@@ -1851,7 +1851,7 @@ export default function ConfiguracoesPage() {
                 <button
                   type="submit"
                   disabled={processingCheckout}
-                  className="w-full bg-[#001CFF] hover:bg-[#001CFF]/90 text-white text-sm font-semibold py-3 rounded-xl flex items-center justify-center space-x-2 transition-all shadow-lg shadow-[#001CFF]/15 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full bg-brand hover:bg-brand/90 text-white text-sm font-semibold py-3 rounded-xl flex items-center justify-center space-x-2 transition-all shadow-lg shadow-brand/15 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {processingCheckout ? (
                     <>
@@ -1877,11 +1877,11 @@ export default function ConfiguracoesPage() {
       {showAddCondoModal && (
         <div className="fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="bg-[#0c0c0e] border border-zinc-800 rounded-2xl w-full max-w-md shadow-2xl">
-            <div className="h-1 bg-[#001CFF] shrink-0 rounded-t-2xl"></div>
+            <div className="h-1 bg-brand shrink-0 rounded-t-2xl"></div>
             <div className="p-6">
               <div className="flex justify-between items-center mb-6">
                 <h3 className="text-sm font-bold text-white flex items-center">
-                  <Building className="w-4 h-4 mr-2 text-[#001CFF]" />
+                  <Building className="w-4 h-4 mr-2 text-brand" />
                   Adicionar Condomínio
                 </h3>
                 <button
@@ -1911,7 +1911,7 @@ export default function ConfiguracoesPage() {
                     placeholder="Ex: Residencial Flores"
                     value={newCondoNome}
                     onChange={(e) => handleCondoNameChange(e.target.value)}
-                    className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-[#001CFF]/50 focus:border-[#001CFF]/50 hover:border-zinc-700 transition-all font-medium"
+                    className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-brand/50 focus:border-brand/50 hover:border-zinc-700 transition-all font-medium"
                   />
                 </div>
 
@@ -1927,7 +1927,7 @@ export default function ConfiguracoesPage() {
                       placeholder="nome-do-condominio"
                       value={newCondoSlug}
                       onChange={(e) => setNewCondoSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
-                      className="w-full pl-6 pr-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-[#001CFF]/50 focus:border-[#001CFF]/50 hover:border-zinc-700 transition-all font-mono"
+                      className="w-full pl-6 pr-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-brand/50 focus:border-brand/50 hover:border-zinc-700 transition-all font-mono"
                     />
                   </div>
                 </div>
@@ -1944,7 +1944,7 @@ export default function ConfiguracoesPage() {
                       placeholder="1234"
                       value={newCondoCodigo}
                       onChange={(e) => setNewCondoCodigo(e.target.value.replace(/\D/g, '').substring(0, 4))}
-                      className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-[#001CFF]/50 focus:border-[#001CFF]/50 hover:border-zinc-700 transition-all font-medium text-center tracking-widest"
+                      className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-brand/50 focus:border-brand/50 hover:border-zinc-700 transition-all font-medium text-center tracking-widest"
                     />
                     <button
                       type="button"
@@ -1959,7 +1959,7 @@ export default function ConfiguracoesPage() {
                 <button
                   type="submit"
                   disabled={savingInstance}
-                  className="w-full mt-2 bg-gradient-to-r from-[#001CFF] to-blue-600 hover:opacity-95 text-white text-sm font-semibold py-2 rounded-lg flex items-center justify-center transition-all shadow-[0_4px_20px_rgba(0,51,255,0.25)] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full mt-2 bg-gradient-to-r from-brand to-blue-600 hover:opacity-95 text-white text-sm font-semibold py-2 rounded-lg flex items-center justify-center transition-all shadow-[0_4px_20px_rgba(0,51,255,0.25)] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {savingInstance ? (
                     <span className="flex items-center space-x-2">
@@ -2007,7 +2007,7 @@ export default function ConfiguracoesPage() {
         id="printable-poster" 
         className={`hidden flex-col items-center justify-between text-center p-12 text-black bg-white rounded-none border-[12px] h-[297mm] w-[210mm] border-double ${
           posterTheme === 'blue' 
-            ? 'border-[#001CFF]' 
+            ? 'border-brand' 
             : posterTheme === 'emerald' 
             ? 'border-emerald-500' 
             : 'border-zinc-900'
@@ -2018,7 +2018,7 @@ export default function ConfiguracoesPage() {
         <div className="flex items-center justify-center space-x-3 mt-6">
           <Building className={`w-12 h-12 ${
             posterTheme === 'blue' 
-              ? 'text-[#001CFF]' 
+              ? 'text-brand' 
               : posterTheme === 'emerald' 
               ? 'text-emerald-500' 
               : 'text-zinc-900'
@@ -2043,7 +2043,7 @@ export default function ConfiguracoesPage() {
         {/* QR Code Container */}
         <div className={`p-6 border-4 rounded-3xl bg-zinc-50 shadow-md ${
           posterTheme === 'blue' 
-            ? 'border-[#001CFF]/30' 
+            ? 'border-brand/30' 
             : posterTheme === 'emerald' 
             ? 'border-emerald-500/30' 
             : 'border-zinc-300'
@@ -2062,7 +2062,7 @@ export default function ConfiguracoesPage() {
           </div>
           <div className={`text-4xl font-black tracking-widest ${
             posterTheme === 'blue' 
-              ? 'text-[#001CFF]' 
+              ? 'text-brand' 
               : posterTheme === 'emerald' 
               ? 'text-emerald-600' 
               : 'text-zinc-900'

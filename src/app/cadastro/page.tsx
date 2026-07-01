@@ -125,13 +125,13 @@ export default function CadastroPage() {
     <div className="min-h-screen bg-[#070709] flex flex-col items-center justify-center p-4 antialiased text-zinc-300 relative overflow-hidden">
       
       {/* Glow de fundo */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-[#001CFF]/10 blur-[130px] rounded-full pointer-events-none z-0"></div>
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-brand/10 blur-[130px] rounded-full pointer-events-none z-0"></div>
 
       <div className="w-full max-w-md space-y-6 relative z-10">
         
         {/* LOGO E CABEÇALHO */}
         <div className="text-center">
-          <div className="inline-flex items-center justify-center w-12 h-12 bg-zinc-900/40 border border-zinc-800 rounded-xl mb-4 text-[#001CFF] shadow-2xl backdrop-blur-sm">
+          <div className="inline-flex items-center justify-center w-12 h-12 bg-zinc-900/40 border border-zinc-800 rounded-xl mb-4 text-brand shadow-2xl backdrop-blur-sm">
             <ShieldCheck className="w-6 h-6" />
           </div>
           <h1 className="text-xl font-bold tracking-tight text-white">Comece com o Zelcore</h1>
@@ -144,7 +144,7 @@ export default function CadastroPage() {
         <div className="flex items-center justify-center space-x-3">
           <div className={`flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold border transition-all ${
             step === 1 
-              ? 'bg-[#001CFF] text-white border-[#001CFF] shadow-[0_0_8px_rgba(0,51,255,0.4)]' 
+              ? 'bg-brand text-white border-brand shadow-[0_0_8px_rgba(0,51,255,0.4)]' 
               : 'bg-zinc-900/50 text-zinc-400 border-zinc-800'
           }`}>
             1
@@ -152,7 +152,7 @@ export default function CadastroPage() {
           <div className="w-8 h-px bg-zinc-800"></div>
           <div className={`flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold border transition-all ${
             step === 2 
-              ? 'bg-[#001CFF] text-white border-[#001CFF] shadow-[0_0_8px_rgba(0,51,255,0.4)]' 
+              ? 'bg-brand text-white border-brand shadow-[0_0_8px_rgba(0,51,255,0.4)]' 
               : 'bg-zinc-900/50 text-zinc-400 border-zinc-800'
           }`}>
             2
@@ -162,7 +162,7 @@ export default function CadastroPage() {
         {/* CARD PRINCIPAL */}
         <div className="bg-[#0f0f13]/90 border border-zinc-800 rounded-2xl p-6 shadow-2xl backdrop-blur-md relative overflow-hidden">
           {/* Linha de reflexo azul no topo */}
-          <div className="absolute inset-x-0 -top-px h-px bg-gradient-to-r from-transparent via-[#001CFF]/60 to-transparent"></div>
+          <div className="absolute inset-x-0 -top-px h-px bg-gradient-to-r from-transparent via-brand/60 to-transparent"></div>
 
           {error && (
             <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-xs font-semibold text-red-400 flex items-center space-x-2 animate-in fade-in duration-200">
@@ -175,7 +175,7 @@ export default function CadastroPage() {
           {step === 1 && (
             <form onSubmit={handleNextStep} className="space-y-4">
               <h3 className="text-sm font-bold uppercase tracking-wider text-zinc-200 flex items-center">
-                <User className="w-4 h-4 mr-2 text-[#001CFF]" />
+                <User className="w-4 h-4 mr-2 text-brand" />
                 Dados do Administrador
               </h3>
 
@@ -189,7 +189,7 @@ export default function CadastroPage() {
                   placeholder="Nome do síndico"
                   value={nome}
                   onChange={(e) => setNome(e.target.value)}
-                  className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-[#001CFF]/50 focus:border-[#001CFF]/50 hover:border-zinc-700 transition-all font-medium"
+                  className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-brand/50 focus:border-brand/50 hover:border-zinc-700 transition-all font-medium"
                   required
                 />
               </div>
@@ -204,7 +204,7 @@ export default function CadastroPage() {
                   placeholder="seuemail@exemplo.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-[#001CFF]/50 focus:border-[#001CFF]/50 hover:border-zinc-700 transition-all font-medium"
+                  className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-brand/50 focus:border-brand/50 hover:border-zinc-700 transition-all font-medium"
                   required
                 />
               </div>
@@ -220,7 +220,7 @@ export default function CadastroPage() {
                     placeholder="Mínimo 6 caracteres"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full pl-3 pr-10 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-[#001CFF]/50 focus:border-[#001CFF]/50 hover:border-zinc-700 transition-all font-medium"
+                    className="w-full pl-3 pr-10 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-brand/50 focus:border-brand/50 hover:border-zinc-700 transition-all font-medium"
                     required
                   />
                   <button
@@ -243,14 +243,14 @@ export default function CadastroPage() {
                   placeholder="Repita a senha"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-[#001CFF]/50 focus:border-[#001CFF]/50 hover:border-zinc-700 transition-all font-medium"
+                  className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-brand/50 focus:border-brand/50 hover:border-zinc-700 transition-all font-medium"
                   required
                 />
               </div>
 
               <button
                 type="submit"
-                className="w-full mt-2 bg-gradient-to-r from-[#001CFF] to-blue-600 hover:opacity-95 text-white text-sm font-semibold py-2 rounded-lg flex items-center justify-center transition-all shadow-[0_4px_20px_rgba(0,51,255,0.25)] active:scale-[0.98] cursor-pointer"
+                className="w-full mt-2 bg-gradient-to-r from-brand to-blue-600 hover:opacity-95 text-white text-sm font-semibold py-2 rounded-lg flex items-center justify-center transition-all shadow-[0_4px_20px_rgba(0,51,255,0.25)] active:scale-[0.98] cursor-pointer"
               >
                 Próximo Passo
                 <ArrowRight className="w-4 h-4 ml-2" />
@@ -262,7 +262,7 @@ export default function CadastroPage() {
           {step === 2 && (
             <form onSubmit={handleCadastro} className="space-y-4">
               <h3 className="text-sm font-bold uppercase tracking-wider text-zinc-200 flex items-center">
-                <Building className="w-4 h-4 mr-2 text-[#001CFF]" />
+                <Building className="w-4 h-4 mr-2 text-brand" />
                 Dados do Condomínio
               </h3>
 
@@ -276,7 +276,7 @@ export default function CadastroPage() {
                   placeholder="Ex: Residencial Flores"
                   value={condominioNome}
                   onChange={(e) => handleCondoNameChange(e.target.value)}
-                  className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-[#001CFF]/50 focus:border-[#001CFF]/50 hover:border-zinc-700 transition-all font-medium"
+                  className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-brand/50 focus:border-brand/50 hover:border-zinc-700 transition-all font-medium"
                   required
                 />
               </div>
@@ -295,7 +295,7 @@ export default function CadastroPage() {
                     placeholder="nome-do-condominio"
                     value={condominioSlug}
                     onChange={(e) => setCondominioSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
-                    className="w-full pl-6 pr-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-[#001CFF]/50 focus:border-[#001CFF]/50 hover:border-zinc-700 transition-all font-mono"
+                    className="w-full pl-6 pr-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-brand/50 focus:border-brand/50 hover:border-zinc-700 transition-all font-mono"
                     required
                   />
                 </div>
@@ -316,7 +316,7 @@ export default function CadastroPage() {
                     maxLength={4}
                     value={codigoAcesso}
                     onChange={(e) => setCodigoAcesso(e.target.value.replace(/\D/g, ''))}
-                    className="w-full pl-3 pr-10 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-[#001CFF]/50 focus:border-[#001CFF]/50 hover:border-zinc-700 transition-all font-medium tracking-wider"
+                    className="w-full pl-3 pr-10 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-brand/50 focus:border-brand/50 hover:border-zinc-700 transition-all font-medium tracking-wider"
                     required
                   />
                   <Key className="absolute right-3 top-2.5 text-zinc-600 w-4 h-4" />
@@ -340,7 +340,7 @@ export default function CadastroPage() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-2/3 bg-gradient-to-r from-[#001CFF] to-blue-600 hover:opacity-95 text-white text-sm font-semibold py-2 rounded-lg flex items-center justify-center transition-all shadow-[0_4px_20px_rgba(0,51,255,0.25)] active:scale-[0.98] disabled:opacity-50 cursor-pointer"
+                  className="w-2/3 bg-gradient-to-r from-brand to-blue-600 hover:opacity-95 text-white text-sm font-semibold py-2 rounded-lg flex items-center justify-center transition-all shadow-[0_4px_20px_rgba(0,51,255,0.25)] active:scale-[0.98] disabled:opacity-50 cursor-pointer"
                 >
                   {loading ? (
                     <>
@@ -362,7 +362,7 @@ export default function CadastroPage() {
             Já tem uma conta cadastrada?{' '}
             <button
               onClick={() => router.push('/login')}
-              className="text-[#001CFF] hover:underline font-bold transition-all bg-transparent border-0 cursor-pointer"
+              className="text-brand hover:underline font-bold transition-all bg-transparent border-0 cursor-pointer"
             >
               Entre no Painel
             </button>

@@ -164,7 +164,7 @@ export default function AchadosPerdidosPage() {
         </div>
         <button
           onClick={() => setShowAddForm(true)}
-          className="bg-[#001CFF] hover:bg-[#001CFF]/90 text-white text-xs font-bold px-4 py-2 rounded-lg flex items-center space-x-1.5 transition-all shadow-[0_4px_20px_rgba(0,51,255,0.20)] active:scale-[0.98] self-start md:self-auto"
+          className="bg-brand hover:bg-brand/90 text-white text-xs font-bold px-4 py-2 rounded-lg flex items-center space-x-1.5 transition-all shadow-[0_4px_20px_rgba(0,51,255,0.20)] active:scale-[0.98] self-start md:self-auto"
         >
           <Plus className="w-4 h-4" />
           <span>Cadastrar Objeto pela Portaria</span>
@@ -228,7 +228,7 @@ export default function AchadosPerdidosPage() {
                     item.status === 'encontrado' 
                       ? 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/20' 
                       : item.status === 'aguardando_retirada'
-                        ? 'bg-[#001CFF]/15 text-[#001CFF] border border-[#001CFF]/20'
+                        ? 'bg-brand/15 text-brand border border-brand/20'
                         : 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'
                   }`}>
                     {item.status === 'encontrado' ? 'Na Portaria' : item.status === 'aguardando_retirada' ? 'Retirada' : 'Entregue'}
@@ -240,7 +240,7 @@ export default function AchadosPerdidosPage() {
                     e.stopPropagation();
                     setSelectedItem(item);
                   }}
-                  className="absolute bottom-2 right-2 bg-black/60 hover:bg-[#001CFF] text-white p-1 rounded-md transition-colors border border-zinc-700 cursor-pointer"
+                  className="absolute bottom-2 right-2 bg-black/60 hover:bg-brand text-white p-1 rounded-md transition-colors border border-zinc-700 cursor-pointer"
                   title="Expandir Imagem"
                 >
                   <Maximize2 className="w-3.5 h-3.5" />
@@ -274,7 +274,7 @@ export default function AchadosPerdidosPage() {
                             e.stopPropagation();
                             handleUpdateStatus(item.id, 'aguardando_retirada');
                           }}
-                          className="flex-1 text-[9px] font-bold py-1.5 bg-[#001CFF]/10 hover:bg-[#001CFF]/20 text-[#001CFF] border border-[#001CFF]/20 rounded-md transition-colors cursor-pointer"
+                          className="flex-1 text-[9px] font-bold py-1.5 bg-brand/10 hover:bg-brand/20 text-brand border border-brand/20 rounded-md transition-colors cursor-pointer"
                         >
                           Pronto
                         </button>
@@ -304,7 +304,7 @@ export default function AchadosPerdidosPage() {
           <div className="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 w-full max-w-md rounded-2xl overflow-hidden shadow-2xl animate-in zoom-in-95 duration-150">
             <div className="p-4 border-b border-zinc-200 dark:border-zinc-800 flex justify-between items-center bg-zinc-50 dark:bg-zinc-900">
               <h3 className="text-xs font-bold text-zinc-900 dark:text-white uppercase tracking-wider flex items-center">
-                <Package className="w-4 h-4 text-[#001CFF] mr-2" />
+                <Package className="w-4 h-4 text-brand mr-2" />
                 Registrar Pertence Encontrado
               </h3>
               <button 
@@ -332,7 +332,7 @@ export default function AchadosPerdidosPage() {
                     placeholder="Descreva o pertence de forma simples..."
                     value={descricao}
                     onChange={(e) => setDescricao(e.target.value)}
-                    className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg text-xs text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-600 focus:outline-none focus:border-[#001CFF]/50 focus:ring-4 focus:ring-[#001CFF]/10 font-medium"
+                    className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg text-xs text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-600 focus:outline-none focus:border-brand/50 focus:ring-4 focus:ring-brand/10 font-medium"
                     required
                   ></textarea>
                 </div>
@@ -344,7 +344,7 @@ export default function AchadosPerdidosPage() {
                     placeholder="Ex: Próximo à portaria principal"
                     value={local}
                     onChange={(e) => setLocal(e.target.value)}
-                    className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg text-xs text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-600 focus:outline-none focus:border-[#001CFF]/50 focus:ring-4 focus:ring-[#001CFF]/10 font-semibold"
+                    className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg text-xs text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-600 focus:outline-none focus:border-brand/50 focus:ring-4 focus:ring-brand/10 font-semibold"
                     required
                   />
                 </div>
@@ -378,7 +378,7 @@ export default function AchadosPerdidosPage() {
                     >
                       {compressing ? (
                         <>
-                          <Loader2 className="w-5 h-5 animate-spin mb-1 text-[#001CFF]" />
+                          <Loader2 className="w-5 h-5 animate-spin mb-1 text-brand" />
                           <span className="text-[10px] font-bold">Processando foto...</span>
                         </>
                       ) : (
@@ -395,7 +395,7 @@ export default function AchadosPerdidosPage() {
                   <button
                     type="submit"
                     disabled={submitting || compressing}
-                    className="w-full bg-[#001CFF] hover:bg-[#001CFF]/90 text-white text-xs font-bold py-2 rounded-lg flex items-center justify-center transition-all shadow-[0_4px_20px_rgba(0,51,255,0.20)] active:scale-[0.98] disabled:opacity-50"
+                    className="w-full bg-brand hover:bg-brand/90 text-white text-xs font-bold py-2 rounded-lg flex items-center justify-center transition-all shadow-[0_4px_20px_rgba(0,51,255,0.20)] active:scale-[0.98] disabled:opacity-50"
                   >
                     {submitting ? (
                       <>
@@ -419,7 +419,7 @@ export default function AchadosPerdidosPage() {
           <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 w-full max-w-md rounded-2xl overflow-hidden shadow-2xl animate-in zoom-in-95 duration-150 relative">
             <div className="p-4 border-b border-zinc-200 dark:border-zinc-800 flex justify-between items-center bg-zinc-50 dark:bg-zinc-950">
               <div className="flex items-center space-x-2 text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-widest">
-                <Package className="w-4 h-4 text-[#001CFF]" />
+                <Package className="w-4 h-4 text-brand" />
                 <span>Objeto Achado</span>
               </div>
               <button 
@@ -464,7 +464,7 @@ export default function AchadosPerdidosPage() {
                   <span className="text-[10px] text-zinc-500 dark:text-zinc-500 font-bold uppercase tracking-wider">Status do Objeto</span>
                   <div className="mt-1 flex items-center space-x-1.5">
                     <span className={`w-1.5 h-1.5 rounded-full ${
-                      selectedItem.status === 'encontrado' ? 'bg-amber-500' : selectedItem.status === 'aguardando_retirada' ? 'bg-[#001CFF]' : 'bg-emerald-500'
+                      selectedItem.status === 'encontrado' ? 'bg-amber-500' : selectedItem.status === 'aguardando_retirada' ? 'bg-brand' : 'bg-emerald-500'
                     }`}></span>
                     <span className="font-bold text-zinc-900 dark:text-white uppercase tracking-wider text-[9px]">
                       {selectedItem.status === 'encontrado' ? 'Na Portaria' : selectedItem.status === 'aguardando_retirada' ? 'Retirada' : 'Entregue'}
@@ -489,7 +489,7 @@ export default function AchadosPerdidosPage() {
                     {selectedItem.status === 'encontrado' && (
                       <button
                         onClick={() => handleUpdateStatus(selectedItem.id, 'aguardando_retirada')}
-                        className="py-2 px-3 bg-[#001CFF]/10 hover:bg-[#001CFF]/20 text-[#001CFF] border border-[#001CFF]/20 rounded-lg text-xs font-bold transition-all"
+                        className="py-2 px-3 bg-brand/10 hover:bg-brand/20 text-brand border border-brand/20 rounded-lg text-xs font-bold transition-all"
                       >
                         Pronto p/ Retirada
                       </button>

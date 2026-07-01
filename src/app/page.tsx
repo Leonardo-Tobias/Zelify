@@ -18,7 +18,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-[#070709] flex items-center justify-center">
       {/* Loader sutil durante o redirecionamento rápido */}
-      <div className="w-6 h-6 border-2 border-t-transparent border-[#001CFF] rounded-full animate-spin"></div>
+      <div className="w-6 h-6 border-2 border-t-transparent border-brand rounded-full animate-spin"></div>
     </div>
   );
 }

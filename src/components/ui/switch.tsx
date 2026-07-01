@@ -33,7 +33,7 @@ export function BillingSwitch({ isAnnual, onChange }: BillingSwitchProps) {
         >
           Anual
         </button>
-        <span className="text-[9px] px-2.5 py-1 rounded-full font-extrabold tracking-wide uppercase bg-[#001CFF] text-white shadow-[0_2px_8px_rgba(0,28,255,0.25)] whitespace-nowrap shrink-0">
+        <span className="text-[9px] px-2.5 py-1 rounded-full font-extrabold tracking-wide uppercase bg-brand text-white shadow-[0_2px_8px_rgba(0,28,255,0.25)] whitespace-nowrap shrink-0">
           2 MESES GRÁTIS
         </span>
       </div>

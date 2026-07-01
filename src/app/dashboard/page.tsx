@@ -483,12 +483,12 @@ function DashboardHomeContent() {
       <div className="fixed bottom-6 right-6 z-50 animate-in slide-in-from-bottom-4 fade-in duration-300 max-w-sm w-full">
         <div className={`relative overflow-hidden rounded-2xl border shadow-2xl backdrop-blur-xl ${
           isUpgrade 
-            ? 'bg-gradient-to-br from-[#001CFF]/15 via-zinc-950/95 to-zinc-950/95 border-[#001CFF]/25 shadow-[0_8px_40px_rgba(0,51,255,0.15)]' 
+            ? 'bg-gradient-to-br from-brand/15 via-zinc-950/95 to-zinc-950/95 border-brand/25 shadow-[0_8px_40px_rgba(0,51,255,0.15)]' 
             : 'bg-gradient-to-br from-red-500/10 via-zinc-950/95 to-zinc-950/95 border-red-500/25 shadow-[0_8px_40px_rgba(239,68,68,0.1)]'
         }`}>
           {/* Glow */}
           <div className={`absolute -top-6 -right-6 w-20 h-20 rounded-full blur-2xl pointer-events-none ${
-            isUpgrade ? 'bg-[#001CFF]/20' : 'bg-red-500/15'
+            isUpgrade ? 'bg-brand/20' : 'bg-red-500/15'
           }`} />
           
           <div className="relative p-4">
@@ -504,7 +504,7 @@ function DashboardHomeContent() {
             <div className="flex items-start space-x-3 pr-6">
               <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border ${
                 isUpgrade 
-                  ? 'bg-[#001CFF]/15 border-[#001CFF]/30 text-[#001CFF]' 
+                  ? 'bg-brand/15 border-brand/30 text-brand' 
                   : 'bg-red-500/15 border-red-500/30 text-red-400'
               }`}>
                 {isUpgrade ? <Crown className="w-4.5 h-4.5" /> : <AlertTriangle className="w-4.5 h-4.5" />}
@@ -522,7 +522,7 @@ function DashboardHomeContent() {
                   setToastMsg(null);
                   router.push('/dashboard/configuracoes?tab=faturamento');
                 }}
-                className="w-full mt-3.5 py-2 bg-[#001CFF] hover:bg-[#001CFF]/90 text-white text-[11px] font-bold rounded-lg transition-all active:scale-[0.98] cursor-pointer flex items-center justify-center space-x-1.5 shadow-[0_4px_15px_rgba(0,51,255,0.25)]"
+                className="w-full mt-3.5 py-2 bg-brand hover:bg-brand/90 text-white text-[11px] font-bold rounded-lg transition-all active:scale-[0.98] cursor-pointer flex items-center justify-center space-x-1.5 shadow-[0_4px_15px_rgba(0,51,255,0.25)]"
               >
                 <Sparkles className="w-3.5 h-3.5" />
                 <span>Fazer Upgrade Agora</span>
@@ -537,7 +537,7 @@ function DashboardHomeContent() {
   if (loading) {
     return (
       <div className="h-full flex flex-col items-center justify-center py-20 text-zinc-500">
-        <Loader2 className="w-8 h-8 text-[#001CFF] animate-spin mb-4" />
+        <Loader2 className="w-8 h-8 text-brand animate-spin mb-4" />
         <span className="text-xs font-semibold uppercase tracking-wider text-zinc-500">Carregando dados...</span>
       </div>
     );
@@ -596,7 +596,7 @@ function DashboardHomeContent() {
           <div className="bg-white dark:bg-zinc-925/80 border border-zinc-200 dark:border-zinc-800 p-5 rounded-2xl flex flex-col justify-between shadow-sm dark:shadow-xl hover:border-zinc-300 dark:hover:border-zinc-700 transition-all group">
             <div className="flex justify-between items-center">
               <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Chamados Totais</span>
-              <div className="w-8 h-8 rounded-lg bg-[#001CFF]/10 border border-[#001CFF]/15 flex items-center justify-center text-[#001CFF] group-hover:scale-105 transition-transform">
+              <div className="w-8 h-8 rounded-lg bg-brand/10 border border-brand/15 flex items-center justify-center text-brand group-hover:scale-105 transition-transform">
                 <Activity className="w-4 h-4" />
               </div>
             </div>
@@ -659,7 +659,7 @@ function DashboardHomeContent() {
                     {/* NOME / SLUG */}
                     <td className="px-5 py-4">
                       <div className="flex items-center space-x-3">
-                        <div className="w-8 h-8 rounded-lg bg-[#001CFF]/10 border border-[#001CFF]/20 flex items-center justify-center text-[#001CFF] font-black text-xs shrink-0">
+                        <div className="w-8 h-8 rounded-lg bg-brand/10 border border-brand/20 flex items-center justify-center text-brand font-black text-xs shrink-0">
                           {item.nome.charAt(0)}
                         </div>
                         <div>
@@ -676,7 +676,7 @@ function DashboardHomeContent() {
                           item.plan_type === 'corporate'
                             ? 'bg-purple-500/10 text-purple-400 border-purple-500/20'
                             : item.plan_type === 'pro'
-                              ? 'bg-[#001CFF]/10 text-[#001CFF] border-[#001CFF]/20'
+                              ? 'bg-brand/10 text-brand border-brand/20'
                               : 'bg-zinc-100 dark:bg-zinc-900 text-zinc-550 border-zinc-200 dark:border-zinc-800'
                         }`}>
                           {item.plan_type}
@@ -723,7 +723,7 @@ function DashboardHomeContent() {
                     <td className="px-5 py-4 text-right">
                       <button
                         onClick={() => handleManageCondo(item.id)}
-                        className="bg-[#001CFF]/10 hover:bg-[#001CFF] hover:text-white text-[#001CFF] text-[10px] font-bold px-3 py-1.5 rounded-lg inline-flex items-center space-x-1 transition-all border border-[#001CFF]/20 active:scale-[0.98] cursor-pointer"
+                        className="bg-brand/10 hover:bg-brand hover:text-white text-brand text-[10px] font-bold px-3 py-1.5 rounded-lg inline-flex items-center space-x-1 transition-all border border-brand/20 active:scale-[0.98] cursor-pointer"
                       >
                         <span>Gerenciar</span>
                         <ArrowRight className="w-3 h-3 ml-0.5" />
@@ -796,7 +796,7 @@ function DashboardHomeContent() {
           </button>
           <button 
             onClick={() => router.push('/dashboard/kanban')}
-            className="bg-[#001CFF] hover:bg-[#001CFF]/90 text-white text-xs font-semibold px-4 py-2.5 rounded-lg flex items-center space-x-1.5 transition-all shadow-[0_4px_20px_rgba(0,51,255,0.25)] active:scale-[0.98] cursor-pointer"
+            className="bg-brand hover:bg-brand/90 text-white text-xs font-semibold px-4 py-2.5 rounded-lg flex items-center space-x-1.5 transition-all shadow-[0_4px_20px_rgba(0,51,255,0.25)] active:scale-[0.98] cursor-pointer"
           >
             <span>Ver Kanban</span>
             <ArrowRight className="w-3.5 h-3.5" />
@@ -824,7 +824,7 @@ function DashboardHomeContent() {
         <div className="bg-white dark:bg-zinc-925/80 border border-zinc-200 dark:border-zinc-800 p-5 rounded-2xl flex flex-col justify-between shadow-sm dark:shadow-xl transition-all hover:border-zinc-300 dark:hover:border-zinc-700 group">
           <div className="flex justify-between items-center">
             <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Em Execução</span>
-            <div className="w-8 h-8 rounded-lg bg-[#001CFF]/10 border border-[#001CFF]/15 flex items-center justify-center text-[#001CFF] group-hover:scale-105 transition-transform">
+            <div className="w-8 h-8 rounded-lg bg-brand/10 border border-brand/15 flex items-center justify-center text-brand group-hover:scale-105 transition-transform">
               <Wrench className="w-4 h-4" />
             </div>
           </div>
@@ -884,7 +884,7 @@ function DashboardHomeContent() {
                   <span className={`shrink-0 w-7 h-7 rounded-lg border flex items-center justify-center ${
                     item.tipo === 'manutencao' 
                       ? 'bg-amber-500/10 text-amber-500 border-amber-500/15' 
-                      : 'bg-[#001CFF]/10 text-[#001CFF] border-[#001CFF]/15'
+                      : 'bg-brand/10 text-brand border-brand/15'
                   }`}>
                     {item.tipo === 'manutencao' ? <Wrench className="w-3.5 h-3.5" /> : <Package className="w-3.5 h-3.5" />}
                   </span>
@@ -915,7 +915,7 @@ function DashboardHomeContent() {
                     item.status === 'pendente' || item.status === 'encontrado'
                       ? 'bg-amber-500/10 text-amber-500 border-amber-500/15' 
                       : item.status === 'em_execucao' || item.status === 'aguardando_retirada'
-                        ? 'bg-[#001CFF]/10 text-[#001CFF] border-[#001CFF]/15'
+                        ? 'bg-brand/10 text-brand border-brand/15'
                         : 'bg-emerald-500/10 text-emerald-450 border-emerald-500/15'
                   }`}>
                     {item.status === 'pendente' ? 'Pendente' 
@@ -943,7 +943,7 @@ export default function DashboardHome() {
   return (
     <React.Suspense fallback={
       <div className="h-full flex flex-col items-center justify-center py-20 text-zinc-500">
-        <Loader2 className="w-8 h-8 text-[#001CFF] animate-spin mb-4" />
+        <Loader2 className="w-8 h-8 text-brand animate-spin mb-4" />
         <span className="text-xs font-semibold uppercase tracking-wider text-zinc-500">Carregando painel...</span>
       </div>
     }>

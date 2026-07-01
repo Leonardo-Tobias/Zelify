@@ -239,8 +239,8 @@ export default function ConfiguracoesPage() {
     setCheckoutError('');
 
     if (checkoutTab === 'card') {
-      if (!cardNumber || !cardName || !cardExpiry || !cardCvv || !cardEmail || !cardCpf || !cardPhone) {
-        setCheckoutError('Preencha todos os campos do cartão (nome, e-mail, CPF, telefone, número, validade e CVV).');
+      if (!cardNumber || !cardName || !cardExpiry || !cardCvv || !cardEmail || !cardCpf) {
+        setCheckoutError('Preencha todos os campos do cartão (nome, e-mail, CPF, número, validade e CVV).');
         return;
       }
       if (cardNumber.replace(/\s/g, '').length < 16) {
@@ -292,7 +292,8 @@ export default function ConfiguracoesPage() {
           ccv: cardCvv,
         };
         body.cpfCnpj = cardCpf.replace(/\D/g, '');
-        body.phone = cardPhone.replace(/\D/g, '');
+        const phoneClean = cardPhone.replace(/\D/g, '');
+        if (phoneClean.length >= 10) body.phone = phoneClean;
         body.holderInfo = {
           name: cardName,
           email: cardEmail,
@@ -1273,7 +1274,6 @@ export default function ConfiguracoesPage() {
                     </label>
                     <input
                       type="tel"
-                      required
                       maxLength={15}
                       placeholder="(11) 99999-9999"
                       value={cardPhone}

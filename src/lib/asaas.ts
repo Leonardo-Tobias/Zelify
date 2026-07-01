@@ -44,10 +44,11 @@ const api = {
   },
 
   async createCustomer(name: string, email: string, cpfCnpj?: string, phone?: string): Promise<AsaasCustomer> {
-    const params: Record<string, string | undefined> = { name, email, cpfCnpj }
-    if (phone) {
+    const params: Record<string, string> = { name, email }
+    if (cpfCnpj) params.cpfCnpj = cpfCnpj
+    // Asaas aceita mobilePhone com DDD + 9 dígitos (11 números)
+    if (phone && phone.length >= 10) {
       params.mobilePhone = phone
-      params.phone = phone // Asaas aceita ambos
     }
     return this.request<AsaasCustomer>('POST', '/customers', params)
   },

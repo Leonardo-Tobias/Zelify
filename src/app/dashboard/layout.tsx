@@ -289,8 +289,8 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
               </div>
             )}
 
-            {/* MOBILE CONDOMINIUM SELECTOR */}
-            {condominios.length > 1 && (
+            {/* MOBILE CONDOMINIUM SELECTOR (apenas corporate) */}
+            {isCorporate && condominios.length > 1 && (
               <div className="space-y-1">
                 <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-wider px-3 pb-1 block">Condomínios</span>
                 {condominios.slice(0, 5).map((c) => (
@@ -301,7 +301,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                       handleSwitchCondo(c);
                     }}
                     className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-sm transition-colors pl-8 ${
-                      !isPortfolioView && c.id === condominio.id
+                      c.id === condominio.id
                         ? 'bg-zinc-100 dark:bg-white/[0.06] text-zinc-900 dark:text-white font-bold border border-zinc-200 dark:border-white/[0.08]'
                         : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/[0.03] font-medium'
                     }`}
@@ -314,17 +314,17 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                 ))}
                 <div className="h-px bg-zinc-200 dark:bg-white/[0.06] mx-3"></div>
                 <button
-                    onClick={() => {
-                      setMobileMenuOpen(false);
-                      router.push('/dashboard/configuracoes?tab=faturamento&addCondo=true');
-                    }}
-                    className="w-full flex items-center space-x-2 px-3 py-2 text-xs text-brand font-semibold hover:bg-zinc-50 dark:hover:bg-white/[0.03] rounded-lg transition-colors"
-                  >
-                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                    </svg>
-                    <span>Adicionar Condomínio</span>
-                  </button>
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    router.push('/dashboard/configuracoes?tab=faturamento&addCondo=true');
+                  }}
+                  className="w-full flex items-center space-x-2 px-3 py-2 text-xs text-brand font-semibold hover:bg-zinc-50 dark:hover:bg-white/[0.03] rounded-lg transition-colors"
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                  <span>Adicionar Condomínio</span>
+                </button>
               </div>
             )}
 
@@ -433,25 +433,22 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                     <span className="text-xs font-bold text-zinc-900 dark:text-white block truncate leading-none">
                       {condominio.nome}
                     </span>
-                    {condominios.length > 0 && (
-                      <span className="text-[9px] text-zinc-500 font-semibold block mt-0.5 truncate">
-                        {condominios.length} {condominios.length === 1 ? 'condomínio' : 'condomínios'}
-                      </span>
-                    )}
                   </div>
                 </div>
-                <svg className={`w-3.5 h-3.5 text-zinc-500 transition-transform ${condoDropdownOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
+                {isCorporate && (
+                  <svg className={`w-3.5 h-3.5 text-zinc-500 transition-transform ${condoDropdownOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                )}
               </button>
 
-              {condoDropdownOpen && (
+              {isCorporate && condoDropdownOpen && (
                 <div className="absolute left-0 right-0 top-full mt-1.5 bg-zinc-900 border border-zinc-800 rounded-xl shadow-2xl z-30 py-1 animate-in fade-in slide-in-from-top-1 duration-150">
 
                   {/* Lista de condomínios */}
                   <div className="max-h-[200px] overflow-y-auto scrollbar-thin scrollbar-thumb-zinc-700 scrollbar-track-transparent">
                     {condominios.map((c) => {
-                      const isActive = !isPortfolioView && c.id === condominio.id;
+                      const isActive = c.id === condominio.id;
                       return (
                         <button
                           key={c.id}
@@ -489,7 +486,6 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
 
                   <div className="h-px bg-zinc-800/60 mx-3 my-1"></div>
 
-                  {/* Adicionar condomínio */}
                   <button
                     onClick={() => {
                       setCondoDropdownOpen(false);

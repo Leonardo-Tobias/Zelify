@@ -77,6 +77,9 @@ const api = {
       name: string
       email: string
       cpfCnpj: string
+      postalCode: string
+      addressNumber: string
+      addressComplement?: string
     }
   }): Promise<AsaasSubscription> {
     return this.request<AsaasSubscription>('POST', '/subscriptions', params)
@@ -140,7 +143,7 @@ export async function createAsaasSubscription(
   cycle: 'MONTHLY' | 'YEARLY',
   value: number,
   creditCardData?: CreditCardData,
-  holderInfo?: { name: string; email: string; cpfCnpj: string }
+  holderInfo?: { name: string; email: string; cpfCnpj: string; postalCode: string; addressNumber: string; addressComplement?: string }
 ) {
   const nextDueDate = cycle === 'YEARLY'
     ? new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]

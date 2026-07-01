@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import crypto from 'crypto'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || ''
@@ -13,15 +14,41 @@ function getSupabaseAdmin() {
   })
 }
 
+function verifySignature(rawBody: string, signatureHeader: string): boolean {
+  if (!WEBHOOK_SECRET) return true
+  if (!signatureHeader) return false
+
+  const expectedSignature = crypto
+    .createHmac('sha256', WEBHOOK_SECRET)
+    .update(rawBody, 'utf8')
+    .digest('hex')
+
+  try {
+    const receivedSignatures = signatureHeader.split(',').map(s => s.trim())
+    return receivedSignatures.some(sig => {
+      const match = sig.match(/^sha256=([a-f0-9]+)$/i)
+      if (!match) return false
+      return crypto.timingSafeEqual(
+        Buffer.from(match[1]),
+        Buffer.from(expectedSignature)
+      )
+    })
+  } catch {
+    return false
+  }
+}
+
 export async function POST(req: NextRequest) {
   try {
-    // Validar signature (se configurada)
+    const rawBody = await req.text()
     const signature = req.headers.get('asaas-signature') || ''
-    if (WEBHOOK_SECRET && signature !== WEBHOOK_SECRET) {
-      console.warn('[WEBHOOK] Signature inválida')
+
+    if (WEBHOOK_SECRET && !verifySignature(rawBody, signature)) {
+      console.warn('[WEBHOOK] Signature inválida — rejeitando')
+      return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
     }
 
-    const event = await req.json()
+    const event = JSON.parse(rawBody)
     const { event: eventName, subscription, payment } = event
 
     if (!subscription?.id && !payment?.subscription) {
@@ -35,7 +62,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ received: true })
     }
 
-    // Mapear eventos do Asaas para nosso subscription_status
     let newStatus: 'active' | 'past_due' | 'canceled' | null = null
 
     switch (eventName) {
@@ -46,9 +72,9 @@ export async function POST(req: NextRequest) {
         break
       case 'PAYMENT_OVERDUE':
       case 'SUBSCRIPTION_OVERDUE':
+      case 'SUBSCRIPTION_DELETED':
         newStatus = 'past_due'
         break
-      case 'SUBSCRIPTION_DELETED':
       case 'PAYMENT_REFUNDED':
       case 'PAYMENT_CHARGEBACK_REQUESTED':
         newStatus = 'canceled'
@@ -56,14 +82,16 @@ export async function POST(req: NextRequest) {
     }
 
     if (newStatus) {
+      const updateData: Record<string, unknown> = {
+        subscription_status: newStatus,
+      }
+      if (subscription?.nextDueDate) {
+        updateData.current_period_end = new Date(subscription.nextDueDate).toISOString()
+      }
+
       await supabase
         .from('condominios')
-        .update({
-          subscription_status: newStatus,
-          current_period_end: subscription?.nextDueDate
-            ? new Date(subscription.nextDueDate).toISOString()
-            : undefined,
-        })
+        .update(updateData)
         .eq('asaas_subscription_id', subscriptionId)
     }
 

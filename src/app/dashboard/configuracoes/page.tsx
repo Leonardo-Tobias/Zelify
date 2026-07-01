@@ -67,6 +67,9 @@ export default function ConfiguracoesPage() {
   const [cardEmail, setCardEmail] = useState('');
   const [cardCpf, setCardCpf] = useState('');
   const [cardPhone, setCardPhone] = useState('');
+  const [cardCep, setCardCep] = useState('');
+  const [cardAddressNumber, setCardAddressNumber] = useState('');
+  const [cardAddressComplement, setCardAddressComplement] = useState('');
   const [checkoutError, setCheckoutError] = useState('');
   const [processingCheckout, setProcessingCheckout] = useState(false);
 
@@ -255,14 +258,23 @@ export default function ConfiguracoesPage() {
         setCheckoutError('Código CVV inválido.');
         return;
       }
-      if (cardCpf.replace(/\D/g, '').length !== 11) {
-        setCheckoutError('CPF inválido. Digite 11 dígitos.');
-        return;
-      }
-      if (cardPhone.replace(/\D/g, '').length < 10) {
-        setCheckoutError('Telefone inválido. Informe DDD + número (ex: 11999999999).');
-        return;
-      }
+    }
+
+    if (cardCpf.replace(/\D/g, '').length !== 11) {
+      setCheckoutError('CPF inválido. Digite 11 dígitos.');
+      return;
+    }
+    if (cardPhone.replace(/\D/g, '').length < 10) {
+      setCheckoutError('Telefone inválido. Informe DDD + número (ex: 11999999999).');
+      return;
+    }
+    if (cardCep.replace(/\D/g, '').length !== 8) {
+      setCheckoutError('CEP inválido. Digite 8 dígitos.');
+      return;
+    }
+    if (!cardAddressNumber.trim()) {
+      setCheckoutError('Informe o número do endereço.');
+      return;
     }
 
     setProcessingCheckout(true);
@@ -272,6 +284,9 @@ export default function ConfiguracoesPage() {
         ? (isAnnual ? 124 : 149)
         : Math.round(totalCorporatePrice * 100) / 100;
 
+      let cpfClean = cardCpf.replace(/\D/g, '')
+      let phoneClean = cardPhone.replace(/\D/g, '')
+
       const body: Record<string, unknown> = {
         condominioId: condominio!.id,
         nome: condominio!.nome,
@@ -280,6 +295,8 @@ export default function ConfiguracoesPage() {
         billingType: checkoutTab === 'pix' ? 'PIX' : 'CREDIT_CARD',
         cycle: isAnnual ? 'YEARLY' : 'MONTHLY',
         value: price,
+        cpfCnpj: cpfClean || undefined,
+        phone: phoneClean.length >= 10 ? phoneClean : undefined,
       };
 
       if (checkoutTab === 'card') {
@@ -291,14 +308,14 @@ export default function ConfiguracoesPage() {
           expiryYear: `20${expYear}`,
           ccv: cardCvv,
         };
-        body.cpfCnpj = cardCpf.replace(/\D/g, '');
-        const phoneClean = cardPhone.replace(/\D/g, '');
-        if (phoneClean.length >= 10) body.phone = phoneClean;
         body.holderInfo = {
           name: cardName,
           email: cardEmail,
-          cpfCnpj: cardCpf.replace(/\D/g, ''),
+          cpfCnpj: cpfClean,
           phone: phoneClean.length >= 10 ? phoneClean : '11912345678',
+          postalCode: cardCep.replace(/\D/g, ''),
+          addressNumber: cardAddressNumber,
+          addressComplement: cardAddressComplement || undefined,
         };
       }
 
@@ -1169,54 +1186,141 @@ export default function ConfiguracoesPage() {
 
               {/* CONTEÚDO PIX */}
               {checkoutTab === 'pix' ? (
-                <div className="space-y-4 flex flex-col items-center py-2">
+                <div className="space-y-4 flex flex-col py-2">
                   {pixQrCode ? (
                     <>
                       {/* QR Code real do Asaas */}
-                      <div className="bg-white p-3 rounded-xl border border-zinc-200 shadow-inner">
-                        <img src={`data:image/png;base64,${pixQrCode}`} alt="QR Code PIX" className="w-32 h-32" />
+                      <div className="flex flex-col items-center space-y-4">
+                        <div className="bg-white p-3 rounded-xl border border-zinc-200 shadow-inner">
+                          <img src={`data:image/png;base64,${pixQrCode}`} alt="QR Code PIX" className="w-32 h-32" />
+                        </div>
+                        <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider text-center">
+                          Aponte a câmera do celular ou copie o código Pix abaixo
+                        </p>
+
+                        <button
+                          type="button"
+                          onClick={handleCopyPix}
+                          className="w-full py-2 bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-bold rounded-lg border border-zinc-800 flex items-center justify-center space-x-1.5 transition-colors cursor-pointer"
+                        >
+                          {copiedPix ? (
+                            <><Check className="w-3.5 h-3.5 text-emerald-500" /><span>Código Pix Copiado!</span></>
+                          ) : (
+                            <><Copy className="w-3.5 h-3.5" /><span>Copiar Código Pix (Copia e Cola)</span></>
+                          )}
+                        </button>
+
+                        <span className="text-[9px] text-zinc-600 text-center leading-relaxed block">
+                          Após pagar, clique no botão abaixo para ativar seu plano.<br />
+                          O sistema também será atualizado automaticamente quando o pagamento for confirmado.
+                        </span>
+
+                        <button
+                          type="button"
+                          onClick={handlePixPaid}
+                          className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-lg border border-emerald-700 flex items-center justify-center space-x-1.5 transition-colors cursor-pointer"
+                        >
+                          <Check className="w-4 h-4" />
+                          <span>Já paguei! Ativar Plano</span>
+                        </button>
                       </div>
-                      <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider text-center">
-                        Aponte a câmera do celular ou copie o código Pix abaixo
-                      </p>
-
-                      <button
-                        type="button"
-                        onClick={handleCopyPix}
-                        className="w-full py-2 bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-bold rounded-lg border border-zinc-800 flex items-center justify-center space-x-1.5 transition-colors cursor-pointer"
-                      >
-                        {copiedPix ? (
-                          <><Check className="w-3.5 h-3.5 text-emerald-500" /><span>Código Pix Copiado!</span></>
-                        ) : (
-                          <><Copy className="w-3.5 h-3.5" /><span>Copiar Código Pix (Copia e Cola)</span></>
-                        )}
-                      </button>
-
-                      <span className="text-[9px] text-zinc-600 text-center leading-relaxed block">
-                        Após pagar, clique no botão abaixo para ativar seu plano.<br />
-                        O sistema também será atualizado automaticamente quando o pagamento for confirmado.
-                      </span>
-
-                      <button
-                        type="button"
-                        onClick={handlePixPaid}
-                        className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-lg border border-emerald-700 flex items-center justify-center space-x-1.5 transition-colors cursor-pointer"
-                      >
-                        <Check className="w-4 h-4" />
-                        <span>Já paguei! Ativar Plano</span>
-                      </button>
                     </>
                   ) : (
                     <>
-                      {/* Estado de loading / QR Code placeholder */}
-                      <div className="bg-white p-3 rounded-xl border border-zinc-200 shadow-inner">
-                        <div className="w-32 h-32 flex items-center justify-center text-zinc-300">
-                          <Loader2 className="w-8 h-8 animate-spin" />
+                      {processingCheckout ? (
+                        <>
+                          <div className="flex flex-col items-center space-y-4">
+                            <div className="bg-white p-3 rounded-xl border border-zinc-200 shadow-inner">
+                              <div className="w-32 h-32 flex items-center justify-center text-zinc-300">
+                                <Loader2 className="w-8 h-8 animate-spin" />
+                              </div>
+                            </div>
+                            <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider text-center">
+                              Gerando QR Code PIX...
+                            </p>
+                          </div>
+                        </>
+                      ) : (
+                        <div className="space-y-3">
+                          <div>
+                            <label className="block text-[9px] font-bold uppercase tracking-wider text-zinc-500 mb-1">
+                              CPF do Titular
+                            </label>
+                            <input
+                              type="text"
+                              required
+                              maxLength={14}
+                              placeholder="000.000.000-00"
+                              value={cardCpf}
+                              onChange={(e) => {
+                                const v = e.target.value.replace(/\D/g, '').replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4').substring(0, 14);
+                                setCardCpf(v);
+                              }}
+                              className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-white placeholder-zinc-705 focus:outline-none focus:border-[#001CFF]/50 font-semibold"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[9px] font-bold uppercase tracking-wider text-zinc-500 mb-1">
+                              Telefone (com DDD)
+                            </label>
+                            <input
+                              type="tel"
+                              maxLength={15}
+                              placeholder="(11) 99999-9999"
+                              value={cardPhone}
+                              onChange={(e) => {
+                                const v = e.target.value.replace(/\D/g, '').replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3').substring(0, 15);
+                                setCardPhone(v);
+                              }}
+                              className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-white placeholder-zinc-705 focus:outline-none focus:border-[#001CFF]/50 font-semibold"
+                            />
+                          </div>
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <label className="block text-[9px] font-bold uppercase tracking-wider text-zinc-500 mb-1">
+                                CEP
+                              </label>
+                              <input
+                                type="text"
+                                required
+                                maxLength={9}
+                                placeholder="00000-000"
+                                value={cardCep}
+                                onChange={(e) => {
+                                  const v = e.target.value.replace(/\D/g, '').replace(/(\d{5})(\d{3})/, '$1-$2').substring(0, 9);
+                                  setCardCep(v);
+                                }}
+                                className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-white placeholder-zinc-705 focus:outline-none focus:border-[#001CFF]/50 font-semibold"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-[9px] font-bold uppercase tracking-wider text-zinc-500 mb-1">
+                                Número
+                              </label>
+                              <input
+                                type="text"
+                                required
+                                placeholder="Ex: 100"
+                                value={cardAddressNumber}
+                                onChange={(e) => setCardAddressNumber(e.target.value)}
+                                className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-white placeholder-zinc-705 focus:outline-none focus:border-[#001CFF]/50 font-semibold"
+                              />
+                            </div>
+                          </div>
+                          <div>
+                            <label className="block text-[9px] font-bold uppercase tracking-wider text-zinc-500 mb-1">
+                              Complemento <span className="text-zinc-600">(opcional)</span>
+                            </label>
+                            <input
+                              type="text"
+                              placeholder="Ex: Apt 42, Bloco B"
+                              value={cardAddressComplement}
+                              onChange={(e) => setCardAddressComplement(e.target.value)}
+                              className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-white placeholder-zinc-705 focus:outline-none focus:border-[#001CFF]/50 font-semibold"
+                            />
+                          </div>
                         </div>
-                      </div>
-                      <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider text-center">
-                        Gerando QR Code PIX...
-                      </p>
+                      )}
                     </>
                   )}
                 </div>
@@ -1282,6 +1386,52 @@ export default function ConfiguracoesPage() {
                         const v = e.target.value.replace(/\D/g, '').replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3').substring(0, 15);
                         setCardPhone(v);
                       }}
+                      className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-white placeholder-zinc-705 focus:outline-none focus:border-[#001CFF]/50 font-semibold"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-[9px] font-bold uppercase tracking-wider text-zinc-500 mb-1">
+                        CEP
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        maxLength={9}
+                        placeholder="00000-000"
+                        value={cardCep}
+                        onChange={(e) => {
+                          const v = e.target.value.replace(/\D/g, '').replace(/(\d{5})(\d{3})/, '$1-$2').substring(0, 9);
+                          setCardCep(v);
+                        }}
+                        className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-white placeholder-zinc-705 focus:outline-none focus:border-[#001CFF]/50 font-semibold"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[9px] font-bold uppercase tracking-wider text-zinc-500 mb-1">
+                        Número
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="Ex: 100"
+                        value={cardAddressNumber}
+                        onChange={(e) => setCardAddressNumber(e.target.value)}
+                        className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-white placeholder-zinc-705 focus:outline-none focus:border-[#001CFF]/50 font-semibold"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-[9px] font-bold uppercase tracking-wider text-zinc-500 mb-1">
+                      Complemento <span className="text-zinc-600">(opcional)</span>
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Ex: Apt 42, Bloco B"
+                      value={cardAddressComplement}
+                      onChange={(e) => setCardAddressComplement(e.target.value)}
                       className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-white placeholder-zinc-705 focus:outline-none focus:border-[#001CFF]/50 font-semibold"
                     />
                   </div>
@@ -1359,7 +1509,7 @@ export default function ConfiguracoesPage() {
                     <>
                       <Lock className="w-3.5 h-3.5" />
                       <span>
-                        {checkoutTab === 'pix' ? 'Confirmar Pix Pago' : 'Finalizar Assinatura'}
+                        {checkoutTab === 'pix' ? (pixQrCode ? 'Confirmar Pix Pago' : 'Gerar QR Code PIX') : 'Finalizar Assinatura'}
                       </span>
                     </>
                   )}

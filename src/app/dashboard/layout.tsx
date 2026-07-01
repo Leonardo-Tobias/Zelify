@@ -38,6 +38,15 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
   const [condominios, setCondominios] = useState<Condominio[]>([]);
   const [isCorporate, setIsCorporate] = useState(false);
+  const [condoDropdownOpen, setCondoDropdownOpen] = useState(false);
+
+  const handleSwitchCondo = (target: Condominio) => {
+    setCondoDropdownOpen(false);
+    localStorage.setItem('zelcore_condominio_gestao', JSON.stringify(target));
+    setCondominio(target);
+    window.dispatchEvent(new Event('storage'));
+    router.push('/dashboard');
+  };
 
   // Inicializar sessão e tema
   useEffect(() => {
@@ -150,6 +159,14 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
+  // Fechar dropdown ao clicar fora
+  useEffect(() => {
+    if (!condoDropdownOpen) return;
+    const handleClick = () => setCondoDropdownOpen(false);
+    document.addEventListener('click', handleClick, { once: true });
+    return () => document.removeEventListener('click', handleClick);
+  }, [condoDropdownOpen]);
+
   // Atualizar título do navegador dinamicamente
   useEffect(() => {
     if (pathname === '/dashboard/kanban') {
@@ -181,15 +198,6 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   }
 
   const navigation = [
-    ...(isCorporate ? [
-      { 
-        name: 'Minha Carteira', 
-        href: '/dashboard?view=portfolio', 
-        icon: Building2, 
-        active: isPortfolioView, 
-        disabled: false 
-      }
-    ] : []),
     { 
       name: 'Painel do Prédio', 
       href: '/dashboard', 
@@ -266,6 +274,58 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                   <span>/{condominio.slug}</span>
                   <ExternalLink className="w-3.5 h-3.5 ml-1" />
                 </a>
+              </div>
+            )}
+
+            {/* MOBILE CONDOMINIUM SELECTOR */}
+            {condominios.length > 1 && (
+              <div className="space-y-1">
+                <button
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    router.push('/dashboard?view=portfolio');
+                  }}
+                  className={`w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm transition-colors ${
+                    isPortfolioView
+                      ? 'bg-zinc-100 dark:bg-white/[0.06] text-zinc-900 dark:text-white font-bold border border-zinc-200 dark:border-white/[0.08]'
+                      : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/[0.03] font-medium'
+                  }`}
+                >
+                  <Building2 className="w-4 h-4 shrink-0" />
+                  <span>Visão Geral (Carteira)</span>
+                </button>
+                {condominios.slice(0, 5).map((c) => (
+                  <button
+                    key={c.id}
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      handleSwitchCondo(c);
+                    }}
+                    className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-sm transition-colors pl-8 ${
+                      !isPortfolioView && c.id === condominio.id
+                        ? 'bg-zinc-100 dark:bg-white/[0.06] text-zinc-900 dark:text-white font-bold border border-zinc-200 dark:border-white/[0.08]'
+                        : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/[0.03] font-medium'
+                    }`}
+                  >
+                    <div className="w-5 h-5 rounded bg-[#001CFF]/10 border border-[#001CFF]/20 flex items-center justify-center text-[#001CFF] text-[8px] font-extrabold shrink-0">
+                      {c.nome.charAt(0)}
+                    </div>
+                    <span className="truncate">{c.nome}</span>
+                  </button>
+                ))}
+                <div className="h-px bg-zinc-200 dark:bg-white/[0.06] mx-3"></div>
+                <button
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    router.push('/cadastro');
+                  }}
+                  className="w-full flex items-center space-x-2 px-3 py-2 text-xs text-[#001CFF] font-semibold hover:bg-zinc-50 dark:hover:bg-white/[0.03] rounded-lg transition-colors"
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                  <span>Adicionar Condomínio</span>
+                </button>
               </div>
             )}
 
@@ -359,45 +419,118 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
               <span className="text-xl font-black tracking-tight text-zinc-900 dark:text-white">Zelcore<span className="text-[#001CFF]">.</span></span>
             </div>
             
-            {isPortfolioView ? (
-              <div className="p-2 bg-[#001CFF]/5 border border-[#001CFF]/10 rounded-lg flex items-center justify-between shadow-sm">
-                <div className="flex items-center space-x-2.5 min-w-0">
-                  <div className="w-6 h-6 rounded bg-[#001CFF]/15 border border-[#001CFF]/30 flex items-center justify-center text-[#001CFF] font-extrabold text-[10px] shrink-0">
-                    <Building2 className="w-3.5 h-3.5" />
-                  </div>
-                  <div className="min-w-0">
-                    <span className="text-xs font-bold text-zinc-900 dark:text-white block truncate leading-none">Minha Carteira</span>
-                    <span className="text-[9px] text-[#001CFF] font-bold uppercase tracking-wider block mt-1">{condominios.length} Condomínios</span>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="p-2.5 bg-zinc-100 dark:bg-white/[0.04] border border-zinc-200 dark:border-white/[0.06] rounded-xl flex items-center justify-between group hover:border-zinc-300 dark:hover:border-white/[0.12] transition-all shadow-sm">
-                <div className="flex items-center space-x-2.5 min-w-0 flex-1">
-                  <div className="w-6 h-6 rounded bg-[#001CFF]/10 border border-[#001CFF]/20 flex items-center justify-center text-[#001CFF] font-extrabold text-[10px] shrink-0">
-                    {condominio.nome.charAt(0)}
-                  </div>
-                  <span className="text-xs font-bold text-zinc-700 dark:text-zinc-200 truncate flex-1 min-w-0" title={condominio.nome}>
-                    {condominio.nome}
-                  </span>
-                </div>
-                <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full shrink-0 ml-2 shadow-[0_0_8px_rgba(16,185,129,0.7)] animate-pulse"></span>
-              </div>
-            )}
-          </div>
-
-          {/* VOLTAR PARA CARTEIRA SE SELECIONADO E FOR CORPORATIVO */}
-          {isCorporate && !isPortfolioView && (
-            <div className="px-2 animate-in fade-in duration-200">
+            {/* DROPDOWN DE CONDOMÍNIOS */}
+            <div className="px-0 relative">
               <button
-                onClick={() => router.push('/dashboard?view=portfolio')}
-                className="w-full flex items-center justify-center space-x-1.5 py-2 bg-[#001CFF]/10 hover:bg-[#001CFF]/20 border border-[#001CFF]/20 text-[#001CFF] rounded-lg text-xs font-bold transition-all shadow-[0_2px_8px_rgba(0,51,255,0.05)] active:scale-[0.98] cursor-pointer"
+                type="button"
+                onClick={() => setCondoDropdownOpen(!condoDropdownOpen)}
+                className={`w-full flex items-center justify-between p-2.5 rounded-xl text-left transition-all shadow-sm border ${
+                  isPortfolioView
+                    ? 'bg-[#001CFF]/5 border-[#001CFF]/10'
+                    : 'bg-zinc-100 dark:bg-white/[0.04] border-zinc-200 dark:border-white/[0.06] hover:border-zinc-300 dark:hover:border-white/[0.12]'
+                }`}
               >
-                <ArrowLeft className="w-3.5 h-3.5" />
-                <span>Voltar para Carteira</span>
+                <div className="flex items-center space-x-2.5 min-w-0 flex-1">
+                  <div className={`w-6 h-6 rounded flex items-center justify-center text-[10px] font-extrabold shrink-0 border ${
+                    isPortfolioView
+                      ? 'bg-[#001CFF]/15 border-[#001CFF]/30 text-[#001CFF]'
+                      : 'bg-[#001CFF]/10 border-[#001CFF]/20 text-[#001CFF]'
+                  }`}>
+                    {isPortfolioView ? <Building2 className="w-3.5 h-3.5" /> : condominio.nome.charAt(0)}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <span className="text-xs font-bold text-zinc-900 dark:text-white block truncate leading-none">
+                      {isPortfolioView ? 'Minha Carteira' : condominio.nome}
+                    </span>
+                    <span className="text-[9px] text-zinc-500 font-semibold block mt-0.5 truncate">
+                      {condominios.length} {condominios.length === 1 ? 'condomínio' : 'condomínios'}
+                    </span>
+                  </div>
+                </div>
+                <svg className={`w-3.5 h-3.5 text-zinc-500 transition-transform ${condoDropdownOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
               </button>
+
+              {condoDropdownOpen && (
+                <div className="absolute left-0 right-0 top-full mt-1.5 bg-zinc-900 border border-zinc-800 rounded-xl shadow-2xl z-30 py-1 animate-in fade-in slide-in-from-top-1 duration-150">
+                  {/* Cabeçalho da carteira */}
+                  <button
+                    onClick={() => {
+                      setCondoDropdownOpen(false);
+                      router.push('/dashboard?view=portfolio');
+                    }}
+                    className={`w-full flex items-center space-x-3 px-3 py-2.5 text-xs transition-colors ${
+                      isPortfolioView
+                        ? 'bg-[#001CFF]/10 text-[#001CFF] font-bold'
+                        : 'text-zinc-400 hover:text-white hover:bg-zinc-800/60 font-medium'
+                    }`}
+                  >
+                    <Building2 className="w-3.5 h-3.5 shrink-0" />
+                    <span>Visão Geral (Carteira)</span>
+                    <span className="ml-auto text-[10px] text-zinc-600">{condominios.length} itens</span>
+                  </button>
+
+                  <div className="h-px bg-zinc-800/60 mx-3 my-1"></div>
+
+                  {/* Lista de condomínios */}
+                  <div className="max-h-[200px] overflow-y-auto scrollbar-thin scrollbar-thumb-zinc-700 scrollbar-track-transparent">
+                    {condominios.map((c) => {
+                      const isActive = !isPortfolioView && c.id === condominio.id;
+                      return (
+                        <button
+                          key={c.id}
+                          onClick={() => handleSwitchCondo(c)}
+                          className={`w-full flex items-center space-x-3 px-3 py-2.5 text-xs transition-colors ${
+                            isActive
+                              ? 'bg-zinc-800/60 text-white font-bold'
+                              : 'text-zinc-400 hover:text-white hover:bg-zinc-800/60 font-medium'
+                          }`}
+                        >
+                          <div className={`w-5 h-5 rounded flex items-center justify-center text-[8px] font-extrabold shrink-0 border ${
+                            isActive
+                              ? 'bg-[#001CFF]/20 border-[#001CFF]/40 text-[#001CFF]'
+                              : 'bg-zinc-800 border-zinc-700 text-zinc-500'
+                          }`}>
+                            {c.nome.charAt(0)}
+                          </div>
+                          <span className="truncate">{c.nome}</span>
+                          {c.plan_type !== 'free' && (
+                            <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded uppercase ml-auto shrink-0 ${
+                              c.plan_type === 'corporate'
+                                ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20'
+                                : 'bg-[#001CFF]/10 text-[#001CFF] border border-[#001CFF]/20'
+                            }`}>
+                              {c.plan_type === 'corporate' ? 'Corp' : 'Pro'}
+                            </span>
+                          )}
+                          {isActive && (
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0 shadow-[0_0_6px_rgba(16,185,129,0.6)]"></span>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  <div className="h-px bg-zinc-800/60 mx-3 my-1"></div>
+
+                  {/* Adicionar condomínio */}
+                  <button
+                    onClick={() => {
+                      setCondoDropdownOpen(false);
+                      router.push('/cadastro');
+                    }}
+                    className="w-full flex items-center space-x-2 px-3 py-2.5 text-xs text-[#001CFF] hover:bg-zinc-800/60 font-semibold transition-colors"
+                  >
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                    </svg>
+                    <span>Adicionar Condomínio</span>
+                  </button>
+                </div>
+              )}
             </div>
-          )}
+          </div>
 
           {/* DENSE PUBLIC URL PREVIEW */}
           {!isPortfolioView && (

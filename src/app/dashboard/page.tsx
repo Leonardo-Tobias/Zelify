@@ -40,7 +40,7 @@ function DashboardHomeContent() {
   const [portfolioCondos, setPortfolioCondos] = useState<Array<{
     id: string;
     nome: string;
-    slug: string;
+    slug: string | null;
     plan_type: 'free' | 'pro' | 'corporate';
     subscription_status: 'active' | 'past_due' | 'canceled';
     totalChamados: number;
@@ -94,8 +94,9 @@ function DashboardHomeContent() {
         setIsCorporate(isCorp);
 
         if (isCorp && (isPortfolioView || !currentCondo)) {
-          // Carregar dados do portfólio
-          const data = await Promise.all(list.map(async (condo) => {
+          // Carregar dados do portfólio — filtrar container corporate
+          const instances = list.filter(c => c.parent_condominio_id || c.plan_type !== 'corporate')
+          const data = await Promise.all(instances.map(async (condo) => {
             const tickets = await db.getChamados(condo.id);
             const total = tickets.length;
             const pending = tickets.filter(t => t.tipo === 'manutencao' && t.status === 'pendente').length;
@@ -111,7 +112,7 @@ function DashboardHomeContent() {
             return {
               id: condo.id,
               nome: condo.nome,
-              slug: condo.slug,
+              slug: condo.slug || null,
               plan_type: condo.plan_type,
               subscription_status: condo.subscription_status,
               totalChamados: total,

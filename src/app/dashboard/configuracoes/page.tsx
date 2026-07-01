@@ -24,7 +24,8 @@ import {
   Lock,
   RefreshCw,
   Shield,
-  X
+  X,
+  Building2
 } from 'lucide-react';
 import { db, Condominio } from '@/lib/db';
 import { BillingSwitch } from '@/components/ui/switch';
@@ -85,6 +86,38 @@ export default function ConfiguracoesPage() {
   // Toast de sucesso
   const [toast, setToast] = useState<{ message: string } | null>(null);
 
+  // Estados de gerenciamento de instâncias corporate
+  const [instanciaCount, setInstanciaCount] = useState(0);
+  const [maxInstances, setMaxInstances] = useState(0);
+  const [showAddCondoModal, setShowAddCondoModal] = useState(false);
+  const [newCondoNome, setNewCondoNome] = useState('');
+  const [newCondoSlug, setNewCondoSlug] = useState('');
+  const [newCondoCodigo, setNewCondoCodigo] = useState('');
+  const [savingInstance, setSavingInstance] = useState(false);
+  const [instanceError, setInstanceError] = useState('');
+
+  // Carregar info de instâncias corporate
+  useEffect(() => {
+    if (!condominio || condominio.plan_type !== 'corporate') return;
+
+    async function loadInstanceInfo() {
+      try {
+        const savedGestor = localStorage.getItem('zelcore_gestor');
+        if (!savedGestor) return;
+        const gestor = JSON.parse(savedGestor);
+        const container = await db.getCorporateContainer(gestor.user_id);
+        if (container?.max_instances) {
+          setMaxInstances(container.max_instances);
+          const count = await db.countCondominioInstancias(container.id);
+          setInstanciaCount(count);
+        }
+      } catch (err) {
+        console.error('Erro ao carregar instâncias:', err);
+      }
+    }
+    loadInstanceInfo();
+  }, [condominio]);
+
   useEffect(() => {
     const savedCondo = localStorage.getItem('zelcore_condominio_gestao');
     if (!savedCondo) {
@@ -95,14 +128,14 @@ export default function ConfiguracoesPage() {
     const condo = JSON.parse(savedCondo) as Condominio;
     setCondominio(condo);
     setNome(condo.nome);
-    setSlug(condo.slug);
-    setCodigoAcesso(condo.codigo_acesso);
+    setSlug(condo.slug || '');
+    setCodigoAcesso(condo.codigo_acesso || '');
     setLoading(false);
 
     // Carrega dados frescos do banco de dados (Supabase ou LocalDB) para refletir atualizações
     async function fetchFreshCondo() {
       try {
-        const fresh = await db.getCondominioBySlug(condo.slug);
+        const fresh = await db.getCondominioBySlug(condo.slug || '');
         if (fresh) {
           setCondominio(fresh);
           localStorage.setItem('zelcore_condominio_gestao', JSON.stringify(fresh));
@@ -311,6 +344,7 @@ export default function ConfiguracoesPage() {
         value: price,
         cpfCnpj: cpfClean || undefined,
         phone: phoneClean.length >= 10 ? phoneClean : undefined,
+        numCondos: selectedUpgrade === 'corporate' ? numCondos : undefined,
       };
 
       if (checkoutTab === 'card') {
@@ -450,6 +484,57 @@ export default function ConfiguracoesPage() {
       }
     }
     setAwaitingPixQrCode(false);
+  };
+
+  const handleAddCondominio = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setInstanceError('');
+
+    if (!newCondoNome.trim() || !newCondoSlug.trim() || !newCondoCodigo.trim()) {
+      setInstanceError('Preencha todos os campos.');
+      return;
+    }
+
+    const cleanSlug = newCondoSlug.toLowerCase().replace(/[^a-z0-9-]/g, '');
+    if (!cleanSlug) {
+      setInstanceError('Slug inválido. Use apenas letras, números e hífens.');
+      return;
+    }
+
+    const savedGestor = localStorage.getItem('zelcore_gestor');
+    if (!savedGestor) return;
+    const gestor = JSON.parse(savedGestor);
+
+    setSavingInstance(true);
+    try {
+      const res = await fetch('/api/condominios/instancia', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nome: newCondoNome.trim(),
+          slug: cleanSlug,
+          codigo_acesso: newCondoCodigo.trim(),
+          userId: gestor.user_id,
+          gestorNome: gestor.nome,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Erro ao criar condomínio.');
+      }
+
+      setShowAddCondoModal(false);
+      setNewCondoNome('');
+      setNewCondoSlug('');
+      setNewCondoCodigo('');
+      setInstanciaCount(prev => prev + 1);
+      setToast({ message: `Condomínio "${newCondoNome}" criado com sucesso!` });
+    } catch (err) {
+      setInstanceError(err instanceof Error ? err.message : 'Erro ao criar condomínio.');
+    } finally {
+      setSavingInstance(false);
+    }
   };
 
   const handleCancelSubscription = async () => {
@@ -1185,6 +1270,54 @@ export default function ConfiguracoesPage() {
             </div>
           </div>
 
+          {/* GERENCIAMENTO DE INSTÂNCIAS CORPORATE */}
+          {condominio?.plan_type === 'corporate' && maxInstances > 0 && (
+            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-6 rounded-xl shadow-sm dark:shadow-xl space-y-4">
+              <div className="flex items-center justify-between">
+                <h4 className="text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider flex items-center">
+                  <Building2 className="w-3.5 h-3.5 mr-1.5 text-[#001CFF]" />
+                  Condomínios da Carteira
+                </h4>
+                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+                  instanciaCount >= maxInstances
+                    ? 'bg-red-500/10 text-red-400 border-red-500/20'
+                    : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                }`}>
+                  {instanciaCount}/{maxInstances}
+                </span>
+              </div>
+
+              {/* Barra de progresso */}
+              <div className="w-full bg-zinc-100 dark:bg-zinc-950 rounded-full h-2 overflow-hidden border border-zinc-200 dark:border-zinc-800">
+                <div
+                  className={`h-full transition-all duration-500 ${
+                    instanciaCount >= maxInstances ? 'bg-red-500' : 'bg-[#001CFF]'
+                  }`}
+                  style={{ width: `${Math.min((instanciaCount / maxInstances) * 100, 100)}%` }}
+                ></div>
+              </div>
+
+              <p className="text-[10px] text-zinc-500 font-medium leading-relaxed">
+                {instanciaCount < maxInstances
+                  ? `Você ainda pode adicionar ${maxInstances - instanciaCount} condomínio(s) ao seu plano Corporate.`
+                  : 'Você atingiu o limite de condomínios do seu plano. Entre em contato para aumentar o limite.'}
+              </p>
+
+              {instanciaCount < maxInstances && (
+                <button
+                  type="button"
+                  onClick={() => setShowAddCondoModal(true)}
+                  className="text-[11px] font-bold bg-[#001CFF] hover:bg-[#001CFF]/90 text-white px-4 py-2 rounded-lg transition-all active:scale-[0.97] cursor-pointer flex items-center space-x-1.5"
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                  <span>Adicionar Condomínio</span>
+                </button>
+              )}
+            </div>
+          )}
+
           {/* CANCELAR ASSINATURA */}
           {condominio?.plan_type !== 'free' && (
             <div className="bg-white dark:bg-zinc-900 border border-red-500/20 p-6 rounded-xl shadow-sm dark:shadow-xl">
@@ -1656,6 +1789,94 @@ export default function ConfiguracoesPage() {
           </div>
         </div>
       )}
+
+      {/* MODAL ADICIONAR CONDOMÍNIO */}
+      {showAddCondoModal && (
+        <div className="fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-[#0c0c0e] border border-zinc-800 rounded-2xl w-full max-w-md shadow-2xl">
+            <div className="h-1 bg-[#001CFF] shrink-0 rounded-t-2xl"></div>
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-sm font-bold text-white">Adicionar Condomínio</h3>
+                <button
+                  type="button"
+                  onClick={() => setShowAddCondoModal(false)}
+                  className="text-zinc-500 hover:text-white text-xs font-medium px-2.5 py-1 bg-zinc-900 border border-zinc-800 rounded-lg transition-all cursor-pointer"
+                >
+                  Fechar
+                </button>
+              </div>
+
+              <form onSubmit={handleAddCondominio} className="space-y-4">
+                {instanceError && (
+                  <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-400 rounded-lg text-xs font-medium flex items-center space-x-2">
+                    <AlertCircle className="w-4 h-4 shrink-0" />
+                    <span>{instanceError}</span>
+                  </div>
+                )}
+
+                <div>
+                  <label className="block text-[11px] font-medium text-zinc-400 mb-1.5">Nome do condomínio</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Ex: Residencial Park Avenue"
+                    value={newCondoNome}
+                    onChange={(e) => setNewCondoNome(e.target.value)}
+                    className="w-full px-3.5 py-2.5 bg-zinc-900/60 border border-zinc-800 rounded-xl text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-[#001CFF]/60 focus:ring-1 focus:ring-[#001CFF]/20 transition-all"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-medium text-zinc-400 mb-1.5">Slug (URL pública)</label>
+                  <div className="flex items-center bg-zinc-900/60 border border-zinc-800 rounded-xl overflow-hidden focus-within:border-[#001CFF]/60 focus-within:ring-1 focus-within:ring-[#001CFF]/20 transition-all">
+                    <span className="px-3 text-xs text-zinc-600 font-mono shrink-0">/</span>
+                    <input
+                      type="text"
+                      required
+                      placeholder="residencial-park-avenue"
+                      value={newCondoSlug}
+                      onChange={(e) => setNewCondoSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
+                      className="w-full py-2.5 pr-3.5 bg-transparent text-sm text-white placeholder-zinc-600 focus:outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-medium text-zinc-400 mb-1.5">Código de acesso (4 dígitos)</label>
+                  <input
+                    type="text"
+                    required
+                    maxLength={4}
+                    placeholder="1234"
+                    value={newCondoCodigo}
+                    onChange={(e) => setNewCondoCodigo(e.target.value.replace(/\D/g, '').substring(0, 4))}
+                    className="w-full px-3.5 py-2.5 bg-zinc-900/60 border border-zinc-800 rounded-xl text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-[#001CFF]/60 focus:ring-1 focus:ring-[#001CFF]/20 transition-all text-center tracking-widest"
+                  />
+                </div>
+
+                <div className="pt-2">
+                  <button
+                    type="submit"
+                    disabled={savingInstance}
+                    className="w-full bg-[#001CFF] hover:bg-[#001CFF]/90 text-white text-sm font-semibold py-2.5 rounded-xl transition-all shadow-lg shadow-[#001CFF]/15 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {savingInstance ? (
+                      <span className="flex items-center justify-center space-x-2">
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span>Criando...</span>
+                      </span>
+                    ) : (
+                      <span>Criar Condomínio</span>
+                    )}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Toast de sucesso */}
       {toast && (
         <div className="fixed bottom-6 right-6 z-50 animate-in slide-in-from-bottom-4 fade-in duration-300 max-w-sm w-full">

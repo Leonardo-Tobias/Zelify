@@ -27,6 +27,7 @@ export async function POST(req: NextRequest) {
       value,
       creditCard,
       holderInfo,
+      numCondos,       // corporate: max_instances
     } = body
 
     if (!condominioId || !planType || !billingType || !value) {
@@ -37,6 +38,62 @@ export async function POST(req: NextRequest) {
     }
 
     const supabase = getSupabaseAdmin()
+
+    // 0. Se for corporate, cria ou recupera o container
+    let targetCondominioId = condominioId
+    if (planType === 'corporate' && supabase) {
+      const { data: gestorRows } = await supabase
+        .from('usuarios_gestores')
+        .select('user_id')
+        .eq('condominio_id', condominioId)
+        .limit(1)
+
+      const userId = gestorRows?.[0]?.user_id
+
+      if (userId) {
+        // Buscar todos os condomínios do gestor
+        const { data: allGestorRows } = await supabase
+          .from('usuarios_gestores')
+          .select('condominio_id')
+          .eq('user_id', userId)
+
+        const allCondoIds = allGestorRows?.map(r => r.condominio_id) || []
+
+        const { data: allCondos } = await supabase
+          .from('condominios')
+          .select('*')
+          .in('id', allCondoIds)
+
+        const existingContainer = allCondos?.find(c => c.plan_type === 'corporate' && !c.parent_condominio_id)
+
+        if (!existingContainer) {
+          // Criar container corporate
+          const { data: container, error: containerErr } = await supabase
+            .from('condominios')
+            .insert({
+              nome: `Corporate - ${nome}`,
+              plan_type: 'corporate',
+              subscription_status: 'active',
+              max_instances: numCondos || 5,
+            })
+            .select()
+            .single()
+
+          if (containerErr) throw containerErr
+
+          // Adotar condomínio atual como primeira instância
+          await supabase
+            .from('condominios')
+            .update({ parent_condominio_id: container.id })
+            .eq('id', condominioId)
+
+          targetCondominioId = container.id
+        } else {
+          // Container já existe — usa ele
+          targetCondominioId = existingContainer.id
+        }
+      }
+    }
 
     // 1. Buscar ou criar customer no Asaas
     let customerId: string | null = null
@@ -59,12 +116,12 @@ export async function POST(req: NextRequest) {
       customerId = customer.id
       console.log('[CHECKOUT] Customer criado:', customerId)
 
-      // Salvar customer_id no Supabase
+      // Salvar customer_id no Supabase (no container se corporate)
       if (supabase) {
         await supabase
           .from('condominios')
           .update({ asaas_customer_id: customerId })
-          .eq('id', condominioId)
+          .eq('id', targetCondominioId)
       }
     } else {
       // Atualiza customer existente com CPF e telefone mais recentes
@@ -84,7 +141,7 @@ export async function POST(req: NextRequest) {
       holderInfo,
     )
 
-    // 3. Salvar subscription_id no Supabase
+    // 3. Salvar subscription_id no Supabase (no container se corporate, senão no próprio condomínio)
     if (supabase) {
       const days = cycle === 'YEARLY' ? 365 : 30
       const periodEnd = new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString()
@@ -98,7 +155,7 @@ export async function POST(req: NextRequest) {
           billing_type: billingType,
           current_period_end: periodEnd,
         })
-        .eq('id', condominioId)
+        .eq('id', targetCondominioId)
     }
 
     // 4. Se for PIX, cria primeiro pagamento avulso com vencimento imediato

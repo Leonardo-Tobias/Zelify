@@ -12,6 +12,8 @@ CREATE TABLE IF NOT EXISTS public.condominios (
     asaas_subscription_id TEXT,
     billing_type TEXT CHECK (billing_type IN ('PIX', 'CREDIT_CARD')),
     current_period_end TIMESTAMPTZ,
+    parent_condominio_id UUID REFERENCES public.condominios(id),
+    max_instances INTEGER,
     created_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 

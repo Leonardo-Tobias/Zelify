@@ -50,14 +50,16 @@ export function logClient(msg: string) {
 export interface Condominio {
   id: string;
   nome: string;
-  slug: string;
-  codigo_acesso: string;
+  slug?: string | null;
+  codigo_acesso?: string | null;
   plan_type: 'free' | 'pro' | 'corporate';
   subscription_status: 'active' | 'past_due' | 'canceled';
   asaas_customer_id?: string | null;
   asaas_subscription_id?: string | null;
   billing_type?: 'PIX' | 'CREDIT_CARD' | null;
   current_period_end?: string | null;
+  parent_condominio_id?: string | null;
+  max_instances?: number | null;
   created_at: string;
 }
 
@@ -324,7 +326,7 @@ export const db = {
       try {
         const condominios = localDB.getCondominios();
         logClient(`getCondominioBySlug: Condominios carregados do localStorage = ${condominios.length} itens`);
-        const result = condominios.find(c => c.slug.toLowerCase() === slug.toLowerCase()) || null;
+        const result = condominios.find(c => c.slug && c.slug.toLowerCase() === slug.toLowerCase()) || null;
         logClient(`getCondominioBySlug: Encontrado = ${JSON.stringify(result)}`);
         return result;
       } catch (err) {
@@ -582,7 +584,7 @@ export const db = {
       return !data;
     } else {
       const condominios = localDB.getCondominios();
-      const exists = condominios.some(c => c.slug.toLowerCase() === cleanSlug);
+      const exists = condominios.some(c => c.slug && c.slug.toLowerCase() === cleanSlug);
       return !exists;
     }
   },
@@ -910,6 +912,63 @@ export const db = {
       localDB.saveCondominios(condominios);
       return condominios[index];
     }
+  },
+
+  async getCorporateContainer(userId: string): Promise<Condominio | null> {
+    const condos = await this.getCondominiosByGestorUser(userId);
+    return condos.find(c => c.plan_type === 'corporate' && !c.parent_condominio_id) || null;
+  },
+
+  async countCondominioInstancias(containerId: string): Promise<number> {
+    if (supabase) {
+      const { count, error } = await supabase
+        .from('condominios')
+        .select('*', { count: 'exact', head: true })
+        .eq('parent_condominio_id', containerId);
+      if (error) throw error;
+      return count || 0;
+    }
+    return 0;
+  },
+
+  async createCondominioInstancia(params: {
+    nome: string;
+    slug: string;
+    codigo_acesso: string;
+    parentId: string;
+    userId: string;
+    gestorNome: string;
+  }): Promise<Condominio> {
+    if (supabase) {
+      const { data: condo, error: err1 } = await supabase
+        .from('condominios')
+        .insert({
+          nome: params.nome,
+          slug: params.slug,
+          codigo_acesso: params.codigo_acesso,
+          plan_type: 'corporate',
+          subscription_status: 'active',
+          parent_condominio_id: params.parentId,
+        })
+        .select()
+        .single();
+
+      if (err1) throw err1;
+
+      const { error: err2 } = await supabase
+        .from('usuarios_gestores')
+        .insert({
+          user_id: params.userId,
+          condominio_id: condo.id,
+          nome: params.gestorNome,
+          papel: 'admin',
+        });
+
+      if (err2) throw err2;
+
+      return condo as Condominio;
+    }
+    throw new Error('Supabase não configurado');
   }
 };
 

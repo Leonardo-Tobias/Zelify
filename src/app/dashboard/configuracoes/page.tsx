@@ -351,6 +351,18 @@ export default function ConfiguracoesPage() {
         setCheckoutSubscriptionId(data.subscriptionId);
         setProcessingCheckout(false);
 
+        // Atualiza localStorage com o novo plano
+        const updatedPix: Condominio = {
+          ...condominio!,
+          plan_type: selectedUpgrade,
+          subscription_status: 'active',
+          billing_type: 'PIX' as const,
+          current_period_end: new Date(Date.now() + (isAnnual ? 365 : 30) * 86400000).toISOString(),
+        };
+        setCondominio(updatedPix);
+        localStorage.setItem('zelcore_condominio_gestao', JSON.stringify(updatedPix));
+        window.dispatchEvent(new Event('storage'));
+
         // Se não veio QR Code ainda, faz polling
         if (!data.pix?.qrCode && !data.pix?.copyPaste && data.subscriptionId) {
           pollPixQrCode(data.subscriptionId);

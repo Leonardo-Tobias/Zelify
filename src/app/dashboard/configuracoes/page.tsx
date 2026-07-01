@@ -22,7 +22,9 @@ import {
   Sparkles,
   CheckCircle2,
   Lock,
-  RefreshCw
+  RefreshCw,
+  Shield,
+  X
 } from 'lucide-react';
 import { db, Condominio } from '@/lib/db';
 import { BillingSwitch } from '@/components/ui/switch';
@@ -78,6 +80,9 @@ export default function ConfiguracoesPage() {
   const [pixCopyPaste, setPixCopyPaste] = useState<string | null>(null);
   const [checkoutSubscriptionId, setCheckoutSubscriptionId] = useState<string | null>(null);
   const [pixPaid, setPixPaid] = useState(false);
+
+  // Toast de sucesso
+  const [toast, setToast] = useState<{ message: string } | null>(null);
 
   useEffect(() => {
     const savedCondo = localStorage.getItem('zelcore_condominio_gestao');
@@ -149,6 +154,14 @@ export default function ConfiguracoesPage() {
     }
     loadMonthlyCount();
   }, [condominio]);
+
+  // Auto-dismiss toast
+  useEffect(() => {
+    if (toast) {
+      const timer = setTimeout(() => setToast(null), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [toast]);
 
   // Limpar e formatar o slug (letras, números, hífen, sem espaços ou acentos)
   const formatSlug = (val: string) => {
@@ -353,7 +366,7 @@ export default function ConfiguracoesPage() {
       window.dispatchEvent(new Event('storage'));
       setShowCheckoutModal(false);
       setCardNumber(''); setCardName(''); setCardExpiry(''); setCardCvv(''); setCardEmail(''); setCardCpf(''); setCardPhone('');
-      alert(`Assinatura ativada com sucesso! Seu condomínio agora está no plano ${selectedUpgrade === 'pro' ? 'Zelcore Pro' : 'Zelcore Corporate'}.`);
+      setToast({ message: `Assinatura ativada com sucesso! Seu condomínio agora está no plano ${selectedUpgrade === 'pro' ? 'Zelcore Pro' : 'Zelcore Corporate'}.` });
     } catch (err) {
       console.error(err);
       setCheckoutError(err instanceof Error ? err.message : 'Erro de processamento da transação. Tente novamente.');
@@ -1107,12 +1120,12 @@ export default function ConfiguracoesPage() {
       {/* MODAL DE CHECKOUT */}
       {showCheckoutModal && (
         <div className="fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-[#0c0c0e] border border-zinc-800 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl relative">
+          <div className="bg-[#0c0c0e] border border-zinc-800 rounded-2xl w-full max-w-md shadow-2xl relative flex flex-col max-h-[90vh]">
             {/* Linha superior azul */}
-            <div className="h-1 bg-[#001CFF]"></div>
+            <div className="h-1 bg-[#001CFF] shrink-0"></div>
             
             {/* Header do checkout */}
-            <div className="p-6 pb-4 border-b border-zinc-800/80 flex justify-between items-center">
+            <div className="p-6 pb-4 border-b border-zinc-800/80 flex justify-between items-center sticky top-0 bg-[#0c0c0e] z-10">
               <div>
                 <h3 className="text-sm font-bold text-white uppercase tracking-wider">Finalizar Assinatura</h3>
                 <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider mt-0.5">
@@ -1128,7 +1141,7 @@ export default function ConfiguracoesPage() {
               </button>
             </div>
 
-            <form onSubmit={handleCheckout} className="p-6 space-y-4">
+            <form onSubmit={handleCheckout} className="overflow-y-auto flex-1 p-6 space-y-4">
               {checkoutError && (
                 <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-400 rounded-lg text-xs font-semibold flex items-center space-x-2">
                   <AlertCircle className="w-4 h-4 shrink-0 text-red-400" />
@@ -1493,29 +1506,71 @@ export default function ConfiguracoesPage() {
                 </div>
               )}
 
-              {/* Botão de Finalizar */}
-              <div className="pt-4 border-t border-zinc-800 flex justify-end">
-                <button
-                  type="submit"
-                  disabled={processingCheckout}
-                  className="w-full bg-[#001CFF] hover:bg-[#001CFF]/90 text-white text-xs font-bold py-2.5 rounded-lg flex items-center justify-center space-x-1.5 transition-all shadow-[0_4px_15px_rgba(0,51,255,0.2)] active:scale-[0.98] disabled:opacity-50 cursor-pointer"
-                >
-                  {processingCheckout ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin mr-1.5 text-zinc-200" />
-                      <span>Processando via Asaas...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Lock className="w-3.5 h-3.5" />
-                      <span>
-                        {checkoutTab === 'pix' ? (pixQrCode ? 'Confirmar Pix Pago' : 'Gerar QR Code PIX') : 'Finalizar Assinatura'}
-                      </span>
-                    </>
-                  )}
-                </button>
+              {/* Rodapé fixo: badges + CTA */}
+              <div className="sticky bottom-0 bg-[#0c0c0e] border-t border-zinc-800 shadow-[0_-4px_20px_rgba(0,0,0,0.5)]">
+                <div className="px-6 pt-4 pb-2 space-y-1.5">
+                  <div className="flex items-center space-x-2 text-[9.5px] text-zinc-500">
+                    <Lock className="w-3 h-3 text-emerald-500 shrink-0" />
+                    <span>Pagamento processado pelo <strong className="text-zinc-400">Asaas</strong></span>
+                  </div>
+                  <div className="flex items-center space-x-2 text-[9.5px] text-zinc-500">
+                    <Shield className="w-3 h-3 text-emerald-500 shrink-0" />
+                    <span>Dados criptografados via <strong className="text-zinc-400">SSL/TLS</strong></span>
+                  </div>
+                  <div className="flex items-center space-x-2 text-[9.5px] text-zinc-500">
+                    <CheckCircle2 className="w-3 h-3 text-emerald-500 shrink-0" />
+                    <span>Não armazenamos dados do seu cartão</span>
+                  </div>
+                </div>
+                <div className="px-6 pb-6 pt-2">
+                  <button
+                    type="submit"
+                    disabled={processingCheckout}
+                    className="w-full bg-[#001CFF] hover:bg-[#001CFF]/90 text-white text-xs font-bold py-2.5 rounded-lg flex items-center justify-center space-x-1.5 transition-all shadow-[0_4px_15px_rgba(0,51,255,0.2)] active:scale-[0.98] disabled:opacity-50 cursor-pointer"
+                  >
+                    {processingCheckout ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin mr-1.5 text-zinc-200" />
+                        <span>Processando via Asaas...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Lock className="w-3.5 h-3.5" />
+                        <span>
+                          {checkoutTab === 'pix' ? (pixQrCode ? 'Confirmar Pix Pago' : 'Gerar QR Code PIX') : 'Finalizar Assinatura'}
+                        </span>
+                      </>
+                    )}
+                  </button>
+                </div>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Toast de sucesso */}
+      {toast && (
+        <div className="fixed bottom-6 right-6 z-50 animate-in slide-in-from-bottom-4 fade-in duration-300 max-w-sm w-full">
+          <div className="relative overflow-hidden rounded-2xl border border-emerald-500/25 shadow-2xl bg-gradient-to-br from-emerald-500/10 via-zinc-950/95 to-zinc-950/95 backdrop-blur-xl shadow-[0_8px_40px_rgba(16,185,129,0.1)]">
+            <div className="absolute -top-6 -right-6 w-20 h-20 rounded-full blur-2xl pointer-events-none bg-emerald-500/15" />
+            <div className="relative p-4">
+              <button
+                onClick={() => setToast(null)}
+                className="absolute top-3 right-3 p-1 text-zinc-500 hover:text-white rounded-md hover:bg-white/10 transition-all cursor-pointer"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+              <div className="flex items-start space-x-3 pr-6">
+                <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border bg-emerald-500/15 border-emerald-500/30 text-emerald-400">
+                  <CheckCircle2 className="w-4.5 h-4.5" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-sm font-bold text-white leading-tight">Assinatura Ativada</p>
+                  <p className="text-[11px] text-zinc-400 mt-1 leading-relaxed font-medium">{toast.message}</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}

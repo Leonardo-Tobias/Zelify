@@ -292,20 +292,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
             {/* MOBILE CONDOMINIUM SELECTOR */}
             {condominios.length > 1 && (
               <div className="space-y-1">
-                <button
-                  onClick={() => {
-                    setMobileMenuOpen(false);
-                    router.push('/dashboard?view=portfolio');
-                  }}
-                  className={`w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm transition-colors ${
-                    isPortfolioView
-                      ? 'bg-zinc-100 dark:bg-white/[0.06] text-zinc-900 dark:text-white font-bold border border-zinc-200 dark:border-white/[0.08]'
-                      : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/[0.03] font-medium'
-                  }`}
-                >
-                  <Building2 className="w-4 h-4 shrink-0" />
-                  <span>Visão Geral (Carteira)</span>
-                </button>
+                <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-wider px-3 pb-1 block">Condomínios</span>
                 {condominios.slice(0, 5).map((c) => (
                   <button
                     key={c.id}
@@ -436,23 +423,15 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
               <button
                 type="button"
                 onClick={() => setCondoDropdownOpen(!condoDropdownOpen)}
-                className={`w-full flex items-center justify-between p-2.5 rounded-xl text-left transition-all shadow-sm border ${
-                  isPortfolioView
-                    ? 'bg-[#001CFF]/5 border-[#001CFF]/10'
-                    : 'bg-zinc-100 dark:bg-white/[0.04] border-zinc-200 dark:border-white/[0.06] hover:border-zinc-300 dark:hover:border-white/[0.12]'
-                }`}
+                className="w-full flex items-center justify-between p-2.5 rounded-xl text-left transition-all shadow-sm border bg-zinc-100 dark:bg-white/[0.04] border-zinc-200 dark:border-white/[0.06] hover:border-zinc-300 dark:hover:border-white/[0.12]"
               >
                 <div className="flex items-center space-x-2.5 min-w-0 flex-1">
-                  <div className={`w-6 h-6 rounded flex items-center justify-center text-[10px] font-extrabold shrink-0 border ${
-                    isPortfolioView
-                      ? 'bg-[#001CFF]/15 border-[#001CFF]/30 text-[#001CFF]'
-                      : 'bg-[#001CFF]/10 border-[#001CFF]/20 text-[#001CFF]'
-                  }`}>
-                    {isPortfolioView ? <Building2 className="w-3.5 h-3.5" /> : condominio.nome.charAt(0)}
+                  <div className="w-6 h-6 rounded flex items-center justify-center text-[10px] font-extrabold shrink-0 border bg-[#001CFF]/10 border-[#001CFF]/20 text-[#001CFF]">
+                    {condominio.nome.charAt(0)}
                   </div>
                   <div className="min-w-0 flex-1">
                     <span className="text-xs font-bold text-zinc-900 dark:text-white block truncate leading-none">
-                      {isPortfolioView ? 'Minha Carteira' : condominio.nome}
+                      {condominio.nome}
                     </span>
                     <span className="text-[9px] text-zinc-500 font-semibold block mt-0.5 truncate">
                       {condominios.length} {condominios.length === 1 ? 'condomínio' : 'condomínios'}
@@ -466,24 +445,6 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
 
               {condoDropdownOpen && (
                 <div className="absolute left-0 right-0 top-full mt-1.5 bg-zinc-900 border border-zinc-800 rounded-xl shadow-2xl z-30 py-1 animate-in fade-in slide-in-from-top-1 duration-150">
-                  {/* Cabeçalho da carteira */}
-                  <button
-                    onClick={() => {
-                      setCondoDropdownOpen(false);
-                      router.push('/dashboard?view=portfolio');
-                    }}
-                    className={`w-full flex items-center space-x-3 px-3 py-2.5 text-xs transition-colors ${
-                      isPortfolioView
-                        ? 'bg-[#001CFF]/10 text-[#001CFF] font-bold'
-                        : 'text-zinc-400 hover:text-white hover:bg-zinc-800/60 font-medium'
-                    }`}
-                  >
-                    <Building2 className="w-3.5 h-3.5 shrink-0" />
-                    <span>Visão Geral (Carteira)</span>
-                    <span className="ml-auto text-[10px] text-zinc-600">{condominios.length} itens</span>
-                  </button>
-
-                  <div className="h-px bg-zinc-800/60 mx-3 my-1"></div>
 
                   {/* Lista de condomínios */}
                   <div className="max-h-[200px] overflow-y-auto scrollbar-thin scrollbar-thumb-zinc-700 scrollbar-track-transparent">

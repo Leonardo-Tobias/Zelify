@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-import { createAsaasCustomer, createAsaasSubscription, createAsaasPixPayment } from '@/lib/asaas'
+import { createAsaasCustomer, createAsaasSubscription, createAsaasPixPayment, updateAsaasCustomer } from '@/lib/asaas'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || ''
@@ -54,8 +54,10 @@ export async function POST(req: NextRequest) {
     }
 
     if (!customerId) {
+      console.log('[CHECKOUT] Criando customer...', { nome, email, cpfCnpj, phone })
       const customer = await createAsaasCustomer(nome, email, cpfCnpj, phone)
       customerId = customer.id
+      console.log('[CHECKOUT] Customer criado:', customerId)
 
       // Salvar customer_id no Supabase
       if (supabase) {
@@ -64,9 +66,14 @@ export async function POST(req: NextRequest) {
           .update({ asaas_customer_id: customerId })
           .eq('id', condominioId)
       }
+    } else {
+      // Atualiza customer existente com CPF e telefone mais recentes
+      console.log('[CHECKOUT] Atualizando customer existente:', customerId, { nome, email, cpfCnpj, phone })
+      await updateAsaasCustomer(customerId, nome, email, cpfCnpj, phone)
     }
 
     // 2. Criar assinatura no Asaas
+    console.log('[CHECKOUT] Criando assinatura...', { customerId, planType, billingType })
     const subscription = await createAsaasSubscription(
       customerId,
       planType,
@@ -124,6 +131,10 @@ export async function POST(req: NextRequest) {
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Erro interno no checkout'
     console.error('[CHECKOUT ERROR]', err)
-    return NextResponse.json({ error: message }, { status: 500 })
+    console.error('[CHECKOUT ERROR stack]', err instanceof Error ? err.stack : '')
+    return NextResponse.json({
+      error: message,
+      detail: err instanceof Error ? err.message : 'Erro desconhecido',
+    }, { status: 500 })
   }
 }

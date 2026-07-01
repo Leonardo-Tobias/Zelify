@@ -46,11 +46,19 @@ const api = {
   async createCustomer(name: string, email: string, cpfCnpj?: string, phone?: string): Promise<AsaasCustomer> {
     const params: Record<string, string> = { name, email }
     if (cpfCnpj) params.cpfCnpj = cpfCnpj
-    // Asaas aceita mobilePhone com DDD + 9 dígitos (11 números)
     if (phone && phone.length >= 10) {
       params.mobilePhone = phone
     }
     return this.request<AsaasCustomer>('POST', '/customers', params)
+  },
+
+  async updateCustomer(id: string, name: string, email: string, cpfCnpj?: string, phone?: string): Promise<AsaasCustomer> {
+    const params: Record<string, string> = { name, email }
+    if (cpfCnpj) params.cpfCnpj = cpfCnpj
+    if (phone && phone.length >= 10) {
+      params.mobilePhone = phone
+    }
+    return this.request<AsaasCustomer>('POST', `/customers/${id}`, params)
   },
 
   async getCustomer(id: string): Promise<AsaasCustomer> {
@@ -119,6 +127,10 @@ const api = {
 
 export async function createAsaasCustomer(name: string, email: string, cpfCnpj?: string, phone?: string) {
   return api.createCustomer(name, email, cpfCnpj, phone)
+}
+
+export async function updateAsaasCustomer(id: string, name: string, email: string, cpfCnpj?: string, phone?: string) {
+  return api.updateCustomer(id, name, email, cpfCnpj, phone)
 }
 
 export async function createAsaasSubscription(

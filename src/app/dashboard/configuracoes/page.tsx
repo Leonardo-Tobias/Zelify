@@ -271,6 +271,14 @@ export default function ConfiguracoesPage() {
         setCheckoutError('Código CVV inválido.');
         return;
       }
+      if (cardCep.replace(/\D/g, '').length !== 8) {
+        setCheckoutError('CEP inválido. Digite 8 dígitos.');
+        return;
+      }
+      if (!cardAddressNumber.trim()) {
+        setCheckoutError('Informe o número do endereço.');
+        return;
+      }
     }
 
     if (cardCpf.replace(/\D/g, '').length !== 11) {
@@ -279,14 +287,6 @@ export default function ConfiguracoesPage() {
     }
     if (cardPhone.replace(/\D/g, '').length < 10) {
       setCheckoutError('Telefone inválido. Informe DDD + número (ex: 11999999999).');
-      return;
-    }
-    if (cardCep.replace(/\D/g, '').length !== 8) {
-      setCheckoutError('CEP inválido. Digite 8 dígitos.');
-      return;
-    }
-    if (!cardAddressNumber.trim()) {
-      setCheckoutError('Informe o número do endereço.');
       return;
     }
 
@@ -1348,50 +1348,9 @@ export default function ConfiguracoesPage() {
                               className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-white placeholder-zinc-705 focus:outline-none focus:border-[#001CFF]/50 font-semibold"
                             />
                           </div>
-                          <div className="grid grid-cols-2 gap-4">
-                            <div>
-                              <label className="block text-[9px] font-bold uppercase tracking-wider text-zinc-500 mb-1">
-                                CEP
-                              </label>
-                              <input
-                                type="text"
-                                required
-                                maxLength={9}
-                                placeholder="00000-000"
-                                value={cardCep}
-                                onChange={(e) => {
-                                  const v = e.target.value.replace(/\D/g, '').replace(/(\d{5})(\d{3})/, '$1-$2').substring(0, 9);
-                                  setCardCep(v);
-                                }}
-                                className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-white placeholder-zinc-705 focus:outline-none focus:border-[#001CFF]/50 font-semibold"
-                              />
-                            </div>
-                            <div>
-                              <label className="block text-[9px] font-bold uppercase tracking-wider text-zinc-500 mb-1">
-                                Número
-                              </label>
-                              <input
-                                type="text"
-                                required
-                                placeholder="Ex: 100"
-                                value={cardAddressNumber}
-                                onChange={(e) => setCardAddressNumber(e.target.value)}
-                                className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-white placeholder-zinc-705 focus:outline-none focus:border-[#001CFF]/50 font-semibold"
-                              />
-                            </div>
-                          </div>
-                          <div>
-                            <label className="block text-[9px] font-bold uppercase tracking-wider text-zinc-500 mb-1">
-                              Complemento <span className="text-zinc-600">(opcional)</span>
-                            </label>
-                            <input
-                              type="text"
-                              placeholder="Ex: Apt 42, Bloco B"
-                              value={cardAddressComplement}
-                              onChange={(e) => setCardAddressComplement(e.target.value)}
-                              className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-white placeholder-zinc-705 focus:outline-none focus:border-[#001CFF]/50 font-semibold"
-                            />
-                          </div>
+                          <p className="text-[9px] text-zinc-500 italic">
+                            CPF e telefone são usados para identificar o pagamento. CEP e endereço só são necessários para cartão de crédito.
+                          </p>
                         </div>
                       )
                     }

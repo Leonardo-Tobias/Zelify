@@ -93,6 +93,14 @@ function DashboardHomeContent() {
         const isCorp = hasCorporate || list.length > 1;
         setIsCorporate(isCorp);
 
+        // Auto-seleciona o primeiro condomínio se nenhum estiver selecionado
+        if (isCorp && !currentCondo && list.length > 0) {
+          const first = list.find(c => !(c.plan_type === 'corporate' && !c.parent_condominio_id)) || list[0]
+          currentCondo = first
+          setCondominio(first)
+          localStorage.setItem('zelcore_condominio_gestao', JSON.stringify(first))
+        }
+
         if (isCorp && (isPortfolioView || !currentCondo)) {
           // Carregar dados do portfólio — remove apenas o container corporate
           const containerIdDrop = list.find(c => c.plan_type === 'corporate' && !c.parent_condominio_id)?.id

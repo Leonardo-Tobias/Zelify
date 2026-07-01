@@ -132,6 +132,15 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
           const containerId = list.find(c => c.plan_type === 'corporate' && !c.parent_condominio_id)?.id
           const instances = list.filter(c => c.id !== containerId)
           setCondominios(instances);
+
+          // Auto-seleciona o primeiro condomínio se o atual não está na lista
+          const currentIsValid = condominio && instances.some(c => c.id === condominio.id)
+          if (instances.length > 0 && !currentIsValid) {
+            const first = instances[0]
+            setCondominio(first)
+            localStorage.setItem('zelcore_condominio_gestao', JSON.stringify(first))
+          }
+
           const hasCorporate = list.some(c => c.plan_type === 'corporate');
           setIsCorporate(hasCorporate || list.length > 1);
         })

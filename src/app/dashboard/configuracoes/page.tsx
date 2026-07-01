@@ -89,7 +89,9 @@ export default function ConfiguracoesPage() {
   // Estados de gerenciamento de instâncias corporate
   const [instanciaCount, setInstanciaCount] = useState(0);
   const [maxInstances, setMaxInstances] = useState(0);
+  const [instanciaList, setInstanciaList] = useState<Condominio[]>([]);
   const [showAddCondoModal, setShowAddCondoModal] = useState(false);
+  const [excluindoId, setExcluindoId] = useState<string | null>(null);
   const [newCondoNome, setNewCondoNome] = useState('');
   const [newCondoSlug, setNewCondoSlug] = useState('');
   const [newCondoCodigo, setNewCondoCodigo] = useState('');
@@ -108,8 +110,12 @@ export default function ConfiguracoesPage() {
         const container = await db.getCorporateContainer(gestor.user_id);
         if (container?.max_instances) {
           setMaxInstances(container.max_instances);
-          const count = await db.countCondominioInstancias(container.id);
-          setInstanciaCount(count);
+          // Carrega lista de instâncias
+          const condos = await db.getCondominiosByGestorUser(gestor.user_id);
+          const containerId = condos.find(c => c.plan_type === 'corporate' && !c.parent_condominio_id)?.id;
+          const list = condos.filter(c => c.id !== containerId);
+          setInstanciaList(list);
+          setInstanciaCount(list.length);
         }
       } catch (err) {
         console.error('Erro ao carregar instâncias:', err);
@@ -540,6 +546,31 @@ export default function ConfiguracoesPage() {
       setInstanceError(err instanceof Error ? err.message : 'Erro ao criar condomínio.');
     } finally {
       setSavingInstance(false);
+    }
+  };
+
+  const handleExcluirInstancia = async (id: string, nome: string) => {
+    if (!window.confirm(`Tem certeza que deseja remover "${nome}"? Os chamados e dados deste condomínio serão excluídos permanentemente.`)) return;
+
+    setExcluindoId(id);
+    try {
+      const res = await fetch('/api/condominios/excluir', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ condominioId: id }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || 'Erro ao remover condomínio');
+      }
+      setInstanciaList(prev => prev.filter(c => c.id !== id));
+      setInstanciaCount(prev => prev - 1);
+      setToast({ message: `Condomínio "${nome}" removido com sucesso.` });
+    } catch (err) {
+      console.error(err);
+      setCheckoutError(err instanceof Error ? err.message : 'Erro ao remover condomínio');
+    } finally {
+      setExcluindoId(null);
     }
   };
 
@@ -1308,6 +1339,31 @@ export default function ConfiguracoesPage() {
                   ? `Você ainda pode adicionar ${maxInstances - instanciaCount} condomínio(s) ao seu plano Corporate.`
                   : 'Você atingiu o limite de condomínios do seu plano. Entre em contato para aumentar o limite.'}
               </p>
+
+              {/* Lista de condomínios */}
+              {instanciaList.length > 0 && (
+                <div className="space-y-2 pt-1 border-t border-zinc-200 dark:border-zinc-800/60">
+                  <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-wider block mb-2">Condomínios ativos</span>
+                  {instanciaList.map((c) => (
+                    <div key={c.id} className="flex items-center justify-between py-1.5 px-2.5 bg-zinc-50 dark:bg-zinc-950/60 rounded-lg border border-zinc-200 dark:border-zinc-800/50">
+                      <div className="flex items-center space-x-2.5 min-w-0">
+                        <div className="w-5 h-5 rounded bg-[#001CFF]/10 border border-[#001CFF]/20 flex items-center justify-center text-[#001CFF] text-[8px] font-extrabold shrink-0">
+                          {c.nome.charAt(0)}
+                        </div>
+                        <span className="text-xs font-semibold text-zinc-800 dark:text-zinc-200 truncate">{c.nome}</span>
+                      </div>
+                      <button
+                        type="button"
+                        disabled={excluindoId === c.id}
+                        onClick={() => handleExcluirInstancia(c.id, c.nome)}
+                        className="text-[10px] font-bold text-red-500 hover:text-red-400 px-2 py-1 rounded-md hover:bg-red-500/10 transition-all disabled:opacity-50 cursor-pointer"
+                      >
+                        {excluindoId === c.id ? '...' : 'Remover'}
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
 
               {instanciaCount < maxInstances && (
                 <button

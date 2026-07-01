@@ -687,13 +687,14 @@ export default function ConfiguracoesPage() {
   // Preços dinâmicos baseados no Toggle Mensal / Anual
   const pricePro = isAnnual ? 124 : 149;
   
+  const isCorporateUnlimited = numCondos >= 100;
   let priceCorporatePerCondo = isAnnual ? 49 : 59;
   if (numCondos >= 16 && numCondos <= 50) {
     priceCorporatePerCondo = isAnnual ? 39 : 49;
-  } else if (numCondos > 50) {
+  } else if (numCondos > 50 && numCondos < 100) {
     priceCorporatePerCondo = isAnnual ? 29 : 39;
   }
-  const totalCorporatePrice = numCondos * priceCorporatePerCondo;
+  const totalCorporatePrice = isCorporateUnlimited ? 0 : numCondos * priceCorporatePerCondo;
 
   return (
     <div className="space-y-6 max-w-2xl relative">
@@ -1299,29 +1300,38 @@ export default function ConfiguracoesPage() {
                     *Condição exclusiva para o plano Corporate (mínimo de 5 condomínios ativos).
                   </p>
 
-                  <div className="flex justify-between items-center text-[10px] text-zinc-500 font-semibold border-t border-zinc-200 dark:border-zinc-800/60 pt-2">
-                    <span>Preço / Prédio:</span>
-                    <span className="font-bold text-zinc-800 dark:text-zinc-200">
-                      R$ {priceCorporatePerCondo},00
-                    </span>
-                  </div>
-
-                  <div className="flex justify-between items-baseline border-t border-zinc-200 dark:border-zinc-800/60 pt-2">
-                    <span className="text-xs font-bold text-zinc-700 dark:text-zinc-350">Mensalidade Total:</span>
-                    <div className="flex flex-col items-end">
-                      <div className="flex items-baseline">
-                        <span className="text-lg font-black text-brand">
-                          R$ {totalCorporatePrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                        </span>
-                        <span className="text-zinc-500 text-[10px] font-semibold ml-0.5">/mês</span>
-                      </div>
-                      {isAnnual && (
-                        <span className="text-[9.5px] text-zinc-450 dark:text-zinc-550 font-bold mt-0.5">
-                          Cobrado anualmente (R$ {(totalCorporatePrice * 12).toLocaleString('pt-BR')}/ano)
-                        </span>
-                      )}
+                  {isCorporateUnlimited ? (
+                    <div className="border-t border-zinc-200 dark:border-zinc-800/60 pt-3">
+                      <span className="text-lg font-black text-brand">Ilimitado</span>
+                      <span className="text-xs text-zinc-500 font-semibold ml-1.5">condomínios</span>
+                      <p className="text-[10px] text-zinc-500 mt-1">Sob consulta comercial</p>
                     </div>
-                  </div>
+                  ) : (
+                    <>
+                      <div className="flex justify-between items-center text-[10px] text-zinc-500 font-semibold border-t border-zinc-200 dark:border-zinc-800/60 pt-2">
+                        <span>Preço / Prédio:</span>
+                        <span className="font-bold text-zinc-800 dark:text-zinc-200">
+                          R$ {priceCorporatePerCondo},00
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-baseline border-t border-zinc-200 dark:border-zinc-800/60 pt-2">
+                        <span className="text-xs font-bold text-zinc-700 dark:text-zinc-350">Mensalidade Total:</span>
+                        <div className="flex flex-col items-end">
+                          <div className="flex items-baseline">
+                            <span className="text-lg font-black text-brand">
+                              R$ {totalCorporatePrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                            </span>
+                            <span className="text-zinc-500 text-[10px] font-semibold ml-0.5">/mês</span>
+                          </div>
+                          {isAnnual && (
+                            <span className="text-[9.5px] text-zinc-450 dark:text-zinc-550 font-bold mt-0.5">
+                              Cobrado anualmente (R$ {(totalCorporatePrice * 12).toLocaleString('pt-BR')}/ano)
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </div>
 
                 <hr className="border-zinc-200 dark:border-zinc-800" />
@@ -1351,20 +1361,26 @@ export default function ConfiguracoesPage() {
                   type="button"
                   disabled={condominio?.plan_type === 'corporate' && condominio?.subscription_status === 'active'}
                   onClick={() => {
+                    if (isCorporateUnlimited) {
+                      window.location.href = 'mailto:vendas@zelcore.com.br?subject=Corporate%20Ilimitado';
+                      return;
+                    }
                     setSelectedUpgrade('corporate');
                     setShowCheckoutModal(true);
                   }}
                   className={`w-full text-xs font-bold py-2.5 rounded-lg transition-all text-center flex items-center justify-center space-x-1.5 ${
                     condominio?.plan_type === 'corporate' && condominio?.subscription_status === 'active'
                       ? 'bg-zinc-100 dark:bg-zinc-950 text-zinc-400 border border-zinc-200 dark:border-zinc-800 cursor-not-allowed'
-                      : 'bg-brand hover:bg-brand/90 text-white shadow-[0_4px_15px_rgba(0,51,255,0.2)] active:scale-[0.98] cursor-pointer'
+                      : isCorporateUnlimited
+                        ? 'bg-gradient-to-r from-brand to-blue-600 hover:opacity-95 text-white shadow-lg'
+                        : 'bg-brand hover:bg-brand/90 text-white shadow-[0_4px_15px_rgba(0,51,255,0.2)] active:scale-[0.98] cursor-pointer'
                   }`}
                 >
                   <Calculator className="w-3.5 h-3.5" />
                   <span>
                     {condominio?.plan_type === 'corporate' 
                       ? (condominio?.subscription_status === 'active' ? 'Plano Ativo' : 'Regularizar Assinatura') 
-                      : 'Assinar Plano Corporate'}
+                      : isCorporateUnlimited ? 'Falar com Consultor' : 'Assinar Plano Corporate'}
                   </span>
                 </button>
               </div>

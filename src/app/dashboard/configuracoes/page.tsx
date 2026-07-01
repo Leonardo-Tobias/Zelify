@@ -25,7 +25,9 @@ import {
   RefreshCw,
   Shield,
   X,
-  Building2
+  Building2,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 import { db, Condominio } from '@/lib/db';
 import { BillingSwitch } from '@/components/ui/switch';
@@ -97,6 +99,7 @@ export default function ConfiguracoesPage() {
   const [newCondoCodigo, setNewCondoCodigo] = useState('');
   const [savingInstance, setSavingInstance] = useState(false);
   const [instanceError, setInstanceError] = useState('');
+  const [showCodigo, setShowCodigo] = useState(false);
 
   // Carregar info de instâncias corporate
   useEffect(() => {
@@ -1933,15 +1936,24 @@ export default function ConfiguracoesPage() {
                   <label className="block text-xs font-bold uppercase tracking-wider text-zinc-300 mb-1.5">
                     Código de acesso dos moradores
                   </label>
-                  <input
-                    type="text"
-                    required
-                    maxLength={4}
-                    placeholder="1234"
-                    value={newCondoCodigo}
-                    onChange={(e) => setNewCondoCodigo(e.target.value.replace(/\D/g, '').substring(0, 4))}
-                    className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-[#001CFF]/50 focus:border-[#001CFF]/50 hover:border-zinc-700 transition-all font-medium text-center tracking-widest"
-                  />
+                  <div className="relative">
+                    <input
+                      type={showCodigo ? 'text' : 'password'}
+                      required
+                      maxLength={4}
+                      placeholder="1234"
+                      value={newCondoCodigo}
+                      onChange={(e) => setNewCondoCodigo(e.target.value.replace(/\D/g, '').substring(0, 4))}
+                      className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-[#001CFF]/50 focus:border-[#001CFF]/50 hover:border-zinc-700 transition-all font-medium text-center tracking-widest"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowCodigo(!showCodigo)}
+                      className="absolute right-3 top-2.5 text-zinc-500 hover:text-zinc-300 transition-colors"
+                    >
+                      {showCodigo ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
                 </div>
 
                 <button

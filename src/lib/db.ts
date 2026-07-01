@@ -519,15 +519,31 @@ export const db = {
       });
       if (authError || !authData.user) return null;
       
-      const { data: gestorData, error: gestorError } = await supabase
+      const { data: gestorRows, error: gestorError } = await supabase
         .from('usuarios_gestores')
         .select('*, condominios(*)')
-        .eq('user_id', authData.user.id)
-        .single();
+        .eq('user_id', authData.user.id);
       
-      if (gestorError || !gestorData) return null;
+      if (gestorError || !gestorRows?.length) return null;
+
+      // Se tiver múltiplos vínculos, prioriza: sindico > admin > zelador, e evita container (slug null)
+      let best = gestorRows[0]
+      for (const row of gestorRows) {
+        const condo = (row as any).condominios
+        // Prefere quem não é container (tem slug)
+        if (!condo?.slug && best !== row) continue // pula container se tiver outra opção
+        if (condo?.slug) {
+          // Prefere sindico > admin > zelador
+          const papelOrder = { sindico: 0, admin: 1, zelador: 2 }
+          const currentScore = papelOrder[row.papel as keyof typeof papelOrder] ?? 99
+          const bestScore = papelOrder[best.papel as keyof typeof papelOrder] ?? 99
+          if (currentScore < bestScore) {
+            best = row
+          }
+        }
+      }
       
-      const { condominios: condo, ...gestor } = gestorData as any;
+      const { condominios: condo, ...gestor } = best as any;
       return {
         gestor,
         condominio: condo

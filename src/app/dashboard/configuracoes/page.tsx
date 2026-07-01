@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { 
   Settings, 
   Save, 
@@ -154,37 +154,33 @@ export default function ConfiguracoesPage() {
   }, [router]);
 
   // Carrega a aba e o plano a partir da URL se fornecidos (fluxo de signup vindo da LP)
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const search = new URLSearchParams(window.location.search);
-      const tabParam = search.get('tab');
-      const planParam = search.get('plan');
-      const intervalParam = search.get('interval');
-      
-      if (tabParam === 'faturamento') {
-        setActiveTab('faturamento');
-        
-        if (intervalParam === 'yearly') {
-          setIsAnnual(true);
-        }
-        
-        if (planParam === 'pro' || planParam === 'corporate') {
-          setSelectedUpgrade(planParam);
-          setShowCheckoutModal(true);
-          
-          const newUrl = window.location.pathname + '?tab=faturamento';
-          window.history.replaceState({ path: newUrl }, '', newUrl);
-        }
+  const searchParams = useSearchParams();
 
-        const addCondoParam = search.get('addCondo');
-        if (addCondoParam === 'true') {
-          setShowAddCondoModal(true);
-          const newUrl = window.location.pathname + '?tab=faturamento';
-          window.history.replaceState({ path: newUrl }, '', newUrl);
-        }
+  useEffect(() => {
+    const tabParam = searchParams.get('tab');
+    const planParam = searchParams.get('plan');
+    const intervalParam = searchParams.get('interval');
+    const addCondoParam = searchParams.get('addCondo');
+
+    if (tabParam === 'faturamento') {
+      setActiveTab('faturamento');
+
+      if (intervalParam === 'yearly') {
+        setIsAnnual(true);
+      }
+
+      if (planParam === 'pro' || planParam === 'corporate') {
+        setSelectedUpgrade(planParam);
+        setShowCheckoutModal(true);
+        router.replace('/dashboard/configuracoes?tab=faturamento');
+      }
+
+      if (addCondoParam === 'true' && !showAddCondoModal) {
+        setShowAddCondoModal(true);
+        router.replace('/dashboard/configuracoes?tab=faturamento');
       }
     }
-  }, []);
+  }, [searchParams, showAddCondoModal]);
 
   // Carrega contagem de chamados do mês se estiver no plano grátis
   useEffect(() => {

@@ -11,8 +11,29 @@ function getSupabaseAdmin() {
   })
 }
 
+async function ensureColumns(supabase: ReturnType<typeof createClient>): Promise<string[]> {
+  const logs: string[] = []
+  const migrations = [
+    `ALTER TABLE public.condominios ADD COLUMN IF NOT EXISTS parent_condominio_id UUID REFERENCES public.condominios(id);`,
+    `ALTER TABLE public.condominios ADD COLUMN IF NOT EXISTS max_instances INTEGER;`,
+    `ALTER TABLE public.condominios ALTER COLUMN slug DROP NOT NULL;`,
+    `ALTER TABLE public.condominios ALTER COLUMN codigo_acesso DROP NOT NULL;`,
+  ]
+  for (const sql of migrations) {
+    const { error } = await supabase.rpc('exec_sql', { sql })
+    if (error && !error.message?.includes('already exists')) {
+      logs.push(`Migration: ${error.message}`)
+    }
+  }
+  return logs
+}
+
 export async function POST(req: NextRequest) {
   try {
+    // Tenta migrar colunas primeiro (ignora se falhar)
+    const supabase = getSupabaseAdmin()
+    if (supabase) await ensureColumns(supabase)
+
     const { nome, slug, codigo_acesso, userId, gestorNome } = await req.json()
 
     if (!nome || !slug || !codigo_acesso || !userId || !gestorNome) {

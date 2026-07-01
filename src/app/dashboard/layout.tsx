@@ -433,9 +433,11 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                     <span className="text-xs font-bold text-zinc-900 dark:text-white block truncate leading-none">
                       {condominio.nome}
                     </span>
-                    <span className="text-[9px] text-zinc-500 font-semibold block mt-0.5 truncate">
-                      {condominios.length} {condominios.length === 1 ? 'condomínio' : 'condomínios'}
-                    </span>
+                    {condominios.length > 0 && (
+                      <span className="text-[9px] text-zinc-500 font-semibold block mt-0.5 truncate">
+                        {condominios.length} {condominios.length === 1 ? 'condomínio' : 'condomínios'}
+                      </span>
+                    )}
                   </div>
                 </div>
                 <svg className={`w-3.5 h-3.5 text-zinc-500 transition-transform ${condoDropdownOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">

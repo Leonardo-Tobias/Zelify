@@ -1141,6 +1141,30 @@ export default function ConfiguracoesPage() {
               </div>
             </div>
           </div>
+
+          {/* CANCELAR ASSINATURA */}
+          {condominio?.plan_type !== 'free' && (
+            <div className="bg-white dark:bg-zinc-900 border border-red-500/20 p-6 rounded-xl shadow-sm dark:shadow-xl">
+              <div className="flex items-center justify-between flex-wrap gap-4">
+                <div className="space-y-1">
+                  <h4 className="text-xs font-bold text-red-500 uppercase tracking-wider flex items-center">
+                    <AlertCircle className="w-3.5 h-3.5 mr-1.5" />
+                    Cancelar Assinatura
+                  </h4>
+                  <p className="text-[10px] text-zinc-500 font-medium leading-relaxed max-w-md">
+                    Ao cancelar, sua assinatura será encerrada e seu condomínio voltará para o plano gratuito (Zelcore Starter). Os dados serão mantidos.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleCancelSubscription}
+                  className="text-[11px] font-bold bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-lg transition-all active:scale-[0.97] cursor-pointer shrink-0"
+                >
+                  Cancelar Assinatura
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -1155,7 +1179,7 @@ export default function ConfiguracoesPage() {
       {/* MODAL DE CHECKOUT */}
       {showCheckoutModal && (
         <div className="fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-[#0c0c0e] border border-zinc-800 rounded-2xl w-full max-w-md shadow-2xl relative flex flex-col max-h-[90vh]">
+          <div className="bg-[#0c0c0e] border border-zinc-800 rounded-2xl w-full max-w-lg shadow-2xl relative flex flex-col max-h-[90vh]">
             {/* Linha superior azul */}
             <div className="h-1 bg-[#001CFF] shrink-0"></div>
             
@@ -1176,7 +1200,8 @@ export default function ConfiguracoesPage() {
               </button>
             </div>
 
-            <form onSubmit={handleCheckout} className="overflow-y-auto flex-1 p-6 space-y-4">
+            <form onSubmit={handleCheckout} className="flex flex-col flex-1 overflow-hidden">
+              <div className="overflow-y-auto flex-1 p-5 space-y-4">
               {checkoutError && (
                 <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-400 rounded-lg text-xs font-semibold flex items-center space-x-2">
                   <AlertCircle className="w-4 h-4 shrink-0 text-red-400" />
@@ -1366,38 +1391,16 @@ export default function ConfiguracoesPage() {
                               onChange={(e) => setCardAddressComplement(e.target.value)}
                               className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-white placeholder-zinc-705 focus:outline-none focus:border-[#001CFF]/50 font-semibold"
                             />
-          </div>
-
-          {/* CANCELAR ASSINATURA */}
-          {condominio?.plan_type !== 'free' && (
-            <div className="bg-white dark:bg-zinc-900 border border-red-500/20 p-6 rounded-xl shadow-sm dark:shadow-xl">
-              <div className="flex items-center justify-between flex-wrap gap-4">
-                <div className="space-y-1">
-                  <h4 className="text-xs font-bold text-red-500 uppercase tracking-wider flex items-center">
-                    <AlertCircle className="w-3.5 h-3.5 mr-1.5" />
-                    Cancelar Assinatura
-                  </h4>
-                  <p className="text-[10px] text-zinc-500 font-medium leading-relaxed max-w-md">
-                    Ao cancelar, sua assinatura será encerrada e seu condomínio voltará para o plano gratuito (Zelcore Starter). Os dados serão mantidos.
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={handleCancelSubscription}
-                  className="text-[11px] font-bold bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-lg transition-all active:scale-[0.97] cursor-pointer shrink-0"
-                >
-                  Cancelar Assinatura
-                </button>
-              </div>
+                          </div>
+                        </div>
+                      )
+                    }
+                  </>
+                )
+              }
             </div>
-          )}
-        </div>
-      )}
-                    </>
-                  )}
-                </div>
-              ) : (
-                /* CONTEÚDO CARTÃO DE CRÉDITO */
+          ) : (
+            /* CONTEÚDO CARTÃO DE CRÉDITO */
                 <div className="space-y-3 pt-1">
                   <div>
                     <label className="block text-[9px] font-bold uppercase tracking-wider text-zinc-500 mb-1">
@@ -1564,24 +1567,25 @@ export default function ConfiguracoesPage() {
                   </div>
                 </div>
               )}
+              </div>
 
               {/* Rodapé fixo: badges + CTA */}
               <div className="sticky bottom-0 bg-[#0c0c0e] border-t border-zinc-800 shadow-[0_-4px_20px_rgba(0,0,0,0.5)]">
-                <div className="px-6 pt-4 pb-2 space-y-1.5">
-                  <div className="flex items-center space-x-2 text-[9.5px] text-zinc-500">
-                    <Lock className="w-3 h-3 text-emerald-500 shrink-0" />
+                <div className="px-5 pt-4 pb-2 space-y-1">
+                  <div className="flex items-center space-x-2 text-[9px] text-zinc-500">
+                    <Lock className="w-2.5 h-2.5 text-emerald-500 shrink-0" />
                     <span>Pagamento processado pelo <strong className="text-zinc-400">Asaas</strong></span>
                   </div>
-                  <div className="flex items-center space-x-2 text-[9.5px] text-zinc-500">
-                    <Shield className="w-3 h-3 text-emerald-500 shrink-0" />
+                  <div className="flex items-center space-x-2 text-[9px] text-zinc-500">
+                    <Shield className="w-2.5 h-2.5 text-emerald-500 shrink-0" />
                     <span>Dados criptografados via <strong className="text-zinc-400">SSL/TLS</strong></span>
                   </div>
-                  <div className="flex items-center space-x-2 text-[9.5px] text-zinc-500">
-                    <CheckCircle2 className="w-3 h-3 text-emerald-500 shrink-0" />
+                  <div className="flex items-center space-x-2 text-[9px] text-zinc-500">
+                    <CheckCircle2 className="w-2.5 h-2.5 text-emerald-500 shrink-0" />
                     <span>Não armazenamos dados do seu cartão</span>
                   </div>
                 </div>
-                <div className="px-6 pb-6 pt-2">
+                <div className="px-5 pb-5 pt-2">
                   <button
                     type="submit"
                     disabled={processingCheckout}

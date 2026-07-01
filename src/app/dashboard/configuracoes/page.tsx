@@ -1178,147 +1178,180 @@ export default function ConfiguracoesPage() {
 
       {/* MODAL DE CHECKOUT */}
       {showCheckoutModal && (
-        <div className="fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-[#0c0c0e] border border-zinc-800 rounded-2xl w-full max-w-lg shadow-2xl relative flex flex-col max-h-[90vh]">
-            {/* Linha superior azul */}
-            <div className="h-1 bg-[#001CFF] shrink-0"></div>
-            
-            {/* Header do checkout */}
-            <div className="p-6 pb-4 border-b border-zinc-800/80 flex justify-between items-center sticky top-0 bg-[#0c0c0e] z-10">
+        <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="bg-[#0c0c0e] border border-zinc-800/80 rounded-2xl w-full max-w-[820px] shadow-2xl relative flex flex-col max-h-[85vh]">
+            <div className="h-1 bg-[#001CFF] shrink-0 rounded-t-2xl"></div>
+
+            <div className="px-7 py-5 border-b border-zinc-800/60 flex justify-between items-center sticky top-0 bg-[#0c0c0e] z-20">
               <div>
-                <h3 className="text-sm font-bold text-white uppercase tracking-wider">Finalizar Assinatura</h3>
-                <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider mt-0.5">
-                  Simulação de pagamento Zelcore
+                <h3 className="text-sm font-bold text-white tracking-tight">Finalizar Assinatura</h3>
+                <p className="text-[11px] text-zinc-500 font-medium mt-0.5">
+                  Pagamento processado pelo <span className="text-zinc-400">Asaas</span>
                 </p>
               </div>
-              <button 
+              <button
                 type="button"
                 onClick={() => setShowCheckoutModal(false)}
-                className="text-zinc-500 hover:text-white text-xs font-bold px-2.5 py-1 bg-zinc-900 border border-zinc-800 rounded-md transition-colors cursor-pointer"
+                className="text-zinc-500 hover:text-white text-xs font-medium px-3 py-1.5 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 rounded-lg transition-all cursor-pointer"
               >
                 Fechar
               </button>
             </div>
 
             <form onSubmit={handleCheckout} className="flex flex-col flex-1 overflow-hidden">
-              <div className="overflow-y-auto flex-1 p-5 space-y-4">
-              {checkoutError && (
-                <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-400 rounded-lg text-xs font-semibold flex items-center space-x-2">
-                  <AlertCircle className="w-4 h-4 shrink-0 text-red-400" />
-                  <span>{checkoutError}</span>
-                </div>
-              )}
-
-              {/* Detalhes do resumo */}
-              <div className="bg-zinc-950 p-3 rounded-lg border border-zinc-900 flex justify-between items-center text-xs">
-                <div>
-                  <p className="font-bold text-white uppercase">
-                    {selectedUpgrade === 'pro' ? 'Plano Zelcore Pro' : 'Plano Zelcore Corporate'}
-                  </p>
-                  <p className="text-[10px] text-zinc-550 mt-0.5">
-                    {isAnnual ? 'Renovação anual automática' : 'Renovação mensal automática'}
-                  </p>
-                </div>
-                <div className="text-right font-black text-[#001CFF] text-sm flex flex-col items-end">
-                  <span>
-                    {selectedUpgrade === 'pro' 
-                      ? `R$ ${pricePro},00` 
-                      : `R$ ${totalCorporatePrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
-                  </span>
-                  <span className="text-[8px] text-zinc-500 font-bold uppercase">
-                    {isAnnual ? '/mês (cobrado anualmente)' : '/mês'}
-                  </span>
-                </div>
-              </div>
-
-              {/* Abas de Pagamento */}
-              <div className="flex gap-2 p-1 bg-zinc-950 rounded-lg border border-zinc-900 text-xs">
-                <button
-                  type="button"
-                  onClick={() => { setCheckoutTab('pix'); setCheckoutError(''); }}
-                  className={`flex-1 py-1.5 rounded-md font-bold text-center transition-all cursor-pointer ${
-                    checkoutTab === 'pix' 
-                      ? 'bg-zinc-900 text-white shadow-sm' 
-                      : 'text-zinc-500 hover:text-zinc-300'
-                  }`}
-                >
-                  PIX
-                </button>
-                <button
-                  type="button"
-                  onClick={() => { setCheckoutTab('card'); setCheckoutError(''); }}
-                  className={`flex-1 py-1.5 rounded-md font-bold text-center transition-all cursor-pointer ${
-                    checkoutTab === 'card' 
-                      ? 'bg-zinc-900 text-white shadow-sm' 
-                      : 'text-zinc-500 hover:text-zinc-300'
-                  }`}
-                >
-                  Cartão de Crédito
-                </button>
-              </div>
-
-              {/* CONTEÚDO PIX */}
-              {checkoutTab === 'pix' ? (
-                <div className="space-y-4 flex flex-col py-2">
-                  {pixQrCode ? (
-                    <>
-                      {/* QR Code real do Asaas */}
-                      <div className="flex flex-col items-center space-y-4">
-                        <div className="bg-white p-3 rounded-xl border border-zinc-200 shadow-inner">
-                          <img src={`data:image/png;base64,${pixQrCode}`} alt="QR Code PIX" className="w-32 h-32" />
-                        </div>
-                        <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider text-center">
-                          Aponte a câmera do celular ou copie o código Pix abaixo
-                        </p>
-
+              <div className="overflow-y-auto flex-1 scrollbar-thin scrollbar-thumb-zinc-700 scrollbar-track-transparent">
+                <div className="md:grid md:grid-cols-5 divide-y md:divide-y-0 md:divide-x divide-zinc-800/50">
+                  {/* LEFT COLUMN - Form (3/5) */}
+                  <div className="col-span-3 p-7 space-y-6">
+                    {/* Payment method selector */}
+                    <div>
+                      <label className="block text-[11px] font-semibold text-zinc-400 mb-3">Forma de pagamento</label>
+                      <div className="flex gap-2 p-1 bg-zinc-900/60 rounded-xl border border-zinc-800/80">
                         <button
                           type="button"
-                          onClick={handleCopyPix}
-                          className="w-full py-2 bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-bold rounded-lg border border-zinc-800 flex items-center justify-center space-x-1.5 transition-colors cursor-pointer"
+                          onClick={() => { setCheckoutTab('pix'); setCheckoutError(''); }}
+                          className={`flex-1 py-2.5 rounded-lg text-xs font-semibold text-center transition-all cursor-pointer ${
+                            checkoutTab === 'pix'
+                              ? 'bg-zinc-800 text-white shadow-sm border border-zinc-700/60'
+                              : 'text-zinc-500 hover:text-zinc-300 border border-transparent'
+                          }`}
                         >
-                          {copiedPix ? (
-                            <><Check className="w-3.5 h-3.5 text-emerald-500" /><span>Código Pix Copiado!</span></>
-                          ) : (
-                            <><Copy className="w-3.5 h-3.5" /><span>Copiar Código Pix (Copia e Cola)</span></>
-                          )}
+                          <span className="flex items-center justify-center space-x-2">
+                            <QrCode className="w-3.5 h-3.5" />
+                            <span>PIX</span>
+                          </span>
                         </button>
-
-                        <span className="text-[9px] text-zinc-600 text-center leading-relaxed block">
-                          Após pagar, clique no botão abaixo para ativar seu plano.<br />
-                          O sistema também será atualizado automaticamente quando o pagamento for confirmado.
-                        </span>
-
                         <button
                           type="button"
-                          onClick={handlePixPaid}
-                          className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-lg border border-emerald-700 flex items-center justify-center space-x-1.5 transition-colors cursor-pointer"
+                          onClick={() => { setCheckoutTab('card'); setCheckoutError(''); }}
+                          className={`flex-1 py-2.5 rounded-lg text-xs font-semibold text-center transition-all cursor-pointer ${
+                            checkoutTab === 'card'
+                              ? 'bg-zinc-800 text-white shadow-sm border border-zinc-700/60'
+                              : 'text-zinc-500 hover:text-zinc-300 border border-transparent'
+                          }`}
                         >
-                          <Check className="w-4 h-4" />
-                          <span>Já paguei! Ativar Plano</span>
+                          <span className="flex items-center justify-center space-x-2">
+                            <CreditCard className="w-3.5 h-3.5" />
+                            <span>Cartão de Crédito</span>
+                          </span>
                         </button>
                       </div>
-                    </>
-                  ) : (
-                    <>
-                      {processingCheckout ? (
-                        <>
-                          <div className="flex flex-col items-center space-y-4">
-                            <div className="bg-white p-3 rounded-xl border border-zinc-200 shadow-inner">
-                              <div className="w-32 h-32 flex items-center justify-center text-zinc-300">
-                                <Loader2 className="w-8 h-8 animate-spin" />
-                              </div>
+                    </div>
+
+                    {/* Error message */}
+                    {checkoutError && (
+                      <div className="p-3.5 bg-red-500/10 border border-red-500/20 text-red-400 rounded-xl text-xs font-medium flex items-start space-x-2.5">
+                        <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                        <span>{checkoutError}</span>
+                      </div>
+                    )}
+
+                    {/* PIX CONTENT */}
+                    {checkoutTab === 'pix' ? (
+                      <div>
+                        {pixQrCode ? (
+                          <div className="flex flex-col items-center space-y-5 py-4">
+                            <p className="text-[11px] font-semibold text-zinc-300">Escaneie o QR Code abaixo para pagar</p>
+                            <div className="bg-white p-4 rounded-xl border border-zinc-200 shadow-lg">
+                              <img src={`data:image/png;base64,${pixQrCode}`} alt="QR Code PIX" className="w-36 h-36" />
                             </div>
-                            <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider text-center">
-                              Gerando QR Code PIX...
+                            <button
+                              type="button"
+                              onClick={handleCopyPix}
+                              className="w-full py-2.5 bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold rounded-xl border border-zinc-800 flex items-center justify-center space-x-2 transition-colors cursor-pointer"
+                            >
+                              {copiedPix ? (
+                                <><Check className="w-3.5 h-3.5 text-emerald-500" /><span>Código Pix Copiado!</span></>
+                              ) : (
+                                <><Copy className="w-3.5 h-3.5" /><span>Copiar código PIX (copia e cola)</span></>
+                              )}
+                            </button>
+                            <p className="text-[10px] text-zinc-600 text-center leading-relaxed">
+                              Após pagar, clique em "Já paguei" para ativar seu plano.<br />
+                              O sistema também atualiza automaticamente.
                             </p>
+                            <button
+                              type="button"
+                              onClick={handlePixPaid}
+                              className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold rounded-xl border border-emerald-700 flex items-center justify-center space-x-2 transition-colors cursor-pointer"
+                            >
+                              <Check className="w-4 h-4" />
+                              <span>Já paguei! Ativar Plano</span>
+                            </button>
                           </div>
-                        </>
-                      ) : (
-                        <div className="space-y-3">
+                        ) : (
+                          <>
+                            {processingCheckout ? (
+                              <div className="flex flex-col items-center space-y-4 py-8">
+                                <div className="bg-zinc-900/60 p-4 rounded-xl border border-zinc-800">
+                                  <Loader2 className="w-10 h-10 animate-spin text-zinc-400" />
+                                </div>
+                                <p className="text-xs text-zinc-500 font-semibold">Gerando QR Code PIX...</p>
+                              </div>
+                            ) : (
+                              <div className="space-y-4">
+                                <div>
+                                  <label className="block text-[11px] font-medium text-zinc-400 mb-1.5">CPF do titular</label>
+                                  <input
+                                    type="text"
+                                    required
+                                    maxLength={14}
+                                    placeholder="000.000.000-00"
+                                    value={cardCpf}
+                                    onChange={(e) => {
+                                      const v = e.target.value.replace(/\D/g, '').replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4').substring(0, 14);
+                                      setCardCpf(v);
+                                    }}
+                                    className="w-full px-3.5 py-2.5 bg-zinc-900/60 border border-zinc-800 rounded-xl text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-[#001CFF]/60 focus:ring-1 focus:ring-[#001CFF]/20 transition-all"
+                                  />
+                                </div>
+                                <div>
+                                  <label className="block text-[11px] font-medium text-zinc-400 mb-1.5">Telefone (com DDD)</label>
+                                  <input
+                                    type="tel"
+                                    maxLength={15}
+                                    placeholder="(11) 99999-9999"
+                                    value={cardPhone}
+                                    onChange={(e) => {
+                                      const v = e.target.value.replace(/\D/g, '').replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3').substring(0, 15);
+                                      setCardPhone(v);
+                                    }}
+                                    className="w-full px-3.5 py-2.5 bg-zinc-900/60 border border-zinc-800 rounded-xl text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-[#001CFF]/60 focus:ring-1 focus:ring-[#001CFF]/20 transition-all"
+                                  />
+                                </div>
+                              </div>
+                            )}
+                          </>
+                        )}
+                      </div>
+                    ) : (
+                      /* CARD CONTENT */
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-[11px] font-medium text-zinc-400 mb-1.5">Nome no cartão</label>
+                          <input
+                            type="text"
+                            required
+                            placeholder="Como está gravado no cartão"
+                            value={cardName}
+                            onChange={(e) => setCardName(e.target.value.toUpperCase())}
+                            className="w-full px-3.5 py-2.5 bg-zinc-900/60 border border-zinc-800 rounded-xl text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-[#001CFF]/60 focus:ring-1 focus:ring-[#001CFF]/20 transition-all"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[11px] font-medium text-zinc-400 mb-1.5">E-mail do titular</label>
+                          <input
+                            type="email"
+                            required
+                            placeholder="email@condominio.com"
+                            value={cardEmail}
+                            onChange={(e) => setCardEmail(e.target.value)}
+                            className="w-full px-3.5 py-2.5 bg-zinc-900/60 border border-zinc-800 rounded-xl text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-[#001CFF]/60 focus:ring-1 focus:ring-[#001CFF]/20 transition-all"
+                          />
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div>
-                            <label className="block text-[9px] font-bold uppercase tracking-wider text-zinc-500 mb-1">
-                              CPF do Titular
-                            </label>
+                            <label className="block text-[11px] font-medium text-zinc-400 mb-1.5">CPF</label>
                             <input
                               type="text"
                               required
@@ -1329,13 +1362,11 @@ export default function ConfiguracoesPage() {
                                 const v = e.target.value.replace(/\D/g, '').replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4').substring(0, 14);
                                 setCardCpf(v);
                               }}
-                              className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-white placeholder-zinc-705 focus:outline-none focus:border-[#001CFF]/50 font-semibold"
+                              className="w-full px-3.5 py-2.5 bg-zinc-900/60 border border-zinc-800 rounded-xl text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-[#001CFF]/60 focus:ring-1 focus:ring-[#001CFF]/20 transition-all"
                             />
                           </div>
                           <div>
-                            <label className="block text-[9px] font-bold uppercase tracking-wider text-zinc-500 mb-1">
-                              Telefone (com DDD)
-                            </label>
+                            <label className="block text-[11px] font-medium text-zinc-400 mb-1.5">Telefone</label>
                             <input
                               type="tel"
                               maxLength={15}
@@ -1345,232 +1376,233 @@ export default function ConfiguracoesPage() {
                                 const v = e.target.value.replace(/\D/g, '').replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3').substring(0, 15);
                                 setCardPhone(v);
                               }}
-                              className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-white placeholder-zinc-705 focus:outline-none focus:border-[#001CFF]/50 font-semibold"
+                              className="w-full px-3.5 py-2.5 bg-zinc-900/60 border border-zinc-800 rounded-xl text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-[#001CFF]/60 focus:ring-1 focus:ring-[#001CFF]/20 transition-all"
                             />
                           </div>
-                          <p className="text-[9px] text-zinc-500 italic">
-                            CPF e telefone são usados para identificar o pagamento. CEP e endereço só são necessários para cartão de crédito.
-                          </p>
                         </div>
-                      )
-                    }
-                  </>
-                )
-              }
-            </div>
-          ) : (
-            /* CONTEÚDO CARTÃO DE CRÉDITO */
-                <div className="space-y-3 pt-1">
-                  <div>
-                    <label className="block text-[9px] font-bold uppercase tracking-wider text-zinc-500 mb-1">
-                      Nome no Cartão
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="Ex: CARLOS S SANTOS"
-                      value={cardName}
-                      onChange={(e) => setCardName(e.target.value.toUpperCase())}
-                      className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-white placeholder-zinc-705 focus:outline-none focus:border-[#001CFF]/50 font-semibold"
-                    />
+                        <div className="pt-2">
+                          <label className="block text-[11px] font-medium text-zinc-400 mb-3">Endereço do titular</label>
+                          <div className="grid grid-cols-2 gap-4 mb-4">
+                            <div>
+                              <label className="block text-[10px] font-medium text-zinc-500 mb-1">CEP</label>
+                              <input
+                                type="text"
+                                required
+                                maxLength={9}
+                                placeholder="00000-000"
+                                value={cardCep}
+                                onChange={(e) => {
+                                  const v = e.target.value.replace(/\D/g, '').replace(/(\d{5})(\d{3})/, '$1-$2').substring(0, 9);
+                                  setCardCep(v);
+                                }}
+                                className="w-full px-3.5 py-2.5 bg-zinc-900/60 border border-zinc-800 rounded-xl text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-[#001CFF]/60 focus:ring-1 focus:ring-[#001CFF]/20 transition-all"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-[10px] font-medium text-zinc-500 mb-1">Número</label>
+                              <input
+                                type="text"
+                                required
+                                placeholder="Ex: 100"
+                                value={cardAddressNumber}
+                                onChange={(e) => setCardAddressNumber(e.target.value)}
+                                className="w-full px-3.5 py-2.5 bg-zinc-900/60 border border-zinc-800 rounded-xl text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-[#001CFF]/60 focus:ring-1 focus:ring-[#001CFF]/20 transition-all"
+                              />
+                            </div>
+                          </div>
+                          <div>
+                            <label className="block text-[10px] font-medium text-zinc-500 mb-1">Complemento <span className="text-zinc-600">(opcional)</span></label>
+                            <input
+                              type="text"
+                              placeholder="Apt 42, Bloco B"
+                              value={cardAddressComplement}
+                              onChange={(e) => setCardAddressComplement(e.target.value)}
+                              className="w-full px-3.5 py-2.5 bg-zinc-900/60 border border-zinc-800 rounded-xl text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-[#001CFF]/60 focus:ring-1 focus:ring-[#001CFF]/20 transition-all"
+                            />
+                          </div>
+                        </div>
+                        <div className="pt-2">
+                          <label className="block text-[11px] font-medium text-zinc-400 mb-3">Dados do cartão</label>
+                          <div>
+                            <label className="block text-[10px] font-medium text-zinc-500 mb-1">Número do cartão</label>
+                            <input
+                              type="text"
+                              required
+                              maxLength={19}
+                              placeholder="0000 0000 0000 0000"
+                              value={cardNumber}
+                              onChange={(e) => {
+                                const v = e.target.value.replace(/\D/g, '').replace(/(\d{4})/g, '$1 ').trim();
+                                setCardNumber(v);
+                              }}
+                              className="w-full px-3.5 py-2.5 bg-zinc-900/60 border border-zinc-800 rounded-xl text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-[#001CFF]/60 focus:ring-1 focus:ring-[#001CFF]/20 transition-all"
+                            />
+                          </div>
+                          <div className="grid grid-cols-2 gap-4 mt-4">
+                            <div>
+                              <label className="block text-[10px] font-medium text-zinc-500 mb-1">Validade</label>
+                              <input
+                                type="text"
+                                required
+                                maxLength={5}
+                                placeholder="MM/AA"
+                                value={cardExpiry}
+                                onChange={(e) => {
+                                  let v = e.target.value.replace(/\D/g, '');
+                                  if (v.length > 2) v = `${v.substring(0, 2)}/${v.substring(2, 4)}`;
+                                  setCardExpiry(v);
+                                }}
+                                className="w-full px-3.5 py-2.5 bg-zinc-900/60 border border-zinc-800 rounded-xl text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-[#001CFF]/60 focus:ring-1 focus:ring-[#001CFF]/20 transition-all"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-[10px] font-medium text-zinc-500 mb-1">CVV</label>
+                              <input
+                                type="password"
+                                required
+                                maxLength={3}
+                                placeholder="000"
+                                value={cardCvv}
+                                onChange={(e) => setCardCvv(e.target.value.replace(/\D/g, ''))}
+                                className="w-full px-3.5 py-2.5 bg-zinc-900/60 border border-zinc-800 rounded-xl text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-[#001CFF]/60 focus:ring-1 focus:ring-[#001CFF]/20 transition-all"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
-                  <div>
-                    <label className="block text-[9px] font-bold uppercase tracking-wider text-zinc-500 mb-1">
-                      E-mail do Titular
-                    </label>
-                    <input
-                      type="email"
-                      required
-                      placeholder="email@condominio.com"
-                      value={cardEmail}
-                      onChange={(e) => setCardEmail(e.target.value)}
-                      className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-white placeholder-zinc-705 focus:outline-none focus:border-[#001CFF]/50 font-semibold"
-                    />
-                  </div>
+                  {/* RIGHT COLUMN - Summary (2/5) */}
+                  <div className="col-span-2 p-7 space-y-6">
+                    {/* Plan card */}
+                    <div className="bg-gradient-to-br from-zinc-900 to-zinc-900/80 rounded-2xl border border-zinc-800/80 p-5 space-y-4">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-semibold text-zinc-500 uppercase tracking-wider">Resumo</span>
+                        <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full border uppercase tracking-wider ${
+                          isAnnual
+                            ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                            : 'bg-zinc-800/50 text-zinc-400 border-zinc-700/50'
+                        }`}>
+                          {isAnnual ? 'Anual' : 'Mensal'}
+                        </span>
+                      </div>
 
-                  <div>
-                    <label className="block text-[9px] font-bold uppercase tracking-wider text-zinc-500 mb-1">
-                      CPF do Titular
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      maxLength={14}
-                      placeholder="000.000.000-00"
-                      value={cardCpf}
-                      onChange={(e) => {
-                        const v = e.target.value.replace(/\D/g, '').replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4').substring(0, 14);
-                        setCardCpf(v);
-                      }}
-                      className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-white placeholder-zinc-705 focus:outline-none focus:border-[#001CFF]/50 font-semibold"
-                    />
-                  </div>
+                      <div className="space-y-2">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <p className="text-sm font-bold text-white">
+                              {selectedUpgrade === 'pro' ? 'Zelcore Pro' : 'Zelcore Corporate'}
+                            </p>
+                            <p className="text-[10px] text-zinc-500 mt-0.5">
+                              {selectedUpgrade === 'pro'
+                                ? 'Para condomínios'
+                                : 'Para administradoras'}
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <span className="text-lg font-black text-[#001CFF]">
+                              {selectedUpgrade === 'pro'
+                                ? `R$ ${pricePro}`
+                                : `R$ ${Math.round(totalCorporatePrice)}`}
+                            </span>
+                            <span className="text-[9px] text-zinc-500 font-semibold ml-0.5">/mês</span>
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-2 text-[10px] text-zinc-500">
+                          <RefreshCw className="w-3 h-3" />
+                          <span>{isAnnual ? 'Cobrado anualmente' : 'Renovação mensal automática'}</span>
+                        </div>
+                      </div>
 
-                  <div>
-                    <label className="block text-[9px] font-bold uppercase tracking-wider text-zinc-500 mb-1">
-                      Telefone (com DDD)
-                    </label>
-                    <input
-                      type="tel"
-                      maxLength={15}
-                      placeholder="(11) 99999-9999"
-                      value={cardPhone}
-                      onChange={(e) => {
-                        const v = e.target.value.replace(/\D/g, '').replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3').substring(0, 15);
-                        setCardPhone(v);
-                      }}
-                      className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-white placeholder-zinc-705 focus:outline-none focus:border-[#001CFF]/50 font-semibold"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-[9px] font-bold uppercase tracking-wider text-zinc-500 mb-1">
-                        CEP
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        maxLength={9}
-                        placeholder="00000-000"
-                        value={cardCep}
-                        onChange={(e) => {
-                          const v = e.target.value.replace(/\D/g, '').replace(/(\d{5})(\d{3})/, '$1-$2').substring(0, 9);
-                          setCardCep(v);
-                        }}
-                        className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-white placeholder-zinc-705 focus:outline-none focus:border-[#001CFF]/50 font-semibold"
-                      />
+                      <div className="border-t border-zinc-800/60 pt-4 space-y-2">
+                        <div className="flex items-center space-x-2.5 text-[11px]">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                          <span className="text-zinc-300 font-medium">Chamados ilimitados</span>
+                        </div>
+                        <div className="flex items-center space-x-2.5 text-[11px]">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                          <span className="text-zinc-300 font-medium">Painel operacional</span>
+                        </div>
+                        <div className="flex items-center space-x-2.5 text-[11px]">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                          <span className="text-zinc-300 font-medium">Suporte prioritário</span>
+                        </div>
+                      </div>
                     </div>
-                    <div>
-                      <label className="block text-[9px] font-bold uppercase tracking-wider text-zinc-500 mb-1">
-                        Número
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        placeholder="Ex: 100"
-                        value={cardAddressNumber}
-                        onChange={(e) => setCardAddressNumber(e.target.value)}
-                        className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-white placeholder-zinc-705 focus:outline-none focus:border-[#001CFF]/50 font-semibold"
-                      />
-                    </div>
-                  </div>
 
-                  <div>
-                    <label className="block text-[9px] font-bold uppercase tracking-wider text-zinc-500 mb-1">
-                      Complemento <span className="text-zinc-600">(opcional)</span>
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="Ex: Apt 42, Bloco B"
-                      value={cardAddressComplement}
-                      onChange={(e) => setCardAddressComplement(e.target.value)}
-                      className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-white placeholder-zinc-705 focus:outline-none focus:border-[#001CFF]/50 font-semibold"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-[9px] font-bold uppercase tracking-wider text-zinc-500 mb-1">
-                      Número do Cartão
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      maxLength={19}
-                      placeholder="0000 0000 0000 0000"
-                      value={cardNumber}
-                      onChange={(e) => {
-                        const v = e.target.value.replace(/\D/g, '').replace(/(\d{4})/g, '$1 ').trim();
-                        setCardNumber(v);
-                      }}
-                      className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-white placeholder-zinc-705 focus:outline-none focus:border-[#001CFF]/50 font-semibold"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-[9px] font-bold uppercase tracking-wider text-zinc-500 mb-1">
-                        Validade (MM/AA)
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        maxLength={5}
-                        placeholder="MM/AA"
-                        value={cardExpiry}
-                        onChange={(e) => {
-                          let v = e.target.value.replace(/\D/g, '');
-                          if (v.length > 2) {
-                            v = `${v.substring(0, 2)}/${v.substring(2, 4)}`;
-                          }
-                          setCardExpiry(v);
-                        }}
-                        className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-white placeholder-zinc-705 focus:outline-none focus:border-[#001CFF]/50 font-semibold"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-[9px] font-bold uppercase tracking-wider text-zinc-500 mb-1">
-                        CVV
-                      </label>
-                      <input
-                        type="password"
-                        required
-                        maxLength={3}
-                        placeholder="000"
-                        value={cardCvv}
-                        onChange={(e) => setCardCvv(e.target.value.replace(/\D/g, ''))}
-                        className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-white placeholder-zinc-705 focus:outline-none focus:border-[#001CFF]/50 font-semibold text-center tracking-widest"
-                      />
+                    {/* Security badges */}
+                    <div className="bg-zinc-900/40 rounded-2xl border border-zinc-800/50 p-5 space-y-3.5">
+                      <span className="text-[10px] font-semibold text-zinc-500 uppercase tracking-wider flex items-center space-x-2">
+                        <Shield className="w-3 h-3" />
+                        <span>Pagamento seguro</span>
+                      </span>
+                      <div className="space-y-3">
+                        <div className="flex items-start space-x-3">
+                          <div className="w-7 h-7 rounded-lg bg-zinc-800/80 border border-zinc-700/50 flex items-center justify-center shrink-0 mt-0.5">
+                            <Lock className="w-3.5 h-3.5 text-emerald-500" />
+                          </div>
+                          <div>
+                            <p className="text-xs font-medium text-zinc-300">Processado pelo Asaas</p>
+                            <p className="text-[10px] text-zinc-600 leading-relaxed mt-0.5">
+                              Pagamento processado com segurança pela plataforma Asaas.
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-start space-x-3">
+                          <div className="w-7 h-7 rounded-lg bg-zinc-800/80 border border-zinc-700/50 flex items-center justify-center shrink-0 mt-0.5">
+                            <Shield className="w-3.5 h-3.5 text-emerald-500" />
+                          </div>
+                          <div>
+                            <p className="text-xs font-medium text-zinc-300">Criptografia SSL/TLS</p>
+                            <p className="text-[10px] text-zinc-600 leading-relaxed mt-0.5">
+                              Todos os dados são transmitidos de forma criptografada.
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-start space-x-3">
+                          <div className="w-7 h-7 rounded-lg bg-zinc-800/80 border border-zinc-700/50 flex items-center justify-center shrink-0 mt-0.5">
+                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+                          </div>
+                          <div>
+                            <p className="text-xs font-medium text-zinc-300">Dados protegidos</p>
+                            <p className="text-[10px] text-zinc-600 leading-relaxed mt-0.5">
+                              Não armazenamos dados do seu cartão de crédito.
+                            </p>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
-              )}
               </div>
 
-              {/* Rodapé fixo: badges + CTA */}
-              <div className="sticky bottom-0 bg-[#0c0c0e] border-t border-zinc-800 shadow-[0_-4px_20px_rgba(0,0,0,0.5)]">
-                <div className="px-5 pt-4 pb-2 space-y-1">
-                  <div className="flex items-center space-x-2 text-[9px] text-zinc-500">
-                    <Lock className="w-2.5 h-2.5 text-emerald-500 shrink-0" />
-                    <span>Pagamento processado pelo <strong className="text-zinc-400">Asaas</strong></span>
-                  </div>
-                  <div className="flex items-center space-x-2 text-[9px] text-zinc-500">
-                    <Shield className="w-2.5 h-2.5 text-emerald-500 shrink-0" />
-                    <span>Dados criptografados via <strong className="text-zinc-400">SSL/TLS</strong></span>
-                  </div>
-                  <div className="flex items-center space-x-2 text-[9px] text-zinc-500">
-                    <CheckCircle2 className="w-2.5 h-2.5 text-emerald-500 shrink-0" />
-                    <span>Não armazenamos dados do seu cartão</span>
-                  </div>
-                </div>
-                <div className="px-5 pb-5 pt-2">
-                  <button
-                    type="submit"
-                    disabled={processingCheckout}
-                    className="w-full bg-[#001CFF] hover:bg-[#001CFF]/90 text-white text-xs font-bold py-2.5 rounded-lg flex items-center justify-center space-x-1.5 transition-all shadow-[0_4px_15px_rgba(0,51,255,0.2)] active:scale-[0.98] disabled:opacity-50 cursor-pointer"
-                  >
-                    {processingCheckout ? (
-                      <>
-                        <Loader2 className="w-4 h-4 animate-spin mr-1.5 text-zinc-200" />
-                        <span>Processando via Asaas...</span>
-                      </>
-                    ) : (
-                      <>
-                        <Lock className="w-3.5 h-3.5" />
-                        <span>
-                          {checkoutTab === 'pix' ? (pixQrCode ? 'Confirmar Pix Pago' : 'Gerar QR Code PIX') : 'Finalizar Assinatura'}
-                        </span>
-                      </>
-                    )}
-                  </button>
-                </div>
+              {/* Footer - CTA */}
+              <div className="shrink-0 border-t border-zinc-800/60 bg-[#0c0c0e] px-7 py-4">
+                <button
+                  type="submit"
+                  disabled={processingCheckout}
+                  className="w-full bg-[#001CFF] hover:bg-[#001CFF]/90 text-white text-sm font-semibold py-3 rounded-xl flex items-center justify-center space-x-2 transition-all shadow-lg shadow-[#001CFF]/15 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {processingCheckout ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>Processando...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Lock className="w-4 h-4" />
+                      <span>
+                        {checkoutTab === 'pix' ? (pixQrCode ? 'Confirmar Pix Pago' : 'Gerar QR Code PIX') : 'Finalizar Assinatura'}
+                      </span>
+                    </>
+                  )}
+                </button>
               </div>
             </form>
           </div>
         </div>
       )}
-
       {/* Toast de sucesso */}
       {toast && (
         <div className="fixed bottom-6 right-6 z-50 animate-in slide-in-from-bottom-4 fade-in duration-300 max-w-sm w-full">

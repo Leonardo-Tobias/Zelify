@@ -100,6 +100,9 @@ export default function ConfiguracoesPage() {
   const [savingInstance, setSavingInstance] = useState(false);
   const [instanceError, setInstanceError] = useState('');
   const [showCodigo, setShowCodigo] = useState(false);
+  const [needsCorporateSetup, setNeedsCorporateSetup] = useState(false);
+  const [corporateCondoId, setCorporateCondoId] = useState<string | null>(null);
+  const [settingUpContainer, setSettingUpContainer] = useState(false);
 
   // Carregar info de instâncias corporate
   useEffect(() => {
@@ -111,15 +114,24 @@ export default function ConfiguracoesPage() {
         if (!savedGestor) return;
         const gestor = JSON.parse(savedGestor);
         const container = await db.getCorporateContainer(gestor.user_id);
-        if (container?.max_instances) {
-          setMaxInstances(container.max_instances);
-          // Carrega lista de instâncias
-          const condos = await db.getCondominiosByGestorUser(gestor.user_id);
-          const containerId = condos.find(c => c.plan_type === 'corporate' && !c.parent_condominio_id && !c.slug)?.id;
-          const list = condos.filter(c => c.id !== containerId);
-          setInstanciaList(list);
-          setInstanciaCount(list.length);
+        const condos = await db.getCondominiosByGestorUser(gestor.user_id);
+
+        // Corporate sem container: usuário tem corporate mas sem slug null
+        if (!container) {
+          const corporateWithSlug = condos.find(c => c.plan_type === 'corporate' && !c.parent_condominio_id && c.slug);
+          if (corporateWithSlug) {
+            setNeedsCorporateSetup(true);
+            setCorporateCondoId(corporateWithSlug.id);
+          }
+          return;
         }
+
+        setNeedsCorporateSetup(false);
+        setMaxInstances(container.max_instances || 10);
+        const containerId = condos.find(c => c.plan_type === 'corporate' && !c.parent_condominio_id && !c.slug)?.id;
+        const list = condos.filter(c => c.id !== containerId);
+        setInstanciaList(list);
+        setInstanciaCount(list.length);
       } catch (err) {
         console.error('Erro ao carregar instâncias:', err);
       }
@@ -567,6 +579,37 @@ export default function ConfiguracoesPage() {
       setInstanceError(err instanceof Error ? err.message : 'Erro ao criar condomínio.');
     } finally {
       setSavingInstance(false);
+    }
+  };
+
+  const handleSetupContainer = async () => {
+    if (!corporateCondoId) return;
+    setSettingUpContainer(true);
+    try {
+      const res = await fetch('/api/condominios/setup-container', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ condominioId: corporateCondoId, maxInstances: 10 }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Erro ao configurar container');
+      setNeedsCorporateSetup(false);
+      setMaxInstances(10);
+      setToast({ message: 'Container corporate configurado com sucesso! Agora você pode gerenciar seus condomínios.' });
+      // Recarrega a lista
+      const savedGestor = localStorage.getItem('zelcore_gestor');
+      if (savedGestor) {
+        const gestor = JSON.parse(savedGestor);
+        const condos = await db.getCondominiosByGestorUser(gestor.user_id);
+        const containerId = condos.find((c: any) => c.plan_type === 'corporate' && !c.parent_condominio_id && !c.slug)?.id;
+        const list = condos.filter((c: any) => c.id !== containerId);
+        setInstanciaList(list);
+        setInstanciaCount(list.length);
+      }
+    } catch (err) {
+      setInstanceError(err instanceof Error ? err.message : 'Erro ao configurar');
+    } finally {
+      setSettingUpContainer(false);
     }
   };
 
@@ -1327,6 +1370,39 @@ export default function ConfiguracoesPage() {
               </div>
             </div>
           </div>
+
+          {/* SETUP CONTAINER CORPORATE */}
+          {condominio?.plan_type === 'corporate' && needsCorporateSetup && corporateCondoId && (
+            <div className="bg-white dark:bg-zinc-900 border border-amber-500/20 p-6 rounded-xl shadow-sm dark:shadow-xl space-y-4">
+              <div className="flex items-start space-x-3">
+                <div className="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 shrink-0">
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <div className="flex-1">
+                  <h4 className="text-xs font-bold text-amber-400 uppercase tracking-wider">Plano Corporate não configurado</h4>
+                  <p className="text-[10px] text-zinc-500 mt-1 leading-relaxed">
+                    Seu plano Corporate precisa ser configurado como container para gerenciar múltiplos condomínios. Isso não afeta seus dados existentes.
+                  </p>
+                  {instanceError && (
+                    <div className="mt-3 p-2.5 bg-red-500/10 border border-red-500/20 text-red-400 rounded-lg text-xs flex items-center space-x-2">
+                      <AlertCircle className="w-4 h-4 shrink-0" />
+                      <span>{instanceError}</span>
+                    </div>
+                  )}
+                  <button
+                    type="button"
+                    disabled={settingUpContainer}
+                    onClick={handleSetupContainer}
+                    className="mt-3 text-[11px] font-bold bg-brand hover:bg-brand/90 text-white px-4 py-2 rounded-lg transition-all active:scale-[0.97] disabled:opacity-50 cursor-pointer"
+                  >
+                    {settingUpContainer ? 'Configurando...' : 'Configurar Container Corporate'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* GERENCIAMENTO DE INSTÂNCIAS CORPORATE */}
           {condominio?.plan_type === 'corporate' && maxInstances > 0 && (

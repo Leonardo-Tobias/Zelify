@@ -494,12 +494,34 @@ export default function ConfiguracoesPage() {
     setAwaitingPixQrCode(false);
   };
 
+  const handleCondoNameChange = (val: string) => {
+    setNewCondoNome(val);
+    const suggested = val
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9\s-]/g, '')
+      .trim()
+      .replace(/\s+/g, '-');
+    setNewCondoSlug(suggested);
+  };
+
   const handleAddCondominio = async (e: React.FormEvent) => {
     e.preventDefault();
     setInstanceError('');
 
     if (!newCondoNome.trim() || !newCondoSlug.trim() || !newCondoCodigo.trim()) {
       setInstanceError('Preencha todos os campos.');
+      return;
+    }
+
+    if (!/^\d{4}$/.test(newCondoCodigo)) {
+      setInstanceError('O código de acesso deve conter exatamente 4 números.');
+      return;
+    }
+
+    if (!/^[a-z0-9-]+$/.test(newCondoSlug)) {
+      setInstanceError('O slug deve conter apenas letras minúsculas, números e hífens.');
       return;
     }
 
@@ -1855,11 +1877,14 @@ export default function ConfiguracoesPage() {
             <div className="h-1 bg-[#001CFF] shrink-0 rounded-t-2xl"></div>
             <div className="p-6">
               <div className="flex justify-between items-center mb-6">
-                <h3 className="text-sm font-bold text-white">Adicionar Condomínio</h3>
+                <h3 className="text-sm font-bold text-white flex items-center">
+                  <Building className="w-4 h-4 mr-2 text-[#001CFF]" />
+                  Adicionar Condomínio
+                </h3>
                 <button
                   type="button"
                   onClick={() => setShowAddCondoModal(false)}
-                  className="text-zinc-500 hover:text-white text-xs font-medium px-2.5 py-1 bg-zinc-900 border border-zinc-800 rounded-lg transition-all cursor-pointer"
+                  className="text-zinc-500 hover:text-white text-xs font-semibold px-2.5 py-1 bg-zinc-900 border border-zinc-800 rounded-lg transition-all cursor-pointer"
                 >
                   Fechar
                 </button>
@@ -1874,34 +1899,40 @@ export default function ConfiguracoesPage() {
                 )}
 
                 <div>
-                  <label className="block text-[11px] font-medium text-zinc-400 mb-1.5">Nome do condomínio</label>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-zinc-300 mb-1.5">
+                    Nome do condomínio
+                  </label>
                   <input
                     type="text"
                     required
-                    placeholder="Ex: Residencial Park Avenue"
+                    placeholder="Ex: Residencial Flores"
                     value={newCondoNome}
-                    onChange={(e) => setNewCondoNome(e.target.value)}
-                    className="w-full px-3.5 py-2.5 bg-zinc-900/60 border border-zinc-800 rounded-xl text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-[#001CFF]/60 focus:ring-1 focus:ring-[#001CFF]/20 transition-all"
+                    onChange={(e) => handleCondoNameChange(e.target.value)}
+                    className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-[#001CFF]/50 focus:border-[#001CFF]/50 hover:border-zinc-700 transition-all font-medium"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-medium text-zinc-400 mb-1.5">Slug (URL pública)</label>
-                  <div className="flex items-center bg-zinc-900/60 border border-zinc-800 rounded-xl overflow-hidden focus-within:border-[#001CFF]/60 focus-within:ring-1 focus-within:ring-[#001CFF]/20 transition-all">
-                    <span className="px-3 text-xs text-zinc-600 font-mono shrink-0">/</span>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-zinc-300 mb-1.5">
+                    Endereço de acesso (Slug da URL)
+                  </label>
+                  <div className="relative flex items-center">
+                    <span className="absolute left-3 text-xs text-zinc-600 font-mono select-none">/</span>
                     <input
                       type="text"
                       required
-                      placeholder="residencial-park-avenue"
+                      placeholder="nome-do-condominio"
                       value={newCondoSlug}
                       onChange={(e) => setNewCondoSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
-                      className="w-full py-2.5 pr-3.5 bg-transparent text-sm text-white placeholder-zinc-600 focus:outline-none"
+                      className="w-full pl-6 pr-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-[#001CFF]/50 focus:border-[#001CFF]/50 hover:border-zinc-700 transition-all font-mono"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-medium text-zinc-400 mb-1.5">Código de acesso (4 dígitos)</label>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-zinc-300 mb-1.5">
+                    Código de acesso dos moradores
+                  </label>
                   <input
                     type="text"
                     required
@@ -1909,26 +1940,24 @@ export default function ConfiguracoesPage() {
                     placeholder="1234"
                     value={newCondoCodigo}
                     onChange={(e) => setNewCondoCodigo(e.target.value.replace(/\D/g, '').substring(0, 4))}
-                    className="w-full px-3.5 py-2.5 bg-zinc-900/60 border border-zinc-800 rounded-xl text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-[#001CFF]/60 focus:ring-1 focus:ring-[#001CFF]/20 transition-all text-center tracking-widest"
+                    className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-[#001CFF]/50 focus:border-[#001CFF]/50 hover:border-zinc-700 transition-all font-medium text-center tracking-widest"
                   />
                 </div>
 
-                <div className="pt-2">
-                  <button
-                    type="submit"
-                    disabled={savingInstance}
-                    className="w-full bg-[#001CFF] hover:bg-[#001CFF]/90 text-white text-sm font-semibold py-2.5 rounded-xl transition-all shadow-lg shadow-[#001CFF]/15 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {savingInstance ? (
-                      <span className="flex items-center justify-center space-x-2">
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        <span>Criando...</span>
-                      </span>
-                    ) : (
-                      <span>Criar Condomínio</span>
-                    )}
-                  </button>
-                </div>
+                <button
+                  type="submit"
+                  disabled={savingInstance}
+                  className="w-full mt-2 bg-gradient-to-r from-[#001CFF] to-blue-600 hover:opacity-95 text-white text-sm font-semibold py-2 rounded-lg flex items-center justify-center transition-all shadow-[0_4px_20px_rgba(0,51,255,0.25)] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {savingInstance ? (
+                    <span className="flex items-center space-x-2">
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>Criando...</span>
+                    </span>
+                  ) : (
+                    <span>Criar Condomínio</span>
+                  )}
+                </button>
               </form>
             </div>
           </div>

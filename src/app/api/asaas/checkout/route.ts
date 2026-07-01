@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-import { createAsaasCustomer, createAsaasSubscription, createAsaasPixPayment, updateAsaasCustomer } from '@/lib/asaas'
+import { createAsaasCustomer, createAsaasSubscription, createAsaasPixPayment, updateAsaasCustomer, cancelAsaasSubscription } from '@/lib/asaas'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || ''
@@ -91,6 +91,24 @@ export async function POST(req: NextRequest) {
         } else {
           // Container já existe — usa ele
           targetCondominioId = existingContainer.id
+        }
+      }
+    }
+
+    // Cancela assinatura anterior se existir (ex: upgrade Pro → Corporate ou mudança de plano)
+    if (supabase) {
+      const { data: currentCondo } = await supabase
+        .from('condominios')
+        .select('asaas_subscription_id')
+        .eq('id', condominioId)
+        .single()
+
+      if (currentCondo?.asaas_subscription_id) {
+        try {
+          console.log('[CHECKOUT] Cancelando assinatura anterior:', currentCondo.asaas_subscription_id)
+          await cancelAsaasSubscription(currentCondo.asaas_subscription_id)
+        } catch (err) {
+          console.warn('[CHECKOUT] Erro ao cancelar assinatura anterior (pode já estar cancelada):', err)
         }
       }
     }

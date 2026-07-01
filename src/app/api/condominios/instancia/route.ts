@@ -91,7 +91,10 @@ export async function POST(req: NextRequest) {
       .select()
       .single()
 
-    if (insertError) throw insertError
+    if (insertError) {
+      console.error('[INSTANCIA INSERT ERROR]', insertError)
+      return NextResponse.json({ error: `Erro ao criar: ${insertError.message}` }, { status: 500 })
+    }
 
     // Vincular gestor
     const { error: linkError } = await supabase
@@ -103,11 +106,17 @@ export async function POST(req: NextRequest) {
         papel: 'admin',
       })
 
-    if (linkError) throw linkError
+    if (linkError) {
+      console.error('[INSTANCIA LINK ERROR]', linkError)
+      // Tenta desfazer a criação se o vínculo falhar
+      await supabase.from('condominios').delete().eq('id', newCondo.id)
+      return NextResponse.json({ error: `Erro ao vincular gestor: ${linkError.message}` }, { status: 500 })
+    }
 
     return NextResponse.json({ success: true, condominio: newCondo })
   } catch (err) {
     console.error('[INSTANCIA ERROR]', err)
-    return NextResponse.json({ error: 'Erro ao criar condomínio.' }, { status: 500 })
+    const message = err instanceof Error ? err.message : 'Erro ao criar condomínio.'
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }

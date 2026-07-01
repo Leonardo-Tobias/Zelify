@@ -298,6 +298,7 @@ export default function ConfiguracoesPage() {
           name: cardName,
           email: cardEmail,
           cpfCnpj: cardCpf.replace(/\D/g, ''),
+          phone: phoneClean.length >= 10 ? phoneClean : '11912345678',
         };
       }
 

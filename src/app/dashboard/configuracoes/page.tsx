@@ -80,6 +80,7 @@ export default function ConfiguracoesPage() {
   const [pixCopyPaste, setPixCopyPaste] = useState<string | null>(null);
   const [checkoutSubscriptionId, setCheckoutSubscriptionId] = useState<string | null>(null);
   const [pixPaid, setPixPaid] = useState(false);
+  const [awaitingPixQrCode, setAwaitingPixQrCode] = useState(false);
 
   // Toast de sucesso
   const [toast, setToast] = useState<{ message: string } | null>(null);
@@ -344,12 +345,17 @@ export default function ConfiguracoesPage() {
         throw new Error(data.error || 'Erro ao processar checkout');
       }
 
-      if (checkoutTab === 'pix' && data.pix) {
-        setPixQrCode(data.pix.qrCode || null);
-        setPixCopyPaste(data.pix.copyPaste || null);
+      if (checkoutTab === 'pix') {
+        setPixQrCode(data.pix?.qrCode || null);
+        setPixCopyPaste(data.pix?.copyPaste || null);
         setCheckoutSubscriptionId(data.subscriptionId);
         setProcessingCheckout(false);
-        // Não fecha o modal — aguarda pagamento PIX
+
+        // Se não veio QR Code ainda, faz polling
+        if (!data.pix?.qrCode && !data.pix?.copyPaste && data.subscriptionId) {
+          pollPixQrCode(data.subscriptionId);
+        }
+
         return;
       }
 
@@ -365,7 +371,7 @@ export default function ConfiguracoesPage() {
       localStorage.setItem('zelcore_condominio_gestao', JSON.stringify(updated));
       window.dispatchEvent(new Event('storage'));
       setShowCheckoutModal(false);
-      setCardNumber(''); setCardName(''); setCardExpiry(''); setCardCvv(''); setCardEmail(''); setCardCpf(''); setCardPhone('');
+      setCardNumber(''); setCardName(''); setCardExpiry(''); setCardCvv(''); setCardEmail(''); setCardCpf(''); setCardPhone(''); setCardCep(''); setCardAddressNumber(''); setCardAddressComplement('');
       setToast({ message: `Assinatura ativada com sucesso! Seu condomínio agora está no plano ${selectedUpgrade === 'pro' ? 'Zelcore Pro' : 'Zelcore Corporate'}.` });
     } catch (err) {
       console.error(err);
@@ -407,6 +413,31 @@ export default function ConfiguracoesPage() {
       // fallback: mesmo sem confirmação do webhook, ativa localmente
       setShowCheckoutModal(false);
     }
+  };
+
+  const pollPixQrCode = async (subscriptionId: string) => {
+    setAwaitingPixQrCode(true);
+    setCheckoutSubscriptionId(subscriptionId);
+
+    // Tenta até 10 vezes com 2s de intervalo
+    for (let i = 0; i < 10; i++) {
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      try {
+        const res = await fetch(`/api/asaas/pix-poll?subscriptionId=${subscriptionId}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.qrCode || data.copyPaste) {
+            setPixQrCode(data.qrCode || null);
+            setPixCopyPaste(data.copyPaste || null);
+            setAwaitingPixQrCode(false);
+            return;
+          }
+        }
+      } catch {
+        // Tenta de novo no próximo ciclo
+      }
+    }
+    setAwaitingPixQrCode(false);
   };
 
   const handleCancelSubscription = async () => {
@@ -1287,6 +1318,16 @@ export default function ConfiguracoesPage() {
                                   <Loader2 className="w-10 h-10 animate-spin text-zinc-400" />
                                 </div>
                                 <p className="text-xs text-zinc-500 font-semibold">Gerando QR Code PIX...</p>
+                              </div>
+                            ) : awaitingPixQrCode ? (
+                              <div className="flex flex-col items-center space-y-4 py-8">
+                                <div className="bg-zinc-900/60 p-4 rounded-xl border border-zinc-800">
+                                  <Loader2 className="w-10 h-10 animate-spin text-zinc-400" />
+                                </div>
+                                <p className="text-xs text-zinc-500 font-semibold">Aguardando QR Code PIX...</p>
+                                <p className="text-[10px] text-zinc-600 text-center">
+                                  O QR Code pode levar alguns segundos para ser gerado.
+                                </p>
                               </div>
                             ) : (
                               <div className="space-y-4">

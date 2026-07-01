@@ -94,9 +94,10 @@ function DashboardHomeContent() {
         setIsCorporate(isCorp);
 
         if (isCorp && (isPortfolioView || !currentCondo)) {
-          // Carregar dados do portfólio — filtrar container corporate
-          const instances = list.filter(c => c.parent_condominio_id || c.plan_type !== 'corporate')
-          const data = await Promise.all(instances.map(async (condo) => {
+          // Carregar dados do portfólio — remove apenas o container corporate
+          const containerIdDrop = list.find(c => c.plan_type === 'corporate' && !c.parent_condominio_id)?.id
+          const listItems = list.filter(c => c.id !== containerIdDrop)
+          const data = await Promise.all(listItems.map(async (condo) => {
             const tickets = await db.getChamados(condo.id);
             const total = tickets.length;
             const pending = tickets.filter(t => t.tipo === 'manutencao' && t.status === 'pendente').length;

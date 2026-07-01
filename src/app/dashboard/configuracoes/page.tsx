@@ -166,7 +166,13 @@ export default function ConfiguracoesPage() {
           setSelectedUpgrade(planParam);
           setShowCheckoutModal(true);
           
-          // Limpa os parâmetros de plano da URL para evitar reabrir ao atualizar
+          const newUrl = window.location.pathname + '?tab=faturamento';
+          window.history.replaceState({ path: newUrl }, '', newUrl);
+        }
+
+        const addCondoParam = search.get('addCondo');
+        if (addCondoParam === 'true') {
+          setShowAddCondoModal(true);
           const newUrl = window.location.pathname + '?tab=faturamento';
           window.history.replaceState({ path: newUrl }, '', newUrl);
         }

@@ -317,17 +317,17 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                 ))}
                 <div className="h-px bg-zinc-200 dark:bg-white/[0.06] mx-3"></div>
                 <button
-                  onClick={() => {
-                    setMobileMenuOpen(false);
-                    router.push('/cadastro');
-                  }}
-                  className="w-full flex items-center space-x-2 px-3 py-2 text-xs text-[#001CFF] font-semibold hover:bg-zinc-50 dark:hover:bg-white/[0.03] rounded-lg transition-colors"
-                >
-                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                  </svg>
-                  <span>Adicionar Condomínio</span>
-                </button>
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      router.push('/dashboard/configuracoes?tab=faturamento&addCondo=true');
+                    }}
+                    className="w-full flex items-center space-x-2 px-3 py-2 text-xs text-[#001CFF] font-semibold hover:bg-zinc-50 dark:hover:bg-white/[0.03] rounded-lg transition-colors"
+                  >
+                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                    </svg>
+                    <span>Adicionar Condomínio</span>
+                  </button>
               </div>
             )}
 
@@ -520,7 +520,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                   <button
                     onClick={() => {
                       setCondoDropdownOpen(false);
-                      router.push('/cadastro');
+                      router.push('/dashboard/configuracoes?tab=faturamento&addCondo=true');
                     }}
                     className="w-full flex items-center space-x-2 px-3 py-2.5 text-xs text-[#001CFF] hover:bg-zinc-800/60 font-semibold transition-colors"
                   >

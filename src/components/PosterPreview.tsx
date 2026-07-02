@@ -93,7 +93,7 @@ export default function PosterPreview({
       {/* Poster Preview */}
       <div
         ref={printRef}
-        className="bg-white rounded-2xl border-4 border-double overflow-hidden w-full max-w-sm shadow-lg"
+        className="bg-white rounded-2xl border-4 border-double overflow-hidden w-full max-w-sm shadow-lg text-zinc-900"
         style={{ borderColor: posterTheme === 'blue' ? '#001CFF' : posterTheme === 'emerald' ? '#10B981' : '#18181B' }}
       >
         <div className="p-6 flex flex-col items-center text-center space-y-4">

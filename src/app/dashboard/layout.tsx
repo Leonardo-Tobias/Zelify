@@ -459,7 +459,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
               <button
                 type="button"
                 onClick={() => setShowPosterModal(true)}
-                className="w-full flex flex-col p-2.5 bg-zinc-100 dark:bg-white/[0.04] border border-zinc-200 dark:border-white/[0.06] rounded-xl text-left hover:text-zinc-900 dark:hover:text-white transition-all group hover:border-zinc-300 dark:hover:border-white/[0.12] shadow-sm cursor-pointer"
+                className="w-full flex flex-col p-2.5 bg-zinc-100 dark:bg-white/[0.04] border border-zinc-200 dark:border-white/[0.06] rounded-xl text-left transition-all group hover:border-zinc-300 dark:hover:border-white/[0.12] shadow-sm cursor-pointer"
               >
                 <div className="flex items-center space-x-2 text-[11px] font-bold text-zinc-600 dark:text-zinc-300 group-hover:text-brand transition-colors w-full">
                   <ExternalLink className="w-3.5 h-3.5 text-zinc-500 group-hover:text-brand shrink-0 transition-colors" />

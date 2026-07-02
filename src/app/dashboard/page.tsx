@@ -146,6 +146,24 @@ function DashboardHomeContent() {
     loadConfig();
   }, [router, isPortfolioView]);
 
+  // Sincronizar dados quando o condominio mudar no localStorage (ex: switch via dropdown)
+  useEffect(() => {
+    const handleStorage = () => {
+      const saved = localStorage.getItem('zelcore_condominio_gestao');
+      if (!saved) return;
+      const updated = JSON.parse(saved) as Condominio;
+      if (updated.id !== condominio?.id) {
+        window.location.reload();
+      }
+    };
+    window.addEventListener('storage', handleStorage);
+    const interval = setInterval(handleStorage, 1500);
+    return () => {
+      window.removeEventListener('storage', handleStorage);
+      clearInterval(interval);
+    };
+  }, [condominio?.id]);
+
   const handleManageCondo = async (condoId: string) => {
     if (!gestor) return;
     try {

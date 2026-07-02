@@ -791,12 +791,20 @@ function DashboardHomeContent() {
               </p>
             </div>
           </div>
-          <button
-            onClick={() => router.push('/dashboard/configuracoes?tab=faturamento')}
-            className="bg-red-600 hover:bg-red-500 text-white text-[11px] font-bold px-3 py-1.5 rounded-lg shrink-0 transition-all active:scale-[0.97] cursor-pointer"
-          >
-            Regularizar Assinatura
-          </button>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              onClick={() => window.location.reload()}
+              className="text-[11px] font-semibold px-3 py-1.5 rounded-lg border border-zinc-500/30 text-zinc-300 hover:text-white hover:border-zinc-500 transition-all active:scale-[0.97] cursor-pointer"
+            >
+              Sincronizar
+            </button>
+            <button
+              onClick={() => router.push('/dashboard/configuracoes?tab=faturamento')}
+              className="bg-red-600 hover:bg-red-500 text-white text-[11px] font-bold px-3 py-1.5 rounded-lg transition-all active:scale-[0.97] cursor-pointer"
+            >
+              Regularizar Assinatura
+            </button>
+          </div>
         </div>
       )}
       {/* CABEÇALHO */}

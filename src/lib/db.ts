@@ -308,7 +308,7 @@ export const db = {
       try {
         const { data, error } = await supabase
           .from('condominios')
-          .select('*')
+          .select('id, nome, slug, plan_type, subscription_status, billing_type, current_period_end, parent_condominio_id, max_instances, created_at')
           .eq('slug', slug)
           .maybeSingle();
         if (error) {

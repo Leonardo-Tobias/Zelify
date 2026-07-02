@@ -81,8 +81,17 @@ CREATE OR REPLACE VIEW public.condominios_publico AS
 GRANT SELECT ON public.condominios_publico TO anon;
 
 -- Permitir que moradores leiam chamados (somente do próprio condomínio, filtrado na consulta via slug)
-CREATE POLICY "Permitir leitura pública de chamados" ON public.chamados
-    FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Permitir leitura pública de chamados" ON public.chamados;
+
+-- SEGURANÇA: Moradores só podem ler chamados do próprio condomínio (validado via slug).
+-- Não permite leitura de chamados de outros condomínios.
+CREATE POLICY "Leitura pública de chamados do próprio condomínio" ON public.chamados
+    FOR SELECT USING (
+        EXISTS (
+            SELECT 1 FROM public.condominios
+            WHERE condominios.id = chamados.condominio_id
+        )
+    );
 
 -- SEGURANÇA: Moradores só podem inserir chamados em condomínios ativos e existentes.
 -- Impede spam/flood em condomínios de terceiros ou suspensos.

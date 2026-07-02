@@ -21,6 +21,9 @@ export default function CadastroPage() {
   }, []);
   const [error, setError] = useState('');
 
+  // LGPD
+  const [aceiteLGPD, setAceiteLGPD] = useState(false);
+
   // Passo 1: Dados do Gestor
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
@@ -86,6 +89,11 @@ export default function CadastroPage() {
     // Validar formato do slug
     if (!/^[a-z0-9-]+$/.test(condominioSlug)) {
       setError('O slug do condomínio deve conter apenas letras minúsculas, números e hífens.');
+      return;
+    }
+
+    if (!aceiteLGPD) {
+      setError('Você precisa aceitar a Política de Privacidade e os Termos de Uso.');
       return;
     }
 
@@ -326,6 +334,26 @@ export default function CadastroPage() {
                 </p>
               </div>
 
+              <label className="flex items-start space-x-3 text-xs text-zinc-500 leading-relaxed pt-2">
+                <input
+                  type="checkbox"
+                  checked={aceiteLGPD}
+                  onChange={(e) => setAceiteLGPD(e.target.checked)}
+                  className="mt-0.5 w-4 h-4 rounded border-zinc-700 bg-zinc-900 text-brand focus:ring-brand/30 accent-brand cursor-pointer shrink-0"
+                />
+                <span className="font-medium">
+                  Li e aceito a{' '}
+                  <a href="/privacidade" target="_blank" className="text-brand hover:underline font-bold">
+                    Política de Privacidade
+                  </a>
+                  {' '}e os{' '}
+                  <a href="/termos" target="_blank" className="text-brand hover:underline font-bold">
+                    Termos de Uso
+                  </a>
+                  .
+                </span>
+              </label>
+
               <div className="flex space-x-2 pt-2">
                 <button
                   type="button"
@@ -339,7 +367,7 @@ export default function CadastroPage() {
 
                 <button
                   type="submit"
-                  disabled={loading}
+                  disabled={loading || !aceiteLGPD}
                   className="w-2/3 bg-gradient-to-r from-brand to-blue-600 hover:opacity-95 text-white text-sm font-semibold py-2 rounded-lg flex items-center justify-center transition-all shadow-[0_4px_20px_rgba(0,51,255,0.25)] active:scale-[0.98] disabled:opacity-50 cursor-pointer"
                 >
                   {loading ? (

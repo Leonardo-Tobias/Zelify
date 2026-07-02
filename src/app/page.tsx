@@ -7,7 +7,7 @@ export default function Home() {
   const router = useRouter();
 
   useEffect(() => {
-    const savedGestor = localStorage.getItem('zelcore_gestor');
+    const savedGestor = localStorage.getItem('zelcon_gestor');
     if (savedGestor) {
       router.push('/dashboard');
     } else {

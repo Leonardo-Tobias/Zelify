@@ -155,7 +155,7 @@ export async function createAsaasSubscription(
     value,
     cycle,
     nextDueDate,
-    description: planType === 'pro' ? 'Zelcore Pro' : 'Zelcore Corporate',
+    description: planType === 'pro' ? 'Zelcon Pro' : 'Zelcon Corporate',
   }
 
   if (billingType === 'CREDIT_CARD' && creditCardData) {

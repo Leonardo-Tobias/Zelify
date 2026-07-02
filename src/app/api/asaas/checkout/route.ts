@@ -30,11 +30,28 @@ export async function POST(req: NextRequest) {
       numCondos,       // corporate: max_instances
     } = body
 
-    if (!condominioId || !planType || !billingType || !value) {
+    if (!condominioId || !planType || !billingType) {
       return NextResponse.json(
         { error: 'Dados obrigatórios ausentes.' },
         { status: 400 }
       )
+    }
+
+    // Recalcula o preço no servidor (não confia no value do cliente)
+    const isAnnual = cycle === 'YEARLY'
+    const getCorporatePerCondoPrice = (n: number, annual: boolean) => {
+      if (n >= 16 && n <= 50) return annual ? 39 : 49
+      if (n > 50 && n < 100) return annual ? 29 : 39
+      return annual ? 49 : 59 // 5-15 condos
+    }
+    let calculatedValue: number
+    if (planType === 'pro') {
+      calculatedValue = isAnnual ? 1488 : 149
+    } else {
+      const condoCount = Math.max(5, Math.min(numCondos || 5, 99))
+      const perCondo = getCorporatePerCondoPrice(condoCount, isAnnual)
+      calculatedValue = condoCount * perCondo
+      if (isAnnual) calculatedValue *= 12
     }
 
     const supabase = getSupabaseAdmin()
@@ -112,8 +129,15 @@ export async function POST(req: NextRequest) {
 
           targetCondominioId = container.id
         } else {
-          // Container já existe — usa ele
+          // Container já existe — atualiza max_instances e usa ele
           targetCondominioId = existingContainer.id
+          const newMaxInstances = Math.max(5, numCondos || 5)
+          if (existingContainer.max_instances !== newMaxInstances) {
+            await supabase
+              .from('condominios')
+              .update({ max_instances: newMaxInstances })
+              .eq('id', existingContainer.id)
+          }
         }
       }
     }
@@ -170,14 +194,17 @@ export async function POST(req: NextRequest) {
       await updateAsaasCustomer(customerId, nome, email, cpfCnpj, phone)
     }
 
+    // Usa o valor recalculado pelo servidor
+    const finalValue = calculatedValue
+
     // 2. Criar assinatura no Asaas
-    console.log('[CHECKOUT] Criando assinatura...', { customerId, planType, billingType })
+    console.log('[CHECKOUT] Criando assinatura...', { customerId, planType, billingType, finalValue })
     const subscription = await createAsaasSubscription(
       customerId,
       planType,
       billingType,
       cycle,
-      value,
+      finalValue,
       creditCard,
       holderInfo,
     )
@@ -187,15 +214,20 @@ export async function POST(req: NextRequest) {
       const days = cycle === 'YEARLY' ? 365 : 30
       const periodEnd = new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString()
 
+      const updateData: Record<string, unknown> = {
+        asaas_subscription_id: subscription.id,
+        plan_type: planType,
+        subscription_status: 'active',
+        billing_type: billingType,
+        current_period_end: periodEnd,
+      }
+      if (planType === 'corporate') {
+        updateData.max_instances = Math.max(5, numCondos || 5)
+      }
+
       await supabase
         .from('condominios')
-        .update({
-          asaas_subscription_id: subscription.id,
-          plan_type: planType,
-          subscription_status: 'active',
-          billing_type: billingType,
-          current_period_end: periodEnd,
-        })
+        .update(updateData)
         .eq('id', targetCondominioId)
     }
 
@@ -206,9 +238,9 @@ export async function POST(req: NextRequest) {
       const dueDate = new Date(Date.now() + 86400000).toISOString().split('T')[0] // amanhã
       const payment = await createAsaasPixPayment({
         customer: customerId,
-        value,
+        value: finalValue,
         dueDate,
-        description: planType === 'pro' ? 'Zelcore Pro - 1º mês' : 'Zelcore Corporate - 1º mês',
+        description: planType === 'pro' ? 'Zelcon Pro - 1º mês' : 'Zelcon Corporate - 1º mês',
       })
       if (payment) {
         pixData = {

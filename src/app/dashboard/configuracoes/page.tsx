@@ -111,7 +111,7 @@ export default function ConfiguracoesPage() {
 
     async function loadInstanceInfo() {
       try {
-        const savedGestor = localStorage.getItem('zelcore_gestor');
+        const savedGestor = localStorage.getItem('zelcon_gestor');
         if (!savedGestor) return;
         const gestor = JSON.parse(savedGestor);
         const container = await db.getCorporateContainer(gestor.user_id);
@@ -219,24 +219,80 @@ export default function ConfiguracoesPage() {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleDownloadQR = async () => {
+  const blobToBase64 = (blob: Blob): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  };
+
+  const handleDownloadQR = async (format: 'png' | 'svg' | 'pdf') => {
     try {
       if (!condominio) return;
       const targetUrl = `https://zelify.vercel.app/${condominio.slug}`;
-      const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=${encodeURIComponent(targetUrl)}`;
+
+      if (format === 'pdf') {
+        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=${encodeURIComponent(targetUrl)}`;
+        const response = await fetch(qrUrl);
+        const blob = await response.blob();
+        const base64 = await blobToBase64(blob);
+        const { default: jsPDF } = await import('jspdf');
+        const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a6' });
+        pdf.addImage(base64, 'PNG', 10, 10, 105, 105);
+        pdf.save(`qrcode-${condominio.slug}.pdf`);
+        return;
+      }
+
+      const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=${encodeURIComponent(targetUrl)}${format === 'svg' ? '&format=svg' : ''}`;
       const response = await fetch(qrUrl);
       const blob = await response.blob();
       const blobUrl = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = blobUrl;
-      link.download = `qrcode-${condominio.slug}.png`;
+      link.download = `qrcode-${condominio.slug}.${format}`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(blobUrl);
     } catch (err) {
       console.error('Erro ao baixar o QR Code:', err);
-      alert('Não foi possível baixar o QR Code diretamente. Clique com o botão direito na imagem do QR Code e escolha "Salvar imagem".');
+      alert('Não foi possível baixar o QR Code diretamente.');
+    }
+  };
+
+  const handleDownloadPoster = async (format: 'png' | 'pdf') => {
+    try {
+      if (!condominio) return;
+      const { default: html2canvas } = await import('html2canvas');
+      const posterEl = document.getElementById('preview-poster');
+      if (!posterEl) return;
+
+      const canvas = await html2canvas(posterEl, {
+        scale: 2,
+        backgroundColor: '#ffffff',
+      });
+
+      if (format === 'png') {
+        const link = document.createElement('a');
+        link.download = `placa-${condominio.slug}.png`;
+        link.href = canvas.toDataURL('image/png');
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } else {
+        const { default: jsPDF } = await import('jspdf');
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+        const imgWidth = 190;
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+        pdf.addImage(imgData, 'PNG', 10, 10, imgWidth, imgHeight);
+        pdf.save(`placa-${condominio.slug}.pdf`);
+      }
+    } catch (err) {
+      console.error('Erro ao baixar a placa:', err);
+      alert('Não foi possível baixar a placa.');
     }
   };
 
@@ -267,7 +323,7 @@ export default function ConfiguracoesPage() {
       if (updated) {
         setCondominio(updated);
         // Atualizar localStorage para refletir na navegação do layout
-        localStorage.setItem('zelcore_condominio_gestao', JSON.stringify(updated));
+        localStorage.setItem('zelcon_condominio_gestao', JSON.stringify(updated));
         
         // Disparar evento para atualizar outros componentes ouvindo storage
         if (typeof window !== 'undefined') {
@@ -330,9 +386,10 @@ export default function ConfiguracoesPage() {
     setProcessingCheckout(true);
 
     try {
-      const price = selectedUpgrade === 'pro'
+      const basePrice = selectedUpgrade === 'pro'
         ? (isAnnual ? 124 : 149)
         : Math.round(totalCorporatePrice * 100) / 100;
+      const price = isAnnual ? basePrice * 12 : basePrice;
 
       let cpfClean = cardCpf.replace(/\D/g, '')
       let phoneClean = cardPhone.replace(/\D/g, '')
@@ -340,7 +397,7 @@ export default function ConfiguracoesPage() {
       const body: Record<string, unknown> = {
         condominioId: condominio!.id,
         nome: condominio!.nome,
-        email: localStorage.getItem('zelcore_user_email') || '',
+        email: localStorage.getItem('zelcon_user_email') || '',
         planType: selectedUpgrade,
         billingType: checkoutTab === 'pix' ? 'PIX' : 'CREDIT_CARD',
         cycle: isAnnual ? 'YEARLY' : 'MONTHLY',
@@ -397,7 +454,7 @@ export default function ConfiguracoesPage() {
           current_period_end: new Date(Date.now() + (isAnnual ? 365 : 30) * 86400000).toISOString(),
         };
         setCondominio(updatedPix);
-        localStorage.setItem('zelcore_condominio_gestao', JSON.stringify(updatedPix));
+        localStorage.setItem('zelcon_condominio_gestao', JSON.stringify(updatedPix));
         window.dispatchEvent(new Event('storage'));
 
         // Se não veio QR Code ainda, faz polling
@@ -417,11 +474,11 @@ export default function ConfiguracoesPage() {
         current_period_end: new Date(Date.now() + (isAnnual ? 365 : 30) * 86400000).toISOString(),
       };
       setCondominio(updated);
-      localStorage.setItem('zelcore_condominio_gestao', JSON.stringify(updated));
+      localStorage.setItem('zelcon_condominio_gestao', JSON.stringify(updated));
       window.dispatchEvent(new Event('storage'));
       setShowCheckoutModal(false);
       setCardNumber(''); setCardName(''); setCardExpiry(''); setCardCvv(''); setCardEmail(''); setCardCpf(''); setCardPhone(''); setCardCep(''); setCardAddressNumber(''); setCardAddressComplement('');
-      setToast({ message: `Assinatura ativada com sucesso! Seu condomínio agora está no plano ${selectedUpgrade === 'pro' ? 'Zelcore Pro' : 'Zelcore Corporate'}.` });
+      setToast({ message: `Assinatura ativada com sucesso! Seu condomínio agora está no plano ${selectedUpgrade === 'pro' ? 'Zelcon Pro' : 'Zelcon Corporate'}.` });
     } catch (err) {
       console.error(err);
       setCheckoutError(err instanceof Error ? err.message : 'Erro de processamento da transação. Tente novamente.');
@@ -431,7 +488,7 @@ export default function ConfiguracoesPage() {
   };
 
   const handleCopyPix = () => {
-    const key = pixCopyPaste || '00020126580014br.gov.bcb.pix0136kpgmpwthrnlrikkplrul5204000053039865405149.005802BR5914Zelcore%20Condominio6009Sao%20Paulo62070503***6304ABCD';
+    const key = pixCopyPaste || '00020126580014br.gov.bcb.pix0136kpgmpwthrnlrikkplrul5204000053039865405149.005802BR5914Zelcon%20Condominio6009Sao%20Paulo62070503***6304ABCD';
     navigator.clipboard.writeText(key);
     setCopiedPix(true);
     setTimeout(() => setCopiedPix(false), 2000);
@@ -449,7 +506,7 @@ export default function ConfiguracoesPage() {
       );
       if (updated) {
         setCondominio(updated);
-        localStorage.setItem('zelcore_condominio_gestao', JSON.stringify(updated));
+        localStorage.setItem('zelcon_condominio_gestao', JSON.stringify(updated));
         window.dispatchEvent(new Event('storage'));
         setShowCheckoutModal(false);
         setPixQrCode(null);
@@ -526,7 +583,7 @@ export default function ConfiguracoesPage() {
       return;
     }
 
-    const savedGestor = localStorage.getItem('zelcore_gestor');
+    const savedGestor = localStorage.getItem('zelcon_gestor');
     if (!savedGestor) return;
     const gestor = JSON.parse(savedGestor);
 
@@ -557,7 +614,7 @@ export default function ConfiguracoesPage() {
 
       if (data.condominio) {
         setInstanciaList(prev => [...prev, data.condominio]);
-        localStorage.setItem('zelcore_condominio_gestao', JSON.stringify(data.condominio));
+        localStorage.setItem('zelcon_condominio_gestao', JSON.stringify(data.condominio));
         window.dispatchEvent(new Event('storage'));
       }
 
@@ -585,7 +642,7 @@ export default function ConfiguracoesPage() {
       setMaxInstances(10);
       setToast({ message: 'Container corporate configurado com sucesso! Agora você pode gerenciar seus condomínios.' });
       // Recarrega a lista
-      const savedGestor = localStorage.getItem('zelcore_gestor');
+      const savedGestor = localStorage.getItem('zelcon_gestor');
       if (savedGestor) {
         const gestor = JSON.parse(savedGestor);
         const condos = await db.getCondominiosByGestorUser(gestor.user_id);
@@ -629,7 +686,7 @@ export default function ConfiguracoesPage() {
   const handleCancelSubscription = async () => {
     if (!condominio) return;
 
-    const confirmed = window.confirm('Tem certeza que deseja cancelar a assinatura? Seu condomínio voltará para o plano gratuito.');
+    const confirmed = window.confirm('Tem certeza que deseja cancelar a assinatura? Seu condomínio voltará para o Zelcon Starter.');
 
     if (!confirmed) return;
 
@@ -649,9 +706,9 @@ export default function ConfiguracoesPage() {
       const updated = await db.resetToFreePlan(condominio.id);
       if (updated) {
         setCondominio(updated);
-        localStorage.setItem('zelcore_condominio_gestao', JSON.stringify(updated));
+        localStorage.setItem('zelcon_condominio_gestao', JSON.stringify(updated));
         window.dispatchEvent(new Event('storage'));
-        setToast({ message: 'Assinatura cancelada. Seu condomínio agora está no plano gratuito.' });
+        setToast({ message: 'Assinatura cancelada. Seu condomínio agora está no Zelcon Starter.' });
       }
     } catch (err) {
       console.error(err);
@@ -857,13 +914,53 @@ export default function ConfiguracoesPage() {
                 </button>
                 <button
                   type="button"
-                  onClick={handleDownloadQR}
+                  onClick={() => handleDownloadQR('png')}
                   className="flex-1 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 hover:text-white text-zinc-800 dark:text-zinc-200 text-xs font-bold py-2 rounded-lg flex items-center justify-center space-x-1.5 border border-zinc-200 dark:border-zinc-700 transition-all shadow-sm active:scale-[0.98] cursor-pointer"
                 >
                   <Download className="w-3.5 h-3.5" />
-                  <span>Baixar QR Code</span>
+                  <span>QR PNG</span>
                 </button>
+                {condominio?.plan_type !== 'free' && (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => handleDownloadQR('svg')}
+                      className="flex-1 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 hover:text-white text-zinc-800 dark:text-zinc-200 text-xs font-bold py-2 rounded-lg flex items-center justify-center space-x-1.5 border border-zinc-200 dark:border-zinc-700 transition-all shadow-sm active:scale-[0.98] cursor-pointer"
+                    >
+                      <Download className="w-3.5 h-3.5" />
+                      <span>QR SVG</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleDownloadQR('pdf')}
+                      className="flex-1 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 hover:text-white text-zinc-800 dark:text-zinc-200 text-xs font-bold py-2 rounded-lg flex items-center justify-center space-x-1.5 border border-zinc-200 dark:border-zinc-700 transition-all shadow-sm active:scale-[0.98] cursor-pointer"
+                    >
+                      <Download className="w-3.5 h-3.5" />
+                      <span>QR PDF</span>
+                    </button>
+                  </>
+                )}
               </div>
+              {condominio?.plan_type !== 'free' && (
+                <div className="flex gap-2 pt-1">
+                  <button
+                    type="button"
+                    onClick={() => handleDownloadPoster('png')}
+                    className="flex-1 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 hover:text-white text-zinc-800 dark:text-zinc-200 text-xs font-bold py-2 rounded-lg flex items-center justify-center space-x-1.5 border border-zinc-200 dark:border-zinc-700 transition-all shadow-sm active:scale-[0.98] cursor-pointer"
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    <span>Placa PNG</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleDownloadPoster('pdf')}
+                    className="flex-1 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 hover:text-white text-zinc-800 dark:text-zinc-200 text-xs font-bold py-2 rounded-lg flex items-center justify-center space-x-1.5 border border-zinc-200 dark:border-zinc-700 transition-all shadow-sm active:scale-[0.98] cursor-pointer"
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    <span>Placa PDF</span>
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* PREVISÃO DA PLACA */}
@@ -892,7 +989,7 @@ export default function ConfiguracoesPage() {
                       ? 'text-emerald-500' 
                       : 'text-zinc-800'
                   }`} />
-                  <span className="font-bold text-[10px] tracking-widest uppercase">Zelcore</span>
+                  <span className="font-bold text-[10px] tracking-widest uppercase">Zelcon</span>
                 </div>
 
                 {/* Nome do Condominio */}
@@ -1074,8 +1171,8 @@ export default function ConfiguracoesPage() {
                   <span>Plano Atual</span>
                 </div>
                 <h3 className="text-lg font-black text-zinc-900 dark:text-white uppercase tracking-wider">
-                  {condominio?.plan_type === 'free' ? 'Zelcore Starter (Grátis)' : 
-                   condominio?.plan_type === 'pro' ? 'Zelcore Pro' : 'Zelcore Corporate'}
+                  {condominio?.plan_type === 'free' ? 'Zelcon Starter' : 
+                   condominio?.plan_type === 'pro' ? 'Zelcon Pro' : 'Zelcon Corporate'}
                 </h3>
               </div>
               <div className="flex items-center gap-2">
@@ -1162,7 +1259,7 @@ export default function ConfiguracoesPage() {
                 <div className="space-y-1">
                   <span className="text-[9px] font-bold text-zinc-550 dark:text-zinc-500 uppercase tracking-widest">Para Síndicos</span>
                   <h4 className="text-base font-black text-zinc-900 dark:text-white uppercase tracking-wider flex items-center">
-                    Zelcore Pro
+                    Zelcon Pro
                     <Sparkles className="w-4 h-4 text-brand ml-1.5" />
                   </h4>
                 </div>
@@ -1201,6 +1298,10 @@ export default function ConfiguracoesPage() {
                   <li className="flex items-center text-zinc-750 dark:text-zinc-300">
                     <CheckCircle2 className="w-4 h-4 text-emerald-500 mr-2 shrink-0" />
                     QR Code Oficial em Alta Resolução
+                  </li>
+                  <li className="flex items-center text-zinc-750 dark:text-zinc-300">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-500 mr-2 shrink-0" />
+                    Suporte Prioritário
                   </li>
                 </ul>
               </div>
@@ -1245,7 +1346,7 @@ export default function ConfiguracoesPage() {
                 <div className="space-y-1">
                   <span className="text-[9px] font-bold text-zinc-555 dark:text-zinc-500 uppercase tracking-widest">Para Administradoras</span>
                   <h4 className="text-base font-black text-zinc-900 dark:text-white uppercase tracking-wider flex items-center">
-                    Zelcore Corporate
+                    Zelcon Corporate
                     <Building className="w-4 h-4 text-brand ml-1.5" />
                   </h4>
                 </div>
@@ -1341,6 +1442,9 @@ export default function ConfiguracoesPage() {
 
                 <hr className="border-zinc-200 dark:border-zinc-800" />
 
+                <div className="text-[10px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-2">
+                  Todas as funcionalidades do Pro, mais:
+                </div>
                 <ul className="space-y-2.5 text-xs font-semibold text-zinc-500 dark:text-zinc-400">
                   <li className="flex items-center text-zinc-750 dark:text-zinc-300">
                     <CheckCircle2 className="w-4 h-4 text-emerald-500 mr-2 shrink-0" />
@@ -1358,6 +1462,10 @@ export default function ConfiguracoesPage() {
                     <CheckCircle2 className="w-4 h-4 text-emerald-500 mr-2 shrink-0" />
                     Rodapé Customizado com sua Marca
                   </li>
+                  <li className="flex items-center text-zinc-750 dark:text-zinc-300">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-500 mr-2 shrink-0" />
+                    Suporte Prioritário
+                  </li>
                 </ul>
               </div>
 
@@ -1367,7 +1475,7 @@ export default function ConfiguracoesPage() {
                   disabled={condominio?.plan_type === 'corporate' && condominio?.subscription_status === 'active'}
                   onClick={() => {
                     if (isCorporateUnlimited) {
-                      window.location.href = 'mailto:vendas@zelcore.com.br?subject=Corporate%20Ilimitado';
+                      window.location.href = 'mailto:vendas@zelcon.com.br?subject=Corporate%20Ilimitado';
                       return;
                     }
                     setSelectedUpgrade('corporate');
@@ -1508,7 +1616,7 @@ export default function ConfiguracoesPage() {
                     Cancelar Assinatura
                   </h4>
                   <p className="text-[10px] text-zinc-500 font-medium leading-relaxed max-w-md">
-                    Ao cancelar, sua assinatura será encerrada e seu condomínio voltará para o plano gratuito (Zelcore Starter). Os dados serão mantidos.
+                    Ao cancelar, sua assinatura será encerrada e seu condomínio voltará para o Zelcon Starter. Os dados serão mantidos.
                   </p>
                 </div>
                 <button
@@ -1858,7 +1966,7 @@ export default function ConfiguracoesPage() {
                         <div className="flex justify-between items-start">
                           <div>
                             <p className="text-sm font-bold text-white">
-                              {selectedUpgrade === 'pro' ? 'Zelcore Pro' : 'Zelcore Corporate'}
+                              {selectedUpgrade === 'pro' ? 'Zelcon Pro' : 'Zelcon Corporate'}
                             </p>
                             <p className="text-[10px] text-zinc-500 mt-0.5">
                               {selectedUpgrade === 'pro'
@@ -2120,7 +2228,7 @@ export default function ConfiguracoesPage() {
               ? 'text-emerald-500' 
               : 'text-zinc-900'
           }`} />
-          <span className="font-black text-3xl tracking-widest uppercase">Zelcore</span>
+          <span className="font-black text-3xl tracking-widest uppercase">Zelcon</span>
         </div>
 
         <div className="space-y-4">
@@ -2172,7 +2280,7 @@ export default function ConfiguracoesPage() {
         </div>
 
         <div className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest mb-4">
-          Gerado automaticamente pelo Zelcore
+          Gerado automaticamente pelo Zelcon
         </div>
       </div>
 

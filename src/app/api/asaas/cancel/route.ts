@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
     }
 
     if (condo.plan_type === 'free') {
-      return NextResponse.json({ error: 'Condomínio já está no plano gratuito.' }, { status: 400 })
+      return NextResponse.json({ error: 'Condomínio já está no Zelcon Starter.' }, { status: 400 })
     }
 
     // Encontrar o container (se for instância, sobe pra ele)

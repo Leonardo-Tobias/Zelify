@@ -50,7 +50,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   // Inicializar sessão e tema
   useEffect(() => {
     // Carregar tema salvo
-    const savedTheme = (localStorage.getItem('zelcore_theme') as 'dark' | 'light') || 'dark';
+    const savedTheme = (localStorage.getItem('zelcon_theme') as 'dark' | 'light') || 'dark';
     setTheme(savedTheme);
     if (savedTheme === 'dark') {
       document.documentElement.classList.add('dark');
@@ -60,8 +60,8 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
 
     // Verificar sessão do gestor (async encapsulado)
     async function initSession() {
-      const savedGestor = localStorage.getItem('zelcore_gestor');
-      const savedCondo = localStorage.getItem('zelcore_condominio_gestao');
+      const savedGestor = localStorage.getItem('zelcon_gestor');
+      const savedCondo = localStorage.getItem('zelcon_condominio_gestao');
 
       if (!savedGestor || !savedCondo) {
         router.push('/login');
@@ -92,8 +92,8 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
 
         setGestor(gestorData);
       } catch (e) {
-        localStorage.removeItem('zelcore_gestor');
-        localStorage.removeItem('zelcore_condominio_gestao');
+        localStorage.removeItem('zelcon_gestor');
+        localStorage.removeItem('zelcon_condominio_gestao');
         router.push('/login');
       } finally {
         setLoading(false);
@@ -112,7 +112,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   const handleToggleTheme = () => {
     const nextTheme = theme === 'dark' ? 'light' : 'dark';
     setTheme(nextTheme);
-    localStorage.setItem('zelcore_theme', nextTheme);
+    localStorage.setItem('zelcon_theme', nextTheme);
     if (nextTheme === 'dark') {
       document.documentElement.classList.add('dark');
     } else {
@@ -131,16 +131,16 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   // Atualizar título do navegador dinamicamente
   useEffect(() => {
     if (pathname === '/dashboard/kanban') {
-      document.title = "Kanban de Ocorrências | Zelcore";
+      document.title = "Kanban de Ocorrências | Zelcon";
     } else {
-      document.title = "Zelcore | Gestão Operacional de Condomínios";
+      document.title = "Zelcon | Gestão Operacional de Condomínios";
     }
   }, [pathname]);
 
   const handleLogout = () => {
     if (confirm('Deseja sair do painel administrativo?')) {
-      localStorage.removeItem('zelcore_gestor');
-      localStorage.removeItem('zelcore_condominio_gestao');
+      localStorage.removeItem('zelcon_gestor');
+      localStorage.removeItem('zelcon_condominio_gestao');
       router.push('/login');
     }
   };
@@ -196,7 +196,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
       {/* MOBILE HEADER */}
       <div className="md:hidden bg-white/90 dark:bg-[#09090b]/90 backdrop-blur-md border-b border-zinc-200 dark:border-white/[0.06] px-4 py-3 flex items-center justify-between z-20">
         <div className="flex items-center space-x-2">
-          <span className="text-lg font-black tracking-tight text-zinc-900 dark:text-white">Zelcore<span className="text-brand">.</span></span>
+          <span className="text-lg font-black tracking-tight text-zinc-900 dark:text-white">Zelcon<span className="text-brand">.</span></span>
           {isPortfolioView ? (
             <span className="text-[10px] bg-brand/10 text-brand px-1.5 py-0.5 rounded font-bold uppercase border border-brand/20">Carteira</span>
           ) : (
@@ -316,7 +316,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                 <div className="absolute -right-4 -bottom-4 w-16 h-16 bg-brand/10 blur-[20px] rounded-full pointer-events-none"></div>
                 <div className="flex items-center space-x-2 text-[10px] font-bold text-brand uppercase tracking-wider mb-1.5">
                   <Sparkles className="w-3.5 h-3.5 text-brand animate-pulse" />
-                  <span>Plano Grátis</span>
+                  <span>Zelcon Starter</span>
                 </div>
                 <p className="text-[11px] font-bold text-zinc-900 dark:text-white leading-tight">Limite de 15 Chamados/mês</p>
                 <p className="text-[10px] text-zinc-500 dark:text-zinc-400 mt-1 leading-normal font-medium">
@@ -365,7 +365,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
           {/* LOGO E SELETOR DE CONDOMÍNIO */}
           <div className="px-2">
             <div className="flex items-center space-x-1 mb-5">
-              <span className="text-xl font-black tracking-tight text-zinc-900 dark:text-white">Zelcore<span className="text-brand">.</span></span>
+              <span className="text-xl font-black tracking-tight text-zinc-900 dark:text-white">Zelcon<span className="text-brand">.</span></span>
             </div>
             
             {/* DROPDOWN DE CONDOMÍNIOS */}
@@ -507,7 +507,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
               <div className="absolute -right-4 -bottom-4 w-16 h-16 bg-brand/10 blur-[20px] rounded-full pointer-events-none"></div>
               <div className="flex items-center space-x-2 text-[10px] font-bold text-brand uppercase tracking-wider mb-1.5">
                 <Sparkles className="w-3.5 h-3.5 text-brand animate-pulse" />
-                <span>Plano Grátis</span>
+                <span>Zelcon Starter</span>
               </div>
               <p className="text-[11px] font-bold text-zinc-900 dark:text-white leading-tight">Limite de 15 Chamados/mês</p>
               <p className="text-[10px] text-zinc-500 dark:text-zinc-400 mt-1 leading-normal font-medium">
@@ -568,6 +568,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                 posterTitle="Portal do Morador"
                 posterInstructions="Escaneie o QR Code abaixo com seu celular para abrir o Portal do Morador, relatar problemas de manutenção ou cadastrar achados e perdidos."
                 posterTheme="blue"
+                planType={condominio.plan_type}
               />
             </div>
           </div>

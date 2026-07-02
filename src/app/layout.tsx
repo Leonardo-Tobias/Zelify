@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Zelcore | Gestão Operacional de Condomínios",
+  title: "Zelcon | Gestão Operacional de Condomínios",
   description: "Plataforma mobile-first para moradores e gestores controlarem manutenções, achados e perdidos e rotinas do condomínio.",
 };
 

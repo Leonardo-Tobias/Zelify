@@ -26,8 +26,8 @@ export function CondominioProvider({ children }: { children: React.ReactNode }) 
 
   // Inicializar sessão do localStorage
   useEffect(() => {
-    const savedGestor = localStorage.getItem('zelcore_gestor')
-    const savedCondo = localStorage.getItem('zelcore_condominio_gestao')
+    const savedGestor = localStorage.getItem('zelcon_gestor')
+    const savedCondo = localStorage.getItem('zelcon_condominio_gestao')
 
     if (!savedGestor || !savedCondo) {
       router.push('/login')
@@ -64,7 +64,7 @@ export function CondominioProvider({ children }: { children: React.ReactNode }) 
         setCondominio((prev) => {
           if (prev && instances.some((c) => c.id === prev.id)) return prev
           if (instances.length > 0) {
-            localStorage.setItem('zelcore_condominio_gestao', JSON.stringify(instances[0]))
+            localStorage.setItem('zelcon_condominio_gestao', JSON.stringify(instances[0]))
             return instances[0]
           }
           return prev
@@ -81,7 +81,7 @@ export function CondominioProvider({ children }: { children: React.ReactNode }) 
         const fresh = list.find((c) => c.id === condominio.id)
         if (fresh && (fresh.subscription_status !== condominio.subscription_status || fresh.plan_type !== condominio.plan_type)) {
           setCondominio(fresh)
-          localStorage.setItem('zelcore_condominio_gestao', JSON.stringify(fresh))
+          localStorage.setItem('zelcon_condominio_gestao', JSON.stringify(fresh))
         }
       }).catch(() => {})
     }
@@ -91,7 +91,7 @@ export function CondominioProvider({ children }: { children: React.ReactNode }) 
 
   const switchCondo = useCallback(
     (target: Condominio) => {
-      localStorage.setItem('zelcore_condominio_gestao', JSON.stringify(target))
+      localStorage.setItem('zelcon_condominio_gestao', JSON.stringify(target))
       setCondominio(target)
       window.dispatchEvent(new Event('storage'))
       router.push('/dashboard')
@@ -106,7 +106,7 @@ export function CondominioProvider({ children }: { children: React.ReactNode }) 
       const fresh = list.find((c) => c.id === condominio.id)
       if (fresh) {
         setCondominio(fresh)
-        localStorage.setItem('zelcore_condominio_gestao', JSON.stringify(fresh))
+        localStorage.setItem('zelcon_condominio_gestao', JSON.stringify(fresh))
       }
     } catch {}
   }, [userId, condominio])

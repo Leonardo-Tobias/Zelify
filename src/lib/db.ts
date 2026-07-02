@@ -254,42 +254,42 @@ class LocalDB {
 
   // Obter condomínios
   getCondominios(): Condominio[] {
-    return this.getStorageItem('zelcore_condominios', MOCK_CONDOMINIOS);
+    return this.getStorageItem('zelcon_condominios', MOCK_CONDOMINIOS);
   }
 
   // Obter gestores
   getGestores(): UsuarioGestor[] {
-    return this.getStorageItem('zelcore_gestores', MOCK_GESTORES);
+    return this.getStorageItem('zelcon_gestores', MOCK_GESTORES);
   }
 
   // Obter chamados
   getChamadosRaw(): Chamado[] {
-    return this.getStorageItem('zelcore_chamados', MOCK_CHAMADOS);
+    return this.getStorageItem('zelcon_chamados', MOCK_CHAMADOS);
   }
 
   // Obter credenciais de login mock
   getAuthCredentials(): MockAuthCredential[] {
-    return this.getStorageItem('zelcore_auth_credentials', []);
+    return this.getStorageItem('zelcon_auth_credentials', []);
   }
 
   // Salvar condomínios
   saveCondominios(data: Condominio[]): void {
-    this.setStorageItem('zelcore_condominios', data);
+    this.setStorageItem('zelcon_condominios', data);
   }
 
   // Salvar gestores
   saveGestores(data: UsuarioGestor[]): void {
-    this.setStorageItem('zelcore_gestores', data);
+    this.setStorageItem('zelcon_gestores', data);
   }
 
   // Salvar chamados
   saveChamados(data: Chamado[]): void {
-    this.setStorageItem('zelcore_chamados', data);
+    this.setStorageItem('zelcon_chamados', data);
   }
 
   // Salvar credenciais de login mock
   saveAuthCredentials(data: MockAuthCredential[]): void {
-    this.setStorageItem('zelcore_auth_credentials', data);
+    this.setStorageItem('zelcon_auth_credentials', data);
   }
 }
 
@@ -422,7 +422,7 @@ export const db = {
 
       if (currentUsageKB + chamadoSizeKB > LOCAL_STORAGE_SAFE_LIMIT_KB && novoChamado.foto_url) {
         // Espaço insuficiente: salvar sem a foto para não corromper o localStorage
-        console.warn(`[Zelcore Mock] Limite de armazenamento local próximo (${currentUsageKB}KB). Foto removida do chamado para evitar estouro.`);
+        console.warn(`[Zelcon Mock] Limite de armazenamento local próximo (${currentUsageKB}KB). Foto removida do chamado para evitar estouro.`);
         novoChamado.foto_url = '';
       }
 

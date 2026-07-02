@@ -9,13 +9,24 @@ interface PosterPreviewProps {
   posterTitle: string
   posterInstructions: string
   posterTheme: 'blue' | 'zinc' | 'emerald'
+  planType: 'free' | 'pro' | 'corporate'
 }
 
+const blobToBase64 = (blob: Blob): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+};
+
 export default function PosterPreview({
-  nome, slug, codigoAcesso, posterTitle, posterInstructions, posterTheme
+  nome, slug, codigoAcesso, posterTitle, posterInstructions, posterTheme, planType
 }: PosterPreviewProps) {
   const printRef = useRef<HTMLDivElement>(null)
-  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(`https://zelify.vercel.app/${slug}`)}`
+  const qrUrl = (size: number, format?: string) =>
+    `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(`https://zelify.vercel.app/${slug}`)}${format ? `&format=${format}` : ''}`
 
   const handlePrint = () => {
     const printWindow = window.open('', '_blank')
@@ -28,7 +39,7 @@ export default function PosterPreview({
     printWindow.document.write(`
       <html>
         <head>
-          <title>${nome} - Zelcore</title>
+          <title>${nome} - Zelcon</title>
           <style>
             @page { size: A4 portrait; margin: 0; }
             body { margin: 0; padding: 40px; background: white; color: black; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: space-between; min-height: 100vh; box-sizing: border-box; text-align: center; }
@@ -53,7 +64,7 @@ export default function PosterPreview({
             <div>
               <div class="header">
                 <span class="header-icon">&#9670;</span>
-                <span class="header-title">Zelcore</span>
+                <span class="header-title">Zelcon</span>
               </div>
               <br/>
               <div class="badge">${nome}</div>
@@ -61,14 +72,14 @@ export default function PosterPreview({
               <p class="subtitle">${posterInstructions}</p>
             </div>
             <div class="qr-box">
-              <img src="${qrUrl}" alt="QR Code" />
+              <img src="${qrUrl(400)}" alt="QR Code" />
             </div>
             <div class="info-box">
               <div class="info-label">Código de Acesso</div>
               <div class="info-code">${codigoAcesso}</div>
               <div class="info-link">zelify.vercel.app/${slug}</div>
             </div>
-            <div class="footer">Gerado automaticamente pelo Zelcore</div>
+            <div class="footer">Gerado automaticamente pelo Zelcon</div>
           </div>
         </body>
       </html>
@@ -81,12 +92,61 @@ export default function PosterPreview({
     navigator.clipboard.writeText(`https://zelify.vercel.app/${slug}`)
   }
 
-  const handleDownloadQR = () => {
+  const handleDownloadQR = async (format: 'png' | 'svg' | 'pdf') => {
+    if (format === 'pdf') {
+      try {
+        const response = await fetch(qrUrl(500));
+        const blob = await response.blob();
+        const base64 = await blobToBase64(blob);
+        const { default: jsPDF } = await import('jspdf');
+        const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a6' });
+        pdf.addImage(base64, 'PNG', 10, 10, 105, 105);
+        pdf.save(`qrcode-${slug}.pdf`);
+      } catch (err) {
+        console.error('Erro ao baixar QR Code em PDF:', err);
+      }
+      return;
+    }
+
     const link = document.createElement('a')
-    link.href = qrUrl
-    link.download = `qr-code-${slug}.png`
+    link.href = qrUrl(500, format === 'svg' ? 'svg' : undefined)
+    link.download = `qrcode-${slug}.${format}`
     link.click()
   }
+
+  const handleDownloadPoster = async (format: 'png' | 'pdf') => {
+    try {
+      const { default: html2canvas } = await import('html2canvas');
+      const posterEl = printRef.current;
+      if (!posterEl) return;
+
+      const canvas = await html2canvas(posterEl, {
+        scale: 2,
+        backgroundColor: '#ffffff',
+      });
+
+      if (format === 'png') {
+        const link = document.createElement('a');
+        link.download = `placa-${slug}.png`;
+        link.href = canvas.toDataURL('image/png');
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } else {
+        const { default: jsPDF } = await import('jspdf');
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+        const imgWidth = 190;
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+        pdf.addImage(imgData, 'PNG', 10, 10, imgWidth, imgHeight);
+        pdf.save(`placa-${slug}.pdf`);
+      }
+    } catch (err) {
+      console.error('Erro ao baixar a placa:', err);
+    }
+  }
+
+  const isPremium = planType !== 'free'
 
   return (
     <div className="flex flex-col items-center space-y-6 py-4">
@@ -98,7 +158,7 @@ export default function PosterPreview({
       >
         <div className="p-6 flex flex-col items-center text-center space-y-4">
           <div className="flex items-center space-x-2">
-            <span className="text-2xl font-black tracking-widest uppercase" style={{ color: posterTheme === 'blue' ? '#001CFF' : posterTheme === 'emerald' ? '#059669' : '#18181B' }}>Zelcore</span>
+            <span className="text-2xl font-black tracking-widest uppercase" style={{ color: posterTheme === 'blue' ? '#001CFF' : posterTheme === 'emerald' ? '#059669' : '#18181B' }}>Zelcon</span>
           </div>
           <div className="text-xs bg-zinc-200 font-black uppercase px-3 py-1 rounded-lg tracking-widest border border-zinc-300">
             {nome}
@@ -106,7 +166,7 @@ export default function PosterPreview({
           <h2 className="text-lg font-black tracking-tight leading-tight">{posterTitle}</h2>
           <p className="text-[11px] text-zinc-600 font-semibold leading-relaxed px-4">{posterInstructions}</p>
           <div className="bg-zinc-50 p-3 rounded-xl border-2" style={{ borderColor: `${posterTheme === 'blue' ? '#001CFF' : posterTheme === 'emerald' ? '#10B981' : '#18181B'}40` }}>
-            <img src={qrUrl} alt="QR Code" className="w-32 h-32 object-contain" />
+            <img src={qrUrl(150)} alt="QR Code" className="w-32 h-32 object-contain" />
           </div>
           <div className="w-full bg-zinc-50 rounded-xl border border-zinc-200 p-4 space-y-2">
             <div className="text-[9px] font-black uppercase tracking-widest text-zinc-500">Código de Acesso</div>
@@ -131,14 +191,36 @@ export default function PosterPreview({
             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg>
             <span>Imprimir Placa</span>
           </button>
-          <button
-            type="button"
-            onClick={handleDownloadQR}
-            className="flex items-center justify-center space-x-2 py-2.5 bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold rounded-xl border border-zinc-800 transition-all active:scale-[0.98] cursor-pointer"
-          >
-            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-            <span>Baixar QR Code</span>
-          </button>
+          <div className="flex gap-1">
+            <button
+              type="button"
+              onClick={() => handleDownloadQR('png')}
+              className="flex-1 flex items-center justify-center space-x-1 py-2.5 bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold rounded-xl border border-zinc-800 transition-all active:scale-[0.98] cursor-pointer"
+            >
+              <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+              <span>QR PNG</span>
+            </button>
+            {isPremium && (
+              <>
+                <button
+                  type="button"
+                  onClick={() => handleDownloadQR('svg')}
+                  className="flex-1 flex items-center justify-center space-x-1 py-2.5 bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold rounded-xl border border-zinc-800 transition-all active:scale-[0.98] cursor-pointer"
+                >
+                  <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                  <span>QR SVG</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleDownloadQR('pdf')}
+                  className="flex-1 flex items-center justify-center space-x-1 py-2.5 bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold rounded-xl border border-zinc-800 transition-all active:scale-[0.98] cursor-pointer"
+                >
+                  <svg className="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                  <span>QR PDF</span>
+                </button>
+              </>
+            )}
+          </div>
         </div>
         <div className="grid grid-cols-2 gap-2">
           <button
@@ -157,6 +239,26 @@ export default function PosterPreview({
             <span>Editar Placa</span>
           </a>
         </div>
+        {isPremium && (
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={() => handleDownloadPoster('png')}
+              className="flex items-center justify-center space-x-2 py-2.5 bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold rounded-xl border border-zinc-800 transition-all active:scale-[0.98] cursor-pointer"
+            >
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+              <span>Baixar Placa (PNG)</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => handleDownloadPoster('pdf')}
+              className="flex items-center justify-center space-x-2 py-2.5 bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold rounded-xl border border-zinc-800 transition-all active:scale-[0.98] cursor-pointer"
+            >
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
+              <span>Baixar Placa (PDF)</span>
+            </button>
+          </div>
+        )}
       </div>
     </div>
   )

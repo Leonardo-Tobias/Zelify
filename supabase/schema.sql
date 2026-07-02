@@ -1,4 +1,4 @@
--- Esquema de Banco de Dados para o Zelcore MVP
+-- Esquema de Banco de Dados para o Zelcon MVP
 
 -- 1. Tabela de Condomínios
 CREATE TABLE IF NOT EXISTS public.condominios (

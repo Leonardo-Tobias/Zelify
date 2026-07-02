@@ -574,7 +574,15 @@ export default function ConfiguracoesPage() {
       setNewCondoSlug('');
       setNewCondoCodigo('');
       setInstanciaCount(prev => prev + 1);
+
+      if (data.condominio) {
+        setInstanciaList(prev => [...prev, data.condominio]);
+        localStorage.setItem('zelcore_condominio_gestao', JSON.stringify(data.condominio));
+        window.dispatchEvent(new Event('storage'));
+      }
+
       setToast({ message: `Condomínio "${newCondoNome}" criado com sucesso!` });
+      router.push('/dashboard');
     } catch (err) {
       setInstanceError(err instanceof Error ? err.message : 'Erro ao criar condomínio.');
     } finally {

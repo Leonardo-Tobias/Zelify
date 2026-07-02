@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 import { db, Condominio, UsuarioGestor, isSupabaseConfigured } from '@/lib/db';
 import { CondominioProvider, useCondominio } from '@/contexts/CondominioContext';
+import PosterPreview from '@/components/PosterPreview';
 
 function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -39,6 +40,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
   const [condoDropdownOpen, setCondoDropdownOpen] = useState(false);
+  const [showPosterModal, setShowPosterModal] = useState(false);
 
   const handleSwitchCondo = (target: Condominio) => {
     setCondoDropdownOpen(false);
@@ -225,16 +227,15 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
           <div className="space-y-4">
             {!isPortfolioView && (
               <div className="px-2.5 py-2 bg-zinc-50 dark:bg-white/[0.04] rounded-lg border border-zinc-200 dark:border-white/[0.06] flex items-center justify-between text-xs">
-                <span className="font-semibold text-zinc-500">Página Pública</span>
-                <a 
-                  href={`/${condominio.slug}`} 
-                  target="_blank" 
-                  rel="noreferrer" 
-                  className="text-brand font-bold flex items-center space-x-0.5 hover:underline"
+                <span className="font-semibold text-zinc-500">Placa do Condomínio</span>
+                <button
+                  type="button"
+                  onClick={() => { setMobileMenuOpen(false); setShowPosterModal(true); }}
+                  className="text-brand font-bold flex items-center space-x-0.5 hover:underline cursor-pointer"
                 >
-                  <span>/{condominio.slug}</span>
+                  <span>Ver Placa</span>
                   <ExternalLink className="w-3.5 h-3.5 ml-1" />
-                </a>
+                </button>
               </div>
             )}
 
@@ -452,23 +453,22 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
             </div>
           </div>
 
-          {/* DENSE PUBLIC URL PREVIEW */}
-          {!isPortfolioView && (
+          {/* BOTÃO DE PLACA / LINK DO MORADOR */}
+          {!isPortfolioView && condominio?.slug && (
             <div className="px-2">
-              <a 
-                href={`/${condominio.slug}`} 
-                target="_blank" 
-                rel="noreferrer" 
-                className="w-full flex flex-col p-2.5 bg-zinc-100 dark:bg-white/[0.04] border border-zinc-200 dark:border-white/[0.06] rounded-xl text-left hover:text-zinc-900 dark:hover:text-white transition-all group hover:border-zinc-300 dark:hover:border-white/[0.12] shadow-sm"
+              <button
+                type="button"
+                onClick={() => setShowPosterModal(true)}
+                className="w-full flex flex-col p-2.5 bg-zinc-100 dark:bg-white/[0.04] border border-zinc-200 dark:border-white/[0.06] rounded-xl text-left hover:text-zinc-900 dark:hover:text-white transition-all group hover:border-zinc-300 dark:hover:border-white/[0.12] shadow-sm cursor-pointer"
               >
                 <div className="flex items-center space-x-2 text-[11px] font-bold text-zinc-600 dark:text-zinc-300 group-hover:text-brand transition-colors w-full">
                   <ExternalLink className="w-3.5 h-3.5 text-zinc-500 group-hover:text-brand shrink-0 transition-colors" />
-                  <span className="truncate">Link do Morador</span>
+                  <span className="truncate">Placa do Condomínio</span>
                 </div>
                 <span className="text-[10px] font-mono text-zinc-400 dark:text-zinc-550 group-hover:text-brand truncate max-w-full block mt-1 transition-colors pl-5.5">
                   zelify.vercel.app/{condominio.slug}
                 </span>
-              </a>
+              </button>
             </div>
           )}
 
@@ -545,6 +545,34 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
           </div>
         </div>
       </aside>
+
+      {/* MODAL DA PLACA DO CONDOMÍNIO */}
+      {showPosterModal && condominio && condominio.slug && (
+        <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="bg-[#0c0c0e] border border-zinc-800/80 rounded-2xl w-full max-w-md shadow-2xl relative max-h-[90vh] overflow-y-auto">
+            <div className="sticky top-0 bg-[#0c0c0e] z-10 flex items-center justify-between p-5 pb-3 border-b border-zinc-800/60">
+              <h3 className="text-sm font-bold text-white tracking-tight">Placa do Condomínio</h3>
+              <button
+                type="button"
+                onClick={() => setShowPosterModal(false)}
+                className="text-zinc-500 hover:text-white text-xs font-medium px-2.5 py-1 bg-zinc-900 border border-zinc-800 rounded-lg transition-all cursor-pointer"
+              >
+                Fechar
+              </button>
+            </div>
+            <div className="p-5">
+              <PosterPreview
+                nome={condominio.nome}
+                slug={condominio.slug}
+                codigoAcesso={condominio.codigo_acesso || '----'}
+                posterTitle="Portal do Morador"
+                posterInstructions="Escaneie o QR Code abaixo com seu celular para abrir o Portal do Morador, relatar problemas de manutenção ou cadastrar achados e perdidos."
+                posterTheme="blue"
+              />
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* CONTAINER DO CONTEÚDO PRINCIPAL */}
       <main className="flex-1 flex flex-col min-w-0 bg-zinc-100 dark:bg-zinc-950 overflow-y-auto max-h-screen relative transition-colors duration-200">

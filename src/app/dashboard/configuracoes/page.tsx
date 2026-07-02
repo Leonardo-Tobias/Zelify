@@ -459,6 +459,7 @@ export default function ConfiguracoesPage() {
         setCondominio(updatedPix);
         localStorage.setItem('zelcon_condominio_gestao', JSON.stringify(safeCondoForStorage(updatedPix)));
         window.dispatchEvent(new Event('storage'));
+        localStorage.removeItem('zelcon_selected_plan_on_signup');
 
         // Se não veio QR Code ainda, faz polling
         if (!data.pix?.qrCode && !data.pix?.copyPaste && data.subscriptionId) {
@@ -481,6 +482,7 @@ export default function ConfiguracoesPage() {
       window.dispatchEvent(new Event('storage'));
       setShowCheckoutModal(false);
       setCardNumber(''); setCardName(''); setCardExpiry(''); setCardCvv(''); setCardEmail(''); setCardCpf(''); setCardPhone(''); setCardCep(''); setCardAddressNumber(''); setCardAddressComplement('');
+      localStorage.removeItem('zelcon_selected_plan_on_signup');
       setToast({ message: `Assinatura ativada com sucesso! Seu condomínio agora está no plano ${selectedUpgrade === 'pro' ? 'Zelcon Pro' : 'Zelcon Corporate'}.` });
     } catch (err) {
       console.error(err);
@@ -516,6 +518,7 @@ export default function ConfiguracoesPage() {
         setPixCopyPaste(null);
         setCheckoutSubscriptionId(null);
         setPixPaid(true);
+        localStorage.removeItem('zelcon_selected_plan_on_signup');
         setTimeout(() => setPixPaid(false), 4000);
       }
     } catch {

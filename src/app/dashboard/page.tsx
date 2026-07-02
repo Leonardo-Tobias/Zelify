@@ -52,6 +52,8 @@ function DashboardHomeContent() {
   const [toastMsg, setToastMsg] = useState<{ type: 'upgrade' | 'error'; title: string; text: string } | null>(null);
 
   // Verificar sessão do gestor e condomínio ativo
+  const [pendingPlan, setPendingPlan] = useState<string | null>(null);
+
   useEffect(() => {
     const savedGestor = localStorage.getItem('zelcon_gestor');
     if (!savedGestor) {
@@ -59,13 +61,11 @@ function DashboardHomeContent() {
       return;
     }
 
-    // Se o usuário selecionou um plano no cadastro (vindo da LP), redireciona direto para faturamento
+    // Verificar se tem plano pendente (vindo do cadastro mas sem finalizar pagamento)
     if (typeof window !== 'undefined') {
       const selectedPlan = localStorage.getItem('zelcon_selected_plan_on_signup');
-      if (selectedPlan) {
-        localStorage.removeItem('zelcon_selected_plan_on_signup');
-        router.push(`/dashboard/configuracoes?tab=faturamento&plan=${selectedPlan}`);
-        return;
+      if (selectedPlan && condominio?.plan_type === 'free') {
+        setPendingPlan(selectedPlan);
       }
     }
     
@@ -775,6 +775,39 @@ function DashboardHomeContent() {
           >
             Regularizar Assinatura
           </button>
+        </div>
+      )}
+      {/* BANNER DE UPGRADE PENDENTE */}
+      {pendingPlan && (
+        <div className="p-4 bg-brand/10 border border-brand/20 rounded-xl text-xs font-semibold leading-relaxed flex items-center justify-between gap-4 animate-in slide-in-from-top-4 duration-300">
+          <div className="flex items-start space-x-2.5">
+            <Sparkles className="w-4 h-4 shrink-0 text-brand mt-0.5" />
+            <div>
+              <p className="font-bold text-zinc-900 dark:text-white">
+                Assinatura {pendingPlan === 'pro' ? 'Zelcon Pro' : 'Zelcon Corporate'} pendente
+              </p>
+              <p className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-0.5 font-medium">
+                Você iniciou a contratação do plano {pendingPlan === 'pro' ? 'Pro' : 'Corporate'} mas ainda não finalizou o pagamento. Clique abaixo para continuar.
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              onClick={() => {
+                localStorage.removeItem('zelcon_selected_plan_on_signup');
+                setPendingPlan(null);
+              }}
+              className="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 text-[11px] px-2 py-1.5 rounded-lg transition-all cursor-pointer"
+            >
+              Dispensar
+            </button>
+            <button
+              onClick={() => router.push(`/dashboard/configuracoes?tab=faturamento&plan=${pendingPlan}`)}
+              className="bg-brand hover:bg-brand/90 text-white text-[11px] font-bold px-3 py-1.5 rounded-lg transition-all active:scale-[0.97] shadow-[0_2px_8px_rgba(0,51,255,0.2)] cursor-pointer"
+            >
+              Finalizar Pagamento
+            </button>
+          </div>
         </div>
       )}
       {/* CABEÇALHO */}

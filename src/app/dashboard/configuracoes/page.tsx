@@ -1296,6 +1296,23 @@ export default function ConfiguracoesPage() {
                       </div>
                     </div>
                   </div>
+
+                    <div className="relative flex items-center">
+                      <input
+                        type="range"
+                        min={5}
+                        max={100}
+                        value={numCondos > 100 ? 100 : numCondos}
+                        onChange={(e) => setNumCondos(Math.max(5, parseInt(e.target.value)))}
+                        className="w-full h-1.5 bg-zinc-200 dark:bg-zinc-950 rounded-lg appearance-none cursor-pointer accent-brand border border-zinc-300 dark:border-zinc-800 focus:outline-none"
+                      />
+                    </div>
+
+                    <div className="flex justify-between text-[8px] text-zinc-500 font-bold uppercase tracking-wider">
+                      <span>5</span>
+                      <span>50</span>
+                      <span className={numCondos >= 100 ? 'text-brand' : ''}>Ilimitado</span>
+                    </div>
                   <p className="text-[8px] text-zinc-555 dark:text-zinc-500 text-right mt-1.5 font-semibold">
                     *Condição exclusiva para o plano Corporate (mínimo de 5 condomínios ativos).
                   </p>

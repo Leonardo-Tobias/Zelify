@@ -81,6 +81,25 @@ export async function POST(req: NextRequest) {
 
           if (containerErr) throw containerErr
 
+          // Vincular gestor ao container
+          if (userId) {
+            const { data: gestorData } = await supabase
+              .from('usuarios_gestores')
+              .select('nome')
+              .eq('user_id', userId)
+              .limit(1)
+              .maybeSingle()
+
+            await supabase
+              .from('usuarios_gestores')
+              .insert({
+                user_id: userId,
+                condominio_id: container.id,
+                nome: gestorData?.nome || nome,
+                papel: 'admin',
+              })
+          }
+
           // Adotar condomínio atual como primeira instância
           await supabase
             .from('condominios')

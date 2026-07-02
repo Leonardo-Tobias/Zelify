@@ -209,34 +209,36 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
     return null;
   }
 
+  const isSubscriptionLocked = !isPortfolioView && condominio?.subscription_status !== 'active' && condominio?.plan_type !== 'free';
+
   const navigation = [
     { 
       name: 'Painel do Prédio', 
       href: '/dashboard', 
       icon: LayoutDashboard, 
       active: !isPortfolioView && pathname === '/dashboard', 
-      disabled: isPortfolioView 
+      disabled: isPortfolioView || isSubscriptionLocked 
     },
     { 
       name: 'Mural de Ocorrências', 
       href: '/dashboard/kanban', 
       icon: ClipboardList, 
       active: !isPortfolioView && pathname === '/dashboard/kanban', 
-      disabled: isPortfolioView 
+      disabled: isPortfolioView || isSubscriptionLocked 
     },
     { 
       name: 'Achados e Perdidos', 
       href: '/dashboard/achados-perdidos', 
       icon: Package, 
       active: !isPortfolioView && pathname === '/dashboard/achados-perdidos', 
-      disabled: isPortfolioView 
+      disabled: isPortfolioView || isSubscriptionLocked 
     },
     { 
       name: 'Configurações', 
       href: '/dashboard/configuracoes', 
       icon: Settings, 
       active: !isPortfolioView && pathname === '/dashboard/configuracoes', 
-      disabled: isPortfolioView 
+      disabled: isPortfolioView || isSubscriptionLocked 
     },
   ];
 

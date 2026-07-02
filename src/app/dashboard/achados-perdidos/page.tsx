@@ -13,7 +13,9 @@ import {
   Loader2, 
   CheckCircle2, 
   X,
-  Maximize2
+  Maximize2,
+  AlertCircle,
+  Lock
 } from 'lucide-react';
 import { db, Chamado, Condominio } from '@/lib/db';
 import { compressImage } from '@/lib/imageCompressor';
@@ -154,8 +156,32 @@ export default function AchadosPerdidosPage() {
     ? itens 
     : itens.filter(item => item.status === filterStatus);
 
+  const isBlocked = condominio?.subscription_status !== 'active' && condominio?.plan_type !== 'free';
+
   return (
     <div className="space-y-6 relative">
+      
+      {/* BLOQUEIO POR INADIMPLÊNCIA */}
+      {isBlocked && (
+        <div className="flex-1 flex items-center justify-center py-16">
+          <div className="text-center space-y-4 max-w-md">
+            <div className="w-14 h-14 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center mx-auto">
+              <Lock className="w-6 h-6 text-red-400" />
+            </div>
+            <h2 className="text-base font-bold text-white">Assinatura Bloqueada</h2>
+            <p className="text-sm text-zinc-400 leading-relaxed">
+              Seu acesso a Achados e Perdidos está temporariamente suspenso devido a pendências de pagamento na sua assinatura.
+            </p>
+            <button
+              onClick={() => router.push('/dashboard/configuracoes?tab=faturamento')}
+              className="inline-flex items-center space-x-2 bg-brand hover:bg-brand/90 text-white text-xs font-semibold px-5 py-2.5 rounded-lg transition-all active:scale-[0.98]"
+            >
+              <span>Regularizar Assinatura</span>
+            </button>
+          </div>
+        </div>
+      )}
+      
         {/* HEADER E CONTROLES */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-zinc-200 dark:border-zinc-800 pb-4">
         <div>

@@ -52,6 +52,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Nenhum plano Corporate ativo encontrado.' }, { status: 400 })
     }
 
+    if (container.subscription_status !== 'active') {
+      return NextResponse.json({ error: 'Assinatura Corporate inativa. Regularize o pagamento para criar novos condomínios.' }, { status: 400 })
+    }
+
     // Validar limite
     if (container.max_instances) {
       const { count } = await supabase

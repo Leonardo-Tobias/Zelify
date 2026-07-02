@@ -181,6 +181,10 @@ function DashboardHomeContent() {
 
   const handleExportCSV = () => {
     if (!condominio) return;
+    if (condominio.subscription_status !== 'active') {
+      setToastMsg({ type: 'error', title: 'Assinatura Inativa', text: 'A exportação de relatórios não está disponível enquanto houver pendências de pagamento. Regularize sua assinatura para liberar esta funcionalidade.' });
+      return;
+    }
     if (condominio.plan_type === 'free') {
       setToastMsg({ type: 'upgrade', title: 'Funcionalidade Premium', text: 'A exportação de relatórios em CSV é exclusiva dos planos Pro e Corporate.' });
       return;
@@ -214,6 +218,10 @@ function DashboardHomeContent() {
 
   const handleExportPDF = async () => {
     if (!condominio) return;
+    if (condominio.subscription_status !== 'active') {
+      setToastMsg({ type: 'error', title: 'Assinatura Inativa', text: 'A exportação de relatórios não está disponível enquanto houver pendências de pagamento. Regularize sua assinatura para liberar esta funcionalidade.' });
+      return;
+    }
     if (condominio.plan_type === 'free') {
       setToastMsg({ type: 'upgrade', title: 'Funcionalidade Premium', text: 'A exportação de relatórios em PDF é exclusiva dos planos Pro e Corporate.' });
       return;

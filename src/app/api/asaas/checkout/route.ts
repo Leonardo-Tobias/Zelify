@@ -64,7 +64,7 @@ export async function POST(req: NextRequest) {
           .select('*')
           .in('id', allCondoIds)
 
-        const existingContainer = allCondos?.find(c => c.plan_type === 'corporate' && !c.parent_condominio_id)
+        const existingContainer = allCondos?.find(c => c.plan_type === 'corporate' && !c.parent_condominio_id && !c.slug)
 
         if (!existingContainer) {
           // Criar container corporate

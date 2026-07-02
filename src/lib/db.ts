@@ -899,6 +899,7 @@ export const db = {
           current_period_end: null,
           asaas_customer_id: null,
           asaas_subscription_id: null,
+          parent_condominio_id: null,
         })
         .eq('id', id)
         .select()
@@ -927,7 +928,7 @@ export const db = {
 
   async getCorporateContainer(userId: string): Promise<Condominio | null> {
     const condos = await this.getCondominiosByGestorUser(userId);
-    return condos.find(c => c.plan_type === 'corporate' && !c.parent_condominio_id) || null;
+    return condos.find(c => c.plan_type === 'corporate' && !c.parent_condominio_id && !c.slug) || null;
   },
 
   async countCondominioInstancias(containerId: string): Promise<number> {

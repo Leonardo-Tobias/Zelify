@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
     // Buscar dados do condomínio
     const { data: condo } = await supabase
       .from('condominios')
-      .select('asaas_subscription_id, plan_type')
+      .select('id, asaas_subscription_id, plan_type, parent_condominio_id, slug')
       .eq('id', condominioId)
       .single()
 
@@ -40,28 +40,75 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Condomínio já está no plano gratuito.' }, { status: 400 })
     }
 
+    // Encontrar o container (se for instância, sobe pra ele)
+    let containerId = condominioId
+    if (condo.parent_condominio_id) {
+      containerId = condo.parent_condominio_id
+    }
+
+    const { data: container } = await supabase
+      .from('condominios')
+      .select('id, asaas_subscription_id')
+      .eq('id', containerId)
+      .single()
+
     // Cancelar assinatura no Asaas
-    if (condo.asaas_subscription_id) {
+    if (container?.asaas_subscription_id) {
       try {
-        await cancelAsaasSubscription(condo.asaas_subscription_id)
-        console.log('[CANCEL] Assinatura cancelada no Asaas:', condo.asaas_subscription_id)
+        await cancelAsaasSubscription(container.asaas_subscription_id)
+        console.log('[CANCEL] Assinatura cancelada no Asaas:', container.asaas_subscription_id)
       } catch (err) {
         console.warn('[CANCEL] Erro ao cancelar no Asaas (pode já estar cancelado):', err)
       }
     }
 
-    // Resetar para plano free no banco
-    await supabase
-      .from('condominios')
-      .update({
-        plan_type: 'free',
-        subscription_status: 'active',
-        billing_type: null,
-        current_period_end: null,
-        asaas_customer_id: null,
-        asaas_subscription_id: null,
-      })
-      .eq('id', condominioId)
+    // Se for container corporate, resetar todas as instâncias + container
+    if (!condo.parent_condominio_id && !condo.slug) {
+      // É o container corporate — resetar todas as instâncias
+      const { data: instances } = await supabase
+        .from('condominios')
+        .select('id')
+        .eq('parent_condominio_id', containerId)
+
+      for (const inst of instances || []) {
+        await supabase
+          .from('condominios')
+          .update({
+            plan_type: 'free',
+            subscription_status: 'active',
+            billing_type: null,
+            current_period_end: null,
+            parent_condominio_id: null,
+          })
+          .eq('id', inst.id)
+      }
+
+      // Remover vínculo do gestor com o container
+      await supabase
+        .from('usuarios_gestores')
+        .delete()
+        .eq('condominio_id', containerId)
+
+      // Resetar container
+      await supabase
+        .from('condominios')
+        .delete()
+        .eq('id', containerId)
+    } else {
+      // É um condomínio normal ou instância — só reseta ele
+      await supabase
+        .from('condominios')
+        .update({
+          plan_type: 'free',
+          subscription_status: 'active',
+          billing_type: null,
+          current_period_end: null,
+          asaas_customer_id: null,
+          asaas_subscription_id: null,
+          parent_condominio_id: null,
+        })
+        .eq('id', condominioId)
+    }
 
     return NextResponse.json({ success: true })
   } catch (err) {

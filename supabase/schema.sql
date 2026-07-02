@@ -107,6 +107,7 @@ CREATE POLICY "Inserção pública de chamados validada" ON public.chamados
 -- FUNÇÃO RPC SEGURA para validar o código de acesso do morador.
 -- Executada com permissão de SECURITY DEFINER (acessa codigo_acesso sem expô-lo via SELECT).
 -- A ANON_KEY nunca verá o valor do código diretamente; apenas recebe true/false.
+-- A comparação usa SHA-256 em vez de plaintext para proteção dos dados.
 CREATE OR REPLACE FUNCTION public.validar_codigo_acesso(
     p_condominio_id UUID,
     p_codigo TEXT
@@ -116,13 +117,25 @@ LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = public
 AS $$
+DECLARE
+    stored_hash TEXT;
+    input_hash TEXT;
 BEGIN
-    RETURN EXISTS (
-        SELECT 1
-        FROM public.condominios
-        WHERE id = p_condominio_id
-          AND codigo_acesso = p_codigo
-    );
+    -- Buscar o hash armazenado do código de acesso
+    SELECT codigo_acesso INTO stored_hash
+    FROM public.condominios
+    WHERE id = p_condominio_id;
+
+    -- Se não encontrou, retorna false
+    IF stored_hash IS NULL THEN
+        RETURN FALSE;
+    END IF;
+
+    -- Gerar hash SHA-256 do código informado
+    input_hash := encode(sha256(p_codigo::bytea), 'hex');
+
+    -- Comparar os hashes
+    RETURN stored_hash = input_hash;
 END;
 $$;
 

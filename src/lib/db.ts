@@ -512,12 +512,13 @@ export const db = {
     codigoAcesso: string
   ): Promise<Condominio | null> {
     if (supabase) {
+      const hashedCodigo = await hashCodigoAcesso(codigoAcesso);
       const { data, error } = await supabase
         .from('condominios')
         .update({
           nome,
           slug,
-          codigo_acesso: codigoAcesso
+          codigo_acesso: hashedCodigo
         })
         .eq('id', id)
         .select()
@@ -661,12 +662,13 @@ export const db = {
       }
 
       // 2. Inserir o condomínio com plano grátis ativo por padrão
+      const hashedCodigo = await hashCodigoAcesso(dados.codigoAcesso);
       const { data: condoData, error: condoError } = await supabase
         .from('condominios')
         .insert({
           nome: dados.condominioNome,
           slug: dados.condominioSlug.trim().toLowerCase(),
-          codigo_acesso: dados.codigoAcesso,
+          codigo_acesso: hashedCodigo,
           plan_type: 'free',
           subscription_status: 'active'
         })
@@ -985,12 +987,13 @@ export const db = {
     gestorNome: string;
   }): Promise<Condominio> {
     if (supabase) {
+      const hashedCodigo = await hashCodigoAcesso(params.codigo_acesso);
       const { data: condo, error: err1 } = await supabase
         .from('condominios')
         .insert({
           nome: params.nome,
           slug: params.slug,
-          codigo_acesso: params.codigo_acesso,
+          codigo_acesso: hashedCodigo,
           plan_type: 'corporate',
           subscription_status: 'active',
           parent_condominio_id: params.parentId,

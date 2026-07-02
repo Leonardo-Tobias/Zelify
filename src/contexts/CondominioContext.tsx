@@ -73,23 +73,21 @@ export function CondominioProvider({ children }: { children: React.ReactNode }) 
       .catch((err) => console.error('Erro ao carregar condominios:', err))
   }, [userId])
 
-  // Sincronizar subscription_status a cada navegação (pathname)
+  // Refresh silencioso quando a janela recuperar o foco (voltar de outra aba)
   useEffect(() => {
-    if (!userId || !condominio) return
-    db.getCondominiosByGestorUser(userId)
-      .then((list) => {
+    const onFocus = () => {
+      if (!userId || !condominio) return
+      db.getCondominiosByGestorUser(userId).then((list) => {
         const fresh = list.find((c) => c.id === condominio.id)
-        if (
-          fresh &&
-          (fresh.subscription_status !== condominio.subscription_status ||
-            fresh.plan_type !== condominio.plan_type)
-        ) {
+        if (fresh && (fresh.subscription_status !== condominio.subscription_status || fresh.plan_type !== condominio.plan_type)) {
           setCondominio(fresh)
           localStorage.setItem('zelcore_condominio_gestao', JSON.stringify(fresh))
         }
-      })
-      .catch(() => {})
-  }, [typeof window !== 'undefined' ? window.location.pathname : '']) // eslint-disable-line
+      }).catch(() => {})
+    }
+    window.addEventListener('focus', onFocus)
+    return () => window.removeEventListener('focus', onFocus)
+  }, [userId, condominio?.id])
 
   const switchCondo = useCallback(
     (target: Condominio) => {

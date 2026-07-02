@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Loader2, AlertCircle, Eye, EyeOff, ShieldCheck, ArrowRight, ArrowLeft, Building, User, Mail, Lock, Key } from 'lucide-react';
-import { db } from '@/lib/db';
+import { db, safeCondoForStorage } from '@/lib/db';
 
 export default function CadastroPage() {
   const router = useRouter();
@@ -119,7 +119,7 @@ export default function CadastroPage() {
 
       // 3. Salvar dados de login no localStorage e redirecionar
       localStorage.setItem('zelcon_gestor', JSON.stringify(session.gestor));
-      localStorage.setItem('zelcon_condominio_gestao', JSON.stringify(session.condominio));
+      localStorage.setItem('zelcon_condominio_gestao', JSON.stringify(safeCondoForStorage(session.condominio)));
       router.push('/dashboard');
     } catch (err: any) {
       setError(err?.message || 'Falha ao efetuar o cadastro. Verifique os dados ou tente novamente.');

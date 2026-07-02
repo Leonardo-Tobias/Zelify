@@ -16,6 +16,39 @@ async function hashPassword(password: string): Promise<string> {
   return btoa(password);
 }
 
+/**
+ * Hash SHA-256 para o código de acesso (PIN) antes de armazenar no banco.
+ * Reutiliza a SubtleCrypto API.
+ */
+export async function hashCodigoAcesso(codigo: string): Promise<string> {
+  if (typeof window !== 'undefined' && window.crypto?.subtle) {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(codigo);
+    const hashBuffer = await window.crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+  return btoa(codigo);
+}
+
+/**
+ * Remove campos sensíveis do objeto Condominio antes de salvar no localStorage.
+ */
+export function safeCondoForStorage(condo: Condominio): Condominio {
+  return {
+    id: condo.id,
+    nome: condo.nome,
+    slug: condo.slug,
+    plan_type: condo.plan_type,
+    subscription_status: condo.subscription_status,
+    billing_type: condo.billing_type,
+    current_period_end: condo.current_period_end,
+    parent_condominio_id: condo.parent_condominio_id,
+    max_instances: condo.max_instances,
+    created_at: condo.created_at,
+  }
+}
+
 // Hash pré-computado da senha seed '123456' para as contas de demo
 // SHA-256('123456') = 8d969eef...
 const SEED_PASSWORD_HASH = '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92';

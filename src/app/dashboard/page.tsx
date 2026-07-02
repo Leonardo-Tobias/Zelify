@@ -24,7 +24,7 @@ import {
   Sparkles,
   Crown
 } from 'lucide-react';
-import { db, Chamado, Condominio, UsuarioGestor } from '@/lib/db';
+import { db, Chamado, Condominio, UsuarioGestor, safeCondoForStorage } from '@/lib/db';
 import { useCondominio } from '@/contexts/CondominioContext';
 
 function DashboardHomeContent() {
@@ -148,7 +148,7 @@ function DashboardHomeContent() {
       const list = await db.getCondominiosByGestorUser(gestor.user_id);
       const target = list.find(c => c.id === condoId);
       if (target) {
-        localStorage.setItem('zelcon_condominio_gestao', JSON.stringify(target));
+        localStorage.setItem('zelcon_condominio_gestao', JSON.stringify(safeCondoForStorage(target)));
         window.dispatchEvent(new Event('storage'));
         router.push('/dashboard');
       }

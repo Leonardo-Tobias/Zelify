@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Loader2, AlertCircle, Eye, EyeOff, ShieldCheck } from 'lucide-react';
-import { db, isSupabaseConfigured } from '@/lib/db';
+import { db, isSupabaseConfigured, safeCondoForStorage } from '@/lib/db';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -36,7 +36,7 @@ export default function LoginPage() {
       if (session) {
         // Salvar dados do gestor e do condomínio no localStorage para a sessão
         localStorage.setItem('zelcon_gestor', JSON.stringify(session.gestor));
-        localStorage.setItem('zelcon_condominio_gestao', JSON.stringify(session.condominio));
+        localStorage.setItem('zelcon_condominio_gestao', JSON.stringify(safeCondoForStorage(session.condominio)));
         router.push('/dashboard');
       } else {
         setError('E-mail ou senha incorretos.');

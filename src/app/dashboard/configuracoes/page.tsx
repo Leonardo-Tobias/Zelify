@@ -29,7 +29,7 @@ import {
   Eye,
   EyeOff
 } from 'lucide-react';
-import { db, Condominio } from '@/lib/db';
+import { db, Condominio, safeCondoForStorage } from '@/lib/db';
 import { useCondominio } from '@/contexts/CondominioContext';
 import { BillingSwitch } from '@/components/ui/switch';
 
@@ -104,6 +104,8 @@ export default function ConfiguracoesPage() {
   const [needsCorporateSetup, setNeedsCorporateSetup] = useState(false);
   const [corporateCondoId, setCorporateCondoId] = useState<string | null>(null);
   const [settingUpContainer, setSettingUpContainer] = useState(false);
+  const [exportingData, setExportingData] = useState(false);
+  const [deletingAccount, setDeletingAccount] = useState(false);
 
   // Carregar info de instâncias corporate
   useEffect(() => {
@@ -323,7 +325,7 @@ export default function ConfiguracoesPage() {
       if (updated) {
         setCondominio(updated);
         // Atualizar localStorage para refletir na navegação do layout
-        localStorage.setItem('zelcon_condominio_gestao', JSON.stringify(updated));
+        localStorage.setItem('zelcon_condominio_gestao', JSON.stringify(safeCondoForStorage(updated)));
         
         // Disparar evento para atualizar outros componentes ouvindo storage
         if (typeof window !== 'undefined') {
@@ -454,7 +456,7 @@ export default function ConfiguracoesPage() {
           current_period_end: new Date(Date.now() + (isAnnual ? 365 : 30) * 86400000).toISOString(),
         };
         setCondominio(updatedPix);
-        localStorage.setItem('zelcon_condominio_gestao', JSON.stringify(updatedPix));
+        localStorage.setItem('zelcon_condominio_gestao', JSON.stringify(safeCondoForStorage(updatedPix)));
         window.dispatchEvent(new Event('storage'));
 
         // Se não veio QR Code ainda, faz polling
@@ -474,7 +476,7 @@ export default function ConfiguracoesPage() {
         current_period_end: new Date(Date.now() + (isAnnual ? 365 : 30) * 86400000).toISOString(),
       };
       setCondominio(updated);
-      localStorage.setItem('zelcon_condominio_gestao', JSON.stringify(updated));
+      localStorage.setItem('zelcon_condominio_gestao', JSON.stringify(safeCondoForStorage(updated)));
       window.dispatchEvent(new Event('storage'));
       setShowCheckoutModal(false);
       setCardNumber(''); setCardName(''); setCardExpiry(''); setCardCvv(''); setCardEmail(''); setCardCpf(''); setCardPhone(''); setCardCep(''); setCardAddressNumber(''); setCardAddressComplement('');
@@ -506,7 +508,7 @@ export default function ConfiguracoesPage() {
       );
       if (updated) {
         setCondominio(updated);
-        localStorage.setItem('zelcon_condominio_gestao', JSON.stringify(updated));
+        localStorage.setItem('zelcon_condominio_gestao', JSON.stringify(safeCondoForStorage(updated)));
         window.dispatchEvent(new Event('storage'));
         setShowCheckoutModal(false);
         setPixQrCode(null);
@@ -614,7 +616,7 @@ export default function ConfiguracoesPage() {
 
       if (data.condominio) {
         setInstanciaList(prev => [...prev, data.condominio]);
-        localStorage.setItem('zelcon_condominio_gestao', JSON.stringify(data.condominio));
+        localStorage.setItem('zelcon_condominio_gestao', JSON.stringify(safeCondoForStorage(data.condominio)));
         window.dispatchEvent(new Event('storage'));
       }
 
@@ -706,7 +708,7 @@ export default function ConfiguracoesPage() {
       const updated = await db.resetToFreePlan(condominio.id);
       if (updated) {
         setCondominio(updated);
-        localStorage.setItem('zelcon_condominio_gestao', JSON.stringify(updated));
+        localStorage.setItem('zelcon_condominio_gestao', JSON.stringify(safeCondoForStorage(updated)));
         window.dispatchEvent(new Event('storage'));
         setToast({ message: 'Assinatura cancelada. Seu condomínio agora está no Zelcon Starter.' });
       }
@@ -715,6 +717,81 @@ export default function ConfiguracoesPage() {
       setCheckoutError(err instanceof Error ? err.message : 'Erro ao cancelar assinatura');
     } finally {
       setProcessingCheckout(false);
+    }
+  };
+
+  const getSupabaseToken = (): string | null => {
+    try {
+      const data = localStorage.getItem('sb-kpgmpwthrnlrikkplrul-auth-token');
+      if (!data) return null;
+      const parsed = JSON.parse(data);
+      return parsed?.access_token || null;
+    } catch {
+      return null;
+    }
+  };
+
+  const handleExportUserData = async () => {
+    setExportingData(true);
+    try {
+      const authToken = getSupabaseToken();
+      if (!authToken) {
+        setToast({ message: 'Sessão expirada. Faça login novamente.' });
+        return;
+      }
+      const res = await fetch('/api/user/data-export', {
+        headers: { authorization: `Bearer ${authToken}` },
+      });
+      if (!res.ok) throw new Error('Erro ao exportar');
+      const data = await res.json();
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `meus-dados-${condominio?.slug || 'zelcon'}.json`;
+      link.click();
+      URL.revokeObjectURL(url);
+      setToast({ message: 'Dados exportados com sucesso!' });
+    } catch (err) {
+      console.error(err);
+      setToast({ message: 'Erro ao exportar dados.' });
+    } finally {
+      setExportingData(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (!condominio) return;
+    const confirmed = window.confirm(
+      'ATENÇÃO: Esta ação é irreversível! Todos os seus dados, chamados e condomínios serão excluídos permanentemente. Deseja continuar?'
+    );
+    if (!confirmed) return;
+
+    const doubleConfirm = window.prompt('Digite "EXCLUIR" para confirmar a exclusão permanente da sua conta:');
+    if (doubleConfirm !== 'EXCLUIR') {
+      setToast({ message: 'Exclusão cancelada.' });
+      return;
+    }
+
+    setDeletingAccount(true);
+    try {
+      const authToken = getSupabaseToken();
+      if (!authToken) {
+        setToast({ message: 'Sessão expirada. Faça login novamente.' });
+        return;
+      }
+      const res = await fetch('/api/user', {
+        method: 'DELETE',
+        headers: { authorization: `Bearer ${authToken}` },
+      });
+      if (!res.ok) throw new Error('Erro ao excluir conta');
+      localStorage.clear();
+      window.location.href = '/';
+    } catch (err) {
+      console.error(err);
+      setToast({ message: 'Erro ao excluir conta. Tente novamente.' });
+    } finally {
+      setDeletingAccount(false);
     }
   };
 
@@ -777,7 +854,7 @@ export default function ConfiguracoesPage() {
       </div>
 
       {activeTab === 'geral' ? (
-        <div className="grid grid-cols-1 gap-6">
+        <><div className="grid grid-cols-1 gap-6">
         
         {/* BOX DO LINK PÚBLICO */}
         <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-6 rounded-xl space-y-4 shadow-sm">
@@ -1158,9 +1235,51 @@ export default function ConfiguracoesPage() {
           </form>
         </div>
       </div>
+
+      {/* SEÇÃO DE PRIVACIDADE E DADOS */}
+      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6 shadow-sm space-y-4">
+        <div className="flex items-center space-x-2 text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-widest">
+          <Shield className="w-4 h-4 text-brand" />
+          <span>Privacidade e Dados</span>
+        </div>
+
+        <p className="text-xs text-zinc-500 font-medium leading-relaxed">
+          Você pode solicitar a exportação de todos os seus dados pessoais ou excluir permanentemente sua conta e todos os dados vinculados.
+        </p>
+
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={handleExportUserData}
+            disabled={exportingData}
+            className="bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-800 dark:text-zinc-200 text-xs font-bold px-4 py-2 rounded-lg flex items-center space-x-1.5 border border-zinc-200 dark:border-zinc-700 transition-all active:scale-[0.98] disabled:opacity-50 cursor-pointer"
+          >
+            {exportingData ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            ) : (
+              <Download className="w-3.5 h-3.5" />
+            )}
+            <span>Exportar meus dados</span>
+          </button>
+          <button
+            type="button"
+            onClick={handleDeleteAccount}
+            disabled={deletingAccount}
+            className="bg-red-500/10 hover:bg-red-500/20 text-red-500 text-xs font-bold px-4 py-2 rounded-lg flex items-center space-x-1.5 border border-red-500/20 transition-all active:scale-[0.98] disabled:opacity-50 cursor-pointer"
+          >
+            {deletingAccount ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            ) : (
+              <AlertCircle className="w-3.5 h-3.5" />
+            )}
+            <span>Excluir minha conta</span>
+          </button>
+        </div>
+      </div>
+      </> 
       ) : (
-        <div className="space-y-6 animate-in fade-in duration-200">
-          {/* CARD DE STATUS DO PLANO ATUAL */}
+      <div className="space-y-6 animate-in fade-in duration-200">
+        {/* CARD DE STATUS DO PLANO ATUAL */}
           <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-6 rounded-xl space-y-4 shadow-sm relative overflow-hidden">
             <div className="absolute top-0 right-0 w-[200px] h-[200px] bg-brand/5 blur-[60px] rounded-full pointer-events-none"></div>
             

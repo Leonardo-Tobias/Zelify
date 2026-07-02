@@ -139,11 +139,11 @@ export default function CadastroPage() {
         
         {/* LOGO */}
         <div className="text-center">
-          <img
-            src="/logo.svg"
-            alt="Zelcon"
-            className="h-10 mx-auto mb-4"
-          />
+          <div className="mb-4">
+            <span className="text-2xl font-black tracking-tight text-white">
+              Zelcon<span className="text-[#001CFF]">.</span>
+            </span>
+          </div>
           <h1 className="text-xl font-bold tracking-tight text-white">Comece com o Zelcon</h1>
           <p className="text-sm text-zinc-300 mt-1 font-medium">
             Cadastre seu condomínio e crie sua conta de síndico

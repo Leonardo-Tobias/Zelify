@@ -59,11 +59,11 @@ export default function LoginPage() {
         
         {/* LOGO */}
         <div className="text-center">
-          <img
-            src="/logo.svg"
-            alt="Zelcon"
-            className="h-10 mx-auto mb-4"
-          />
+          <div className="mb-4">
+            <span className="text-2xl font-black tracking-tight text-white">
+              Zelcon<span className="text-[#001CFF]">.</span>
+            </span>
+          </div>
           <h1 className="text-xl font-bold tracking-tight text-white">Acesse o Zelcon Gestor</h1>
           <p className="text-xs text-zinc-400 mt-1 font-medium">
             Painel administrativo para síndicos e zeladores

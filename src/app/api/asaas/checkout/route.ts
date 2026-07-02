@@ -84,7 +84,11 @@ export async function POST(req: NextRequest) {
           // Adotar condomínio atual como primeira instância
           await supabase
             .from('condominios')
-            .update({ parent_condominio_id: container.id })
+            .update({
+              parent_condominio_id: container.id,
+              plan_type: 'corporate',
+              subscription_status: 'active',
+            })
             .eq('id', condominioId)
 
           targetCondominioId = container.id

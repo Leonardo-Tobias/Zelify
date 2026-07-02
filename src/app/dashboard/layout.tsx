@@ -150,6 +150,24 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
     }
   }, [gestor, condominio]);
 
+  // Sincronizar subscription_status com o banco de dados a cada 30s
+  useEffect(() => {
+    if (!gestor || !condominio) return;
+    const syncStatus = async () => {
+      try {
+        const list = await db.getCondominiosByGestorUser(gestor.user_id);
+        const fresh = list.find(c => c.id === condominio.id);
+        if (fresh && fresh.subscription_status !== condominio.subscription_status) {
+          setCondominio(fresh);
+          localStorage.setItem('zelcore_condominio_gestao', JSON.stringify(fresh));
+          window.dispatchEvent(new Event('storage'));
+        }
+      } catch {}
+    };
+    const interval = setInterval(syncStatus, 30000);
+    return () => clearInterval(interval);
+  }, [gestor, condominio?.id]);
+
   // Listener para capturar atualizações de nome/slug nas configurações
   useEffect(() => {
     const handleStorageChange = () => {

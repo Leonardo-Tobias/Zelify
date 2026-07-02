@@ -15,7 +15,8 @@ import {
   X,
   Maximize2,
   AlertCircle,
-  Lock
+  Lock,
+  Trash2
 } from 'lucide-react';
 import { db, Chamado } from '@/lib/db';
 import { useCondominio } from '@/contexts/CondominioContext';
@@ -133,6 +134,19 @@ export default function AchadosPerdidosPage() {
       }
     } catch (err) {
       alert('Erro ao atualizar status.');
+      console.error(err);
+    }
+  };
+
+  const handleDeleteChamado = async (id: string) => {
+    try {
+      await db.deleteChamado(id);
+      setItens(prev => prev.filter(item => item.id !== id));
+      if (selectedItem && selectedItem.id === id) {
+        setSelectedItem(null);
+      }
+    } catch (err) {
+      alert('Erro ao excluir item.');
       console.error(err);
     }
   };
@@ -310,6 +324,19 @@ export default function AchadosPerdidosPage() {
                         Entregar
                       </button>
                     </div>
+                  )}
+                  {item.status === 'entregue' && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (window.confirm('Excluir este item permanentemente?')) {
+                          handleDeleteChamado(item.id);
+                        }
+                      }}
+                      className="w-full text-[9px] font-bold py-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/20 rounded-md transition-colors cursor-pointer"
+                    >
+                      Excluir
+                    </button>
                   )}
                 </div>
               </div>
@@ -522,6 +549,22 @@ export default function AchadosPerdidosPage() {
                       Marcar como Entregue
                     </button>
                   </div>
+                </div>
+              )}
+
+              {selectedItem.status === 'entregue' && (
+                <div className="pt-4 border-t border-zinc-200 dark:border-zinc-800">
+                  <button
+                    onClick={() => {
+                      if (window.confirm('Excluir este item permanentemente?')) {
+                        handleDeleteChamado(selectedItem.id);
+                      }
+                    }}
+                    className="w-full py-2.5 bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/20 rounded-lg text-xs font-bold transition-all flex items-center justify-center space-x-1.5 cursor-pointer"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>Excluir permanentemente</span>
+                  </button>
                 </div>
               )}
 

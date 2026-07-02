@@ -15,7 +15,8 @@ import {
   X,
   Maximize2,
   AlertCircle,
-  Lock
+  Lock,
+  Trash2
 } from 'lucide-react';
 import { db, Chamado } from '@/lib/db';
 import { useCondominio } from '@/contexts/CondominioContext';
@@ -61,6 +62,19 @@ export default function KanbanPage() {
       }
     } catch (err) {
       alert('Erro ao atualizar status.');
+      console.error(err);
+    }
+  };
+
+  const handleDeleteChamado = async (id: string) => {
+    try {
+      await db.deleteChamado(id);
+      setChamados(prev => prev.filter(c => c.id !== id));
+      if (selectedChamado && selectedChamado.id === id) {
+        setSelectedChamado(null);
+      }
+    } catch (err) {
+      alert('Erro ao excluir chamado.');
       console.error(err);
     }
   };
@@ -248,6 +262,20 @@ export default function KanbanPage() {
                               <ChevronRight className="w-3 h-3" />
                             </button>
                           )}
+                          {col.status === 'resolvido' && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (window.confirm('Excluir este chamado permanentemente?')) {
+                                  handleDeleteChamado(item.id);
+                                }
+                              }}
+                              className="p-1 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-500 hover:text-red-400 rounded transition-colors cursor-pointer"
+                              title="Excluir chamado"
+                            >
+                              <Trash2 className="w-3 h-3" />
+                            </button>
+                          )}
                         </div>
                       </div>
 
@@ -383,6 +411,22 @@ export default function KanbanPage() {
                   </button>
                 </div>
               </div>
+
+              {selectedChamado.status === 'resolvido' && (
+                <div className="pt-2 border-t border-zinc-800/60">
+                  <button
+                    onClick={() => {
+                      if (window.confirm('Excluir este chamado permanentemente?')) {
+                        handleDeleteChamado(selectedChamado.id);
+                      }
+                    }}
+                    className="w-full py-2 px-3 rounded-lg text-xs font-bold transition-all border bg-red-500/10 border-red-500/20 text-red-500 hover:bg-red-500/20 flex items-center justify-center space-x-1.5 cursor-pointer"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>Excluir permanentemente</span>
+                  </button>
+                </div>
+              )}
 
             </div>
           </div>

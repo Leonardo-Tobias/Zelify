@@ -467,6 +467,26 @@ export const db = {
   },
 
   /**
+   * Exclui permanentemente um chamado.
+   */
+  async deleteChamado(id: string): Promise<void> {
+    if (supabase) {
+      const { error } = await supabase
+        .from('chamados')
+        .delete()
+        .eq('id', id);
+      if (error) throw error;
+    } else {
+      const chamados = localDB.getChamadosRaw();
+      const index = chamados.findIndex(c => c.id === id);
+      if (index !== -1) {
+        chamados.splice(index, 1);
+        localDB.saveChamados(chamados);
+      }
+    }
+  },
+
+  /**
    * Altera o status de um chamado (Kanban ou Achados e Perdidos).
    */
   async updateChamadoStatus(

@@ -1,12 +1,13 @@
 'use client';
 
-import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { Loader2, AlertCircle, Eye, EyeOff, ShieldCheck, ArrowRight, ArrowLeft, Building, User, Mail, Lock, Key } from 'lucide-react';
+import React, { useState, useEffect, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Loader2, AlertCircle, Eye, EyeOff, ShieldCheck, ArrowRight, ArrowLeft, Building, User, Mail, Lock, Key, Check } from 'lucide-react';
 import { db, safeCondoForStorage } from '@/lib/db';
 
-export default function CadastroPage() {
+function CadastroForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   
@@ -16,6 +17,10 @@ export default function CadastroPage() {
       const planParam = new URLSearchParams(window.location.search).get('plan');
       if (planParam === 'pro' || planParam === 'corporate') {
         localStorage.setItem('zelcon_selected_plan_on_signup', planParam);
+      }
+      const stepParam = new URLSearchParams(window.location.search).get('step');
+      if (stepParam === '2') {
+        setStep(2);
       }
     }
   }, []);
@@ -336,20 +341,27 @@ export default function CadastroPage() {
                 </p>
               </div>
 
-              <label className="flex items-start space-x-3 text-xs text-zinc-500 leading-relaxed pt-2">
+              <label className="flex items-start space-x-3 text-xs cursor-pointer group pt-2">
+                <div className={`relative w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 mt-0.5 transition-all ${
+                  aceiteLGPD
+                    ? 'bg-brand border-brand'
+                    : 'bg-zinc-900 border-zinc-700 group-hover:border-zinc-500'
+                }`}>
+                  {aceiteLGPD && <Check className="w-3.5 h-3.5 text-white" />}
+                </div>
                 <input
                   type="checkbox"
                   checked={aceiteLGPD}
                   onChange={(e) => setAceiteLGPD(e.target.checked)}
-                  className="mt-0.5 w-4 h-4 rounded border-zinc-700 bg-zinc-900 text-brand focus:ring-brand/30 accent-brand cursor-pointer shrink-0"
+                  className="sr-only"
                 />
-                <span className="font-medium">
+                <span className="font-medium text-zinc-400">
                   Li e aceito a{' '}
-                  <a href="/privacidade" target="_blank" className="text-brand hover:underline font-bold">
+                  <a href={`/privacidade?step=${step}`} target="_blank" className="text-brand hover:underline font-bold">
                     Política de Privacidade
                   </a>
                   {' '}e os{' '}
-                  <a href="/termos" target="_blank" className="text-brand hover:underline font-bold">
+                  <a href={`/termos?step=${step}`} target="_blank" className="text-brand hover:underline font-bold">
                     Termos de Uso
                   </a>
                   .
@@ -400,5 +412,17 @@ export default function CadastroPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function CadastroPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-[#070709] flex items-center justify-center">
+        <Loader2 className="w-5 h-5 animate-spin text-brand" />
+      </div>
+    }>
+      <CadastroForm />
+    </Suspense>
   );
 }

@@ -25,6 +25,7 @@ import {
   Crown
 } from 'lucide-react';
 import { db, Chamado, Condominio, UsuarioGestor } from '@/lib/db';
+import { useCondominio } from '@/contexts/CondominioContext';
 
 function DashboardHomeContent() {
   const router = useRouter();
@@ -32,11 +33,11 @@ function DashboardHomeContent() {
   const view = searchParams.get('view');
   const isPortfolioView = view === 'portfolio';
 
+  const { condominio, isCorporate } = useCondominio();
+
   const [gestor, setGestor] = useState<UsuarioGestor | null>(null);
-  const [condominio, setCondominio] = useState<Condominio | null>(null);
   const [chamados, setChamados] = useState<Chamado[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isCorporate, setIsCorporate] = useState(false);
   const [portfolioCondos, setPortfolioCondos] = useState<Array<{
     id: string;
     nome: string;
@@ -71,38 +72,16 @@ function DashboardHomeContent() {
     const parsedGestor = JSON.parse(savedGestor) as UsuarioGestor;
     setGestor(parsedGestor);
 
-    const savedCondo = localStorage.getItem('zelcore_condominio_gestao');
-    let currentCondo = savedCondo ? (JSON.parse(savedCondo) as Condominio) : null;
-    setCondominio(currentCondo);
-
     async function loadConfig() {
       try {
         const list = await db.getCondominiosByGestorUser(parsedGestor.user_id);
-        
-        // Atualiza a sessão local com as informações mais recentes do banco de dados (plano, status, etc)
-        if (currentCondo) {
-          const freshCondo = list.find(c => c.id === currentCondo!.id);
-          if (freshCondo) {
-            currentCondo = freshCondo;
-            setCondominio(freshCondo);
-            localStorage.setItem('zelcore_condominio_gestao', JSON.stringify(freshCondo));
-          }
-        }
+        const currentId = condominio?.id;
 
         const hasCorporate = list.some(c => c.plan_type === 'corporate');
         const isCorp = hasCorporate || list.length > 1;
-        setIsCorporate(isCorp);
 
-        // Auto-seleciona o primeiro condomínio se nenhum estiver selecionado
-        if (isCorp && !currentCondo && list.length > 0) {
-          const first = list.find(c => !(c.plan_type === 'corporate' && !c.parent_condominio_id && !c.slug)) || list[0]
-          currentCondo = first
-          setCondominio(first)
-          localStorage.setItem('zelcore_condominio_gestao', JSON.stringify(first))
-        }
-
-        if (isCorp && (isPortfolioView || !currentCondo)) {
-          // Carregar dados do portfólio — remove apenas o container corporate
+        if (isCorp && (isPortfolioView || !currentId)) {
+          // Carregar dados do portfólio
           const containerIdDrop = list.find(c => c.plan_type === 'corporate' && !c.parent_condominio_id && !c.slug)?.id
           const listItems = list.filter(c => c.id !== containerIdDrop)
           const data = await Promise.all(listItems.map(async (condo) => {
@@ -131,14 +110,13 @@ function DashboardHomeContent() {
             };
           }));
           setPortfolioCondos(data);
-        } else if (currentCondo) {
-          // Carregar dados de um único condomínio
-          const data = await db.getChamados(currentCondo.id);
-          setChamados(data);
+        } else if (currentId) {
+          const chamadosData = await db.getChamados(currentId);
+          setChamados(chamadosData);
         }
+        setLoading(false);
       } catch (err) {
-        console.error(err);
-      } finally {
+        console.error('Erro ao carregar dados:', err);
         setLoading(false);
       }
     }
@@ -791,20 +769,12 @@ function DashboardHomeContent() {
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-2 shrink-0">
-            <button
-              onClick={() => window.location.reload()}
-              className="text-[11px] font-semibold px-3 py-1.5 rounded-lg border border-zinc-500/30 text-zinc-300 hover:text-white hover:border-zinc-500 transition-all active:scale-[0.97] cursor-pointer"
-            >
-              Sincronizar
-            </button>
-            <button
-              onClick={() => router.push('/dashboard/configuracoes?tab=faturamento')}
-              className="bg-red-600 hover:bg-red-500 text-white text-[11px] font-bold px-3 py-1.5 rounded-lg transition-all active:scale-[0.97] cursor-pointer"
-            >
-              Regularizar Assinatura
-            </button>
-          </div>
+          <button
+            onClick={() => router.push('/dashboard/configuracoes?tab=faturamento')}
+            className="bg-red-600 hover:bg-red-500 text-white text-[11px] font-bold px-3 py-1.5 rounded-lg shrink-0 transition-all active:scale-[0.97] cursor-pointer"
+          >
+            Regularizar Assinatura
+          </button>
         </div>
       )}
       {/* CABEÇALHO */}

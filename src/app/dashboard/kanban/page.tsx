@@ -17,18 +17,18 @@ import {
   AlertCircle,
   Lock
 } from 'lucide-react';
-import { db, Chamado, Condominio } from '@/lib/db';
+import { db, Chamado } from '@/lib/db';
+import { useCondominio } from '@/contexts/CondominioContext';
 
 type StatusType = 'pendente' | 'em_execucao' | 'resolvido';
 
 export default function KanbanPage() {
   const router = useRouter();
-  const [condominio, setCondominio] = useState<Condominio | null>(null);
+  const { condominio } = useCondominio();
   const [chamados, setChamados] = useState<Chamado[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedChamado, setSelectedChamado] = useState<Chamado | null>(null);
   
-  // Drag and drop state
   const [draggedId, setDraggedId] = useState<string | null>(null);
 
   const loadData = async (condoId: string) => {
@@ -43,16 +43,10 @@ export default function KanbanPage() {
   };
 
   useEffect(() => {
-    const savedCondo = localStorage.getItem('zelcore_condominio_gestao');
-    if (!savedCondo) {
-      router.push('/login');
-      return;
+    if (condominio?.id) {
+      loadData(condominio.id);
     }
-    
-    const condo = JSON.parse(savedCondo) as Condominio;
-    setCondominio(condo);
-    loadData(condo.id);
-  }, [router]);
+  }, [condominio?.id]);
 
   // Alterar status de um chamado
   const handleUpdateStatus = async (id: string, newStatus: StatusType) => {

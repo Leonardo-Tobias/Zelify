@@ -17,14 +17,15 @@ import {
   AlertCircle,
   Lock
 } from 'lucide-react';
-import { db, Chamado, Condominio } from '@/lib/db';
+import { db, Chamado } from '@/lib/db';
+import { useCondominio } from '@/contexts/CondominioContext';
 import { compressImage } from '@/lib/imageCompressor';
 
 type StatusType = 'encontrado' | 'aguardando_retirada' | 'entregue';
 
 export default function AchadosPerdidosPage() {
   const router = useRouter();
-  const [condominio, setCondominio] = useState<Condominio | null>(null);
+  const { condominio } = useCondominio();
   const [itens, setItens] = useState<Chamado[]>([]);
   const [loading, setLoading] = useState(true);
   const [filterStatus, setFilterStatus] = useState<StatusType | 'todos'>('todos');
@@ -55,16 +56,10 @@ export default function AchadosPerdidosPage() {
   };
 
   useEffect(() => {
-    const savedCondo = localStorage.getItem('zelcore_condominio_gestao');
-    if (!savedCondo) {
-      router.push('/login');
-      return;
+    if (condominio?.id) {
+      loadData(condominio.id);
     }
-    
-    const condo = JSON.parse(savedCondo) as Condominio;
-    setCondominio(condo);
-    loadData(condo.id);
-  }, [router]);
+  }, [condominio?.id]);
 
   // Upload e compressão de foto pela portaria
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {

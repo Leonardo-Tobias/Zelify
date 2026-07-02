@@ -30,11 +30,12 @@ import {
   EyeOff
 } from 'lucide-react';
 import { db, Condominio } from '@/lib/db';
+import { useCondominio } from '@/contexts/CondominioContext';
 import { BillingSwitch } from '@/components/ui/switch';
 
 export default function ConfiguracoesPage() {
   const router = useRouter();
-  const [condominio, setCondominio] = useState<Condominio | null>(null);
+  const { condominio, setCondominio, refreshCondo } = useCondominio();
   const [loading, setLoading] = useState(true);
 
   // Navegação por abas
@@ -140,33 +141,12 @@ export default function ConfiguracoesPage() {
   }, [condominio]);
 
   useEffect(() => {
-    const savedCondo = localStorage.getItem('zelcore_condominio_gestao');
-    if (!savedCondo) {
-      router.push('/login');
-      return;
-    }
-    
-    const condo = JSON.parse(savedCondo) as Condominio;
-    setCondominio(condo);
-    setNome(condo.nome);
-    setSlug(condo.slug || '');
-    setCodigoAcesso(condo.codigo_acesso || '');
+    if (!condominio) return;
+    setNome(condominio.nome);
+    setSlug(condominio.slug || '');
+    setCodigoAcesso(condominio.codigo_acesso || '');
     setLoading(false);
-
-    // Carrega dados frescos do banco de dados (Supabase ou LocalDB) para refletir atualizações
-    async function fetchFreshCondo() {
-      try {
-        const fresh = await db.getCondominioBySlug(condo.slug || '');
-        if (fresh) {
-          setCondominio(fresh);
-          localStorage.setItem('zelcore_condominio_gestao', JSON.stringify(fresh));
-        }
-      } catch (err) {
-        console.error('Erro ao atualizar condomínio com dados do banco:', err);
-      }
-    }
-    fetchFreshCondo();
-  }, [router]);
+  }, [condominio]);
 
   // Carrega a aba e o plano a partir da URL se fornecidos (fluxo de signup vindo da LP)
   const searchParams = useSearchParams();

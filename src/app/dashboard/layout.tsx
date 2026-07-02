@@ -23,6 +23,7 @@ import {
   Sparkles
 } from 'lucide-react';
 import { db, Condominio, UsuarioGestor, isSupabaseConfigured } from '@/lib/db';
+import { useCondominio } from '@/contexts/CondominioContext';
 
 function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -31,21 +32,17 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   const view = searchParams.get('view');
   const isPortfolioView = view === 'portfolio';
 
+  const { condominio, condominios, isCorporate, loading: ctxLoading, switchCondo: contextSwitch, refreshCondo } = useCondominio();
+
   const [loading, setLoading] = useState(true);
   const [gestor, setGestor] = useState<UsuarioGestor | null>(null);
-  const [condominio, setCondominio] = useState<Condominio | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
-  const [condominios, setCondominios] = useState<Condominio[]>([]);
-  const [isCorporate, setIsCorporate] = useState(false);
   const [condoDropdownOpen, setCondoDropdownOpen] = useState(false);
 
   const handleSwitchCondo = (target: Condominio) => {
     setCondoDropdownOpen(false);
-    localStorage.setItem('zelcore_condominio_gestao', JSON.stringify(target));
-    setCondominio(target);
-    window.dispatchEvent(new Event('storage'));
-    router.push('/dashboard');
+    contextSwitch(target);
   };
 
   // Inicializar sessão e tema
@@ -71,10 +68,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
 
       try {
         const gestorData = JSON.parse(savedGestor);
-        const condoData = JSON.parse(savedCondo);
 
-        // #6 — Validar schema: garantir que os campos obrigatórios existem
-        // Impede que alguém manipule o localStorage via DevTools para elevar privilégios
         if (
           !gestorData?.id ||
           !gestorData?.user_id ||
@@ -83,9 +77,6 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
           !['sindico', 'zelador', 'admin'].includes(gestorData.papel)
         ) {
           throw new Error('Dados de sessão do gestor inválidos ou adulterados.');
-        }
-        if (!condoData?.id || !condoData?.slug || !condoData?.nome) {
-          throw new Error('Dados de sessão do condomínio inválidos.');
         }
 
         // #7 — Verificar sessão real no Supabase (apenas quando conectado ao backend)
@@ -98,7 +89,6 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
         }
 
         setGestor(gestorData);
-        setCondominio(condoData);
       } catch (e) {
         localStorage.removeItem('zelcore_gestor');
         localStorage.removeItem('zelcore_condominio_gestao');
@@ -111,6 +101,11 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
     initSession();
   }, [router]);
 
+  // Atualizar loading quando context estiver pronto
+  useEffect(() => {
+    if (!ctxLoading && gestor) setLoading(false);
+  }, [ctxLoading, gestor]);
+
   // Alternar Modo Claro / Modo Escuro
   const handleToggleTheme = () => {
     const nextTheme = theme === 'dark' ? 'light' : 'dark';
@@ -122,67 +117,6 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
       document.documentElement.classList.remove('dark');
     }
   };
-
-  // Carregar todos os condomínios do gestor para suporte corporativo/multi-condomínio
-  useEffect(() => {
-    if (gestor) {
-      db.getCondominiosByGestorUser(gestor.user_id)
-        .then((list) => {
-          // Remove apenas o container corporate (plan_type corporate sem parent), mantém tudo resto
-          const containerId = list.find(c => c.plan_type === 'corporate' && !c.parent_condominio_id && !c.slug)?.id
-          const instances = list.filter(c => c.id !== containerId)
-          setCondominios(instances);
-
-          // Auto-seleciona o primeiro condomínio se o atual não está na lista
-          const currentIsValid = condominio && instances.some(c => c.id === condominio.id)
-          if (instances.length > 0 && !currentIsValid) {
-            const first = instances[0]
-            setCondominio(first)
-            localStorage.setItem('zelcore_condominio_gestao', JSON.stringify(first))
-          }
-
-          const hasCorporate = list.some(c => c.plan_type === 'corporate');
-          setIsCorporate(hasCorporate || list.length > 1);
-        })
-        .catch((err) => {
-          console.error("Erro ao carregar condomínios da carteira:", err);
-        });
-    }
-  }, [gestor, condominio]);
-
-  // Sincronizar subscription_status ao navegar entre páginas
-  useEffect(() => {
-    if (!gestor || !condominio) return;
-    db.getCondominiosByGestorUser(gestor.user_id).then((list) => {
-      const fresh = list.find(c => c.id === condominio.id);
-      if (fresh && (fresh.subscription_status !== condominio.subscription_status || fresh.plan_type !== condominio.plan_type)) {
-        setCondominio(fresh);
-        localStorage.setItem('zelcore_condominio_gestao', JSON.stringify(fresh));
-        window.dispatchEvent(new Event('storage'));
-      }
-    }).catch(() => {});
-  }, [pathname]);
-
-  // Listener para capturar atualizações de nome/slug nas configurações
-  useEffect(() => {
-    const handleStorageChange = () => {
-      const savedCondo = localStorage.getItem('zelcore_condominio_gestao');
-      if (savedCondo) {
-        try {
-          setCondominio(JSON.parse(savedCondo));
-        } catch {}
-      }
-    };
-
-    window.addEventListener('storage', handleStorageChange);
-    // Intervalo para atualizar em navegações internas de SPA
-    const interval = setInterval(handleStorageChange, 1000);
-
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-      clearInterval(interval);
-    };
-  }, []);
 
   // Fechar dropdown ao clicar fora
   useEffect(() => {

@@ -65,6 +65,14 @@ function DashboardHomeContent() {
     if (typeof window !== 'undefined') {
       const selectedPlan = localStorage.getItem('zelcon_selected_plan_on_signup');
       if (selectedPlan && condominio?.plan_type === 'free') {
+        const alreadyRedirected = localStorage.getItem('zelcon_redirected_to_checkout');
+        if (!alreadyRedirected) {
+          // Primeira vez: redireciona direto pro checkout
+          localStorage.setItem('zelcon_redirected_to_checkout', 'true');
+          router.push(`/dashboard/configuracoes?tab=faturamento&plan=${selectedPlan}`);
+          return;
+        }
+        // Já foi redirecionado antes: mostra banner
         setPendingPlan(selectedPlan);
       }
     }
@@ -795,6 +803,7 @@ function DashboardHomeContent() {
             <button
               onClick={() => {
                 localStorage.removeItem('zelcon_selected_plan_on_signup');
+                localStorage.removeItem('zelcon_redirected_to_checkout');
                 setPendingPlan(null);
               }}
               className="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 text-[11px] px-2 py-1.5 rounded-lg transition-all cursor-pointer"

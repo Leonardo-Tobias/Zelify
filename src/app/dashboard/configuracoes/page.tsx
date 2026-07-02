@@ -460,6 +460,7 @@ export default function ConfiguracoesPage() {
         localStorage.setItem('zelcon_condominio_gestao', JSON.stringify(safeCondoForStorage(updatedPix)));
         window.dispatchEvent(new Event('storage'));
         localStorage.removeItem('zelcon_selected_plan_on_signup');
+        localStorage.removeItem('zelcon_redirected_to_checkout');
 
         // Se não veio QR Code ainda, faz polling
         if (!data.pix?.qrCode && !data.pix?.copyPaste && data.subscriptionId) {
@@ -519,6 +520,7 @@ export default function ConfiguracoesPage() {
         setCheckoutSubscriptionId(null);
         setPixPaid(true);
         localStorage.removeItem('zelcon_selected_plan_on_signup');
+        localStorage.removeItem('zelcon_redirected_to_checkout');
         setTimeout(() => setPixPaid(false), 4000);
       }
     } catch {

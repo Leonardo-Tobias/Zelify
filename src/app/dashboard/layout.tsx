@@ -23,7 +23,7 @@ import {
   Sparkles
 } from 'lucide-react';
 import { db, Condominio, UsuarioGestor, isSupabaseConfigured } from '@/lib/db';
-import { useCondominio } from '@/contexts/CondominioContext';
+import { CondominioProvider, useCondominio } from '@/contexts/CondominioContext';
 
 function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -591,7 +591,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <p className="mt-4 text-xs font-semibold uppercase tracking-wider text-zinc-500">Carregando...</p>
       </div>
     }>
-      <DashboardLayoutContent>{children}</DashboardLayoutContent>
+      <CondominioProvider>
+        <DashboardLayoutContent>{children}</DashboardLayoutContent>
+      </CondominioProvider>
     </React.Suspense>
   );
 }

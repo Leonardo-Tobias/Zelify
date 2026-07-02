@@ -55,6 +55,7 @@ export default function ConfiguracoesPage() {
   const [posterTitle, setPosterTitle] = useState('Portal do Morador');
   const [posterInstructions, setPosterInstructions] = useState('Escaneie o QR Code abaixo com seu celular para abrir o Portal do Morador, relatar problemas de manutenção ou cadastrar achados e perdidos.');
   const [posterTheme, setPosterTheme] = useState<'blue' | 'zinc' | 'emerald'>('blue');
+  const [posterShowCodigo, setPosterShowCodigo] = useState(true);
 
   // Estados de Faturamento
   const [monthlyChamadosCount, setMonthlyChamadosCount] = useState(0);
@@ -980,6 +981,18 @@ export default function ConfiguracoesPage() {
                 </div>
               </div>
 
+              <label className="flex items-center space-x-3 text-xs cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={posterShowCodigo}
+                  onChange={(e) => setPosterShowCodigo(e.target.checked)}
+                  className="w-4 h-4 rounded border-zinc-300 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-950 text-brand focus:ring-brand/30 accent-brand cursor-pointer"
+                />
+                <span className="font-semibold text-zinc-600 dark:text-zinc-400">
+                  Exibir código de acesso na placa
+                </span>
+              </label>
+
               <div className="flex gap-2 pt-2">
                 <button
                   type="button"
@@ -1100,6 +1113,7 @@ export default function ConfiguracoesPage() {
                 </div>
 
                 {/* Rodapé do Poster */}
+                {posterShowCodigo && (
                 <div className="w-full text-center space-y-1 bg-zinc-50 p-2 rounded border border-zinc-100">
                   <div className="text-[7px] text-zinc-500 font-bold uppercase tracking-widest">
                     Código de Acesso
@@ -1117,6 +1131,7 @@ export default function ConfiguracoesPage() {
                     {condominio?.slug ? `zelify.vercel.app/${condominio.slug}` : 'link'}
                   </div>
                 </div>
+                )}
               </div>
             </div>
           </div>
@@ -2380,6 +2395,7 @@ export default function ConfiguracoesPage() {
         </div>
 
         {/* Instruções de Acesso */}
+        {posterShowCodigo && (
         <div className="w-full max-w-md mx-auto space-y-3 bg-zinc-50 p-6 rounded-2xl border border-zinc-200 shadow-sm mb-6">
           <div className="text-xs font-black uppercase tracking-widest text-zinc-500">
             Código de Acesso
@@ -2397,6 +2413,7 @@ export default function ConfiguracoesPage() {
             Link de Acesso: <span className="font-bold underline">https://zelify.vercel.app/{condominio?.slug || ''}</span>
           </div>
         </div>
+        )}
 
         <div className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest mb-4">
           Gerado automaticamente pelo Zelcon

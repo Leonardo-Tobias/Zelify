@@ -569,6 +569,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                 posterInstructions="Escaneie o QR Code abaixo com seu celular para abrir o Portal do Morador, relatar problemas de manutenção ou cadastrar achados e perdidos."
                 posterTheme="blue"
                 planType={condominio.plan_type}
+                showCodigo={true}
               />
             </div>
           </div>

@@ -10,6 +10,7 @@ interface PosterPreviewProps {
   posterInstructions: string
   posterTheme: 'blue' | 'zinc' | 'emerald'
   planType: 'free' | 'pro' | 'corporate'
+  showCodigo?: boolean
 }
 
 const blobToBase64 = (blob: Blob): Promise<string> => {
@@ -22,7 +23,7 @@ const blobToBase64 = (blob: Blob): Promise<string> => {
 };
 
 export default function PosterPreview({
-  nome, slug, codigoAcesso, posterTitle, posterInstructions, posterTheme, planType
+  nome, slug, codigoAcesso, posterTitle, posterInstructions, posterTheme, planType, showCodigo = true
 }: PosterPreviewProps) {
   const printRef = useRef<HTMLDivElement>(null)
   const qrUrl = (size: number, format?: string) =>
@@ -168,6 +169,7 @@ export default function PosterPreview({
           <div className="bg-zinc-50 p-3 rounded-xl border-2" style={{ borderColor: `${posterTheme === 'blue' ? '#001CFF' : posterTheme === 'emerald' ? '#10B981' : '#18181B'}40` }}>
             <img src={qrUrl(150)} alt="QR Code" className="w-32 h-32 object-contain" />
           </div>
+          {showCodigo && (
           <div className="w-full bg-zinc-50 rounded-xl border border-zinc-200 p-4 space-y-2">
             <div className="text-[9px] font-black uppercase tracking-widest text-zinc-500">Código de Acesso</div>
             <div className="text-2xl font-black tracking-widest" style={{ color: posterTheme === 'blue' ? '#001CFF' : posterTheme === 'emerald' ? '#059669' : '#18181B' }}>
@@ -177,6 +179,7 @@ export default function PosterPreview({
               zelify.vercel.app/{slug}
             </div>
           </div>
+          )}
         </div>
       </div>
 

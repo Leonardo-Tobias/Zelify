@@ -252,7 +252,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                     className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-sm transition-colors pl-8 ${
                       c.id === condominio.id
                         ? 'bg-zinc-100 dark:bg-white/[0.06] text-zinc-900 dark:text-white font-bold border border-zinc-200 dark:border-white/[0.08]'
-                        : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/[0.03] font-medium'
+                        : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/[0.03] font-medium cursor-pointer'
                     }`}
                   >
                     <div className="w-5 h-5 rounded bg-brand/10 border border-brand/20 flex items-center justify-center text-brand text-[8px] font-extrabold shrink-0">
@@ -293,12 +293,12 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                         ? 'bg-zinc-100 dark:bg-white/[0.06] text-zinc-900 dark:text-white font-bold border border-zinc-200 dark:border-white/[0.08]' 
                         : item.disabled
                           ? 'opacity-40 text-zinc-400 dark:text-zinc-600 cursor-not-allowed'
-                          : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/[0.03] font-medium'
-                    }`}
-                  >
-                    <item.icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-brand' : 'text-zinc-500'}`} />
-                    <span>{item.name}</span>
-                    {item.disabled && (
+                      : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/[0.03] font-medium cursor-pointer'
+                  }`}
+                >
+                  <item.icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-brand' : 'text-zinc-500'}`} />
+                  <span>{item.name}</span>
+                  {item.disabled && (
                       <Lock className="w-3.5 h-3.5 text-zinc-450 ml-auto shrink-0" />
                     )}
                   </button>
@@ -486,9 +486,8 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                       ? 'bg-zinc-100 dark:bg-white/[0.06] text-zinc-900 dark:text-white font-bold border border-zinc-200 dark:border-white/[0.08] shadow-sm' 
                       : item.disabled
                         ? 'opacity-45 text-zinc-450 dark:text-zinc-650 cursor-not-allowed'
-                        : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/[0.03] font-medium'
-                  }`}
-                >
+                        : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/[0.03] font-medium cursor-pointer'
+                  }`}>
                   <item.icon className={`w-4 h-4 shrink-0 transition-colors ${isActive ? 'text-brand' : 'text-zinc-500'}`} />
                   <span>{item.name}</span>
                   {item.disabled && (

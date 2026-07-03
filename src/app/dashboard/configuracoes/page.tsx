@@ -32,6 +32,7 @@ import {
 import { db, Condominio, safeCondoForStorage } from '@/lib/db';
 import { useCondominio } from '@/contexts/CondominioContext';
 import { BillingSwitch } from '@/components/ui/switch';
+import Checkbox from '@/components/ui/checkbox';
 
 export default function ConfiguracoesPage() {
   const router = useRouter();
@@ -986,17 +987,11 @@ export default function ConfiguracoesPage() {
                 </div>
               </div>
 
-              <label className="flex items-center space-x-3 text-xs cursor-pointer select-none">
-                <input
-                  type="checkbox"
-                  checked={posterShowCodigo}
-                  onChange={(e) => setPosterShowCodigo(e.target.checked)}
-                  className="w-4 h-4 rounded border-zinc-300 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-950 text-brand focus:ring-brand/30 accent-brand cursor-pointer"
-                />
-                <span className="font-semibold text-zinc-600 dark:text-zinc-400">
-                  Exibir código de acesso na placa
-                </span>
-              </label>
+              <Checkbox
+                checked={posterShowCodigo}
+                onChange={setPosterShowCodigo}
+                label="Exibir código de acesso na placa"
+              />
 
               <div className="flex gap-2 pt-2">
                 <button

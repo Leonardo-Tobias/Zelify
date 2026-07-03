@@ -2,8 +2,9 @@
 
 import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Loader2, AlertCircle, Eye, EyeOff, ShieldCheck, ArrowRight, ArrowLeft, Building, User, Mail, Lock, Key, Check } from 'lucide-react';
+import { Loader2, AlertCircle, Eye, EyeOff, ShieldCheck, ArrowRight, ArrowLeft, Building, User, Mail, Lock, Key } from 'lucide-react';
 import { db, safeCondoForStorage } from '@/lib/db';
+import Checkbox from '@/components/ui/checkbox';
 
 function CadastroForm() {
   const router = useRouter();
@@ -341,32 +342,22 @@ function CadastroForm() {
                 </p>
               </div>
 
-              <label className="flex items-start space-x-3 text-xs cursor-pointer group pt-2">
-                <div className={`relative w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 mt-0.5 transition-all ${
-                  aceiteLGPD
-                    ? 'bg-brand border-brand'
-                    : 'bg-zinc-900 border-zinc-700 group-hover:border-zinc-500'
-                }`}>
-                  {aceiteLGPD && <Check className="w-3.5 h-3.5 text-white" />}
-                </div>
-                <input
-                  type="checkbox"
-                  checked={aceiteLGPD}
-                  onChange={(e) => setAceiteLGPD(e.target.checked)}
-                  className="sr-only"
-                />
-                <span className="font-medium text-zinc-400">
-                  Li e aceito a{' '}
-                  <a href={`/privacidade?step=${step}`} target="_blank" className="text-brand hover:underline font-bold">
-                    Política de Privacidade
-                  </a>
-                  {' '}e os{' '}
-                  <a href={`/termos?step=${step}`} target="_blank" className="text-brand hover:underline font-bold">
-                    Termos de Uso
-                  </a>
-                  .
-                </span>
-              </label>
+              <Checkbox
+                checked={aceiteLGPD}
+                onChange={setAceiteLGPD}
+                label={
+                  <>
+                    Li e aceito a{' '}
+                    <a href={`/privacidade?step=${step}`} target="_blank" className="text-brand hover:underline font-bold">
+                      Política de Privacidade
+                    </a>
+                    {' '}e os{' '}
+                    <a href={`/termos?step=${step}`} target="_blank" className="text-brand hover:underline font-bold">
+                      Termos de Uso
+                    </a>.
+                  </>
+                }
+              />
 
               <div className="flex space-x-2 pt-2">
                 <button

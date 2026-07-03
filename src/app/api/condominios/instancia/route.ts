@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-import crypto from 'crypto'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || ''
@@ -83,13 +82,12 @@ export async function POST(req: NextRequest) {
     }
 
     // Criar instância
-    const hashedCodigo = crypto.createHash('sha256').update(codigo_acesso).digest('hex');
     const { data: newCondo, error: insertError } = await supabase
       .from('condominios')
       .insert({
         nome,
         slug: cleanSlug,
-        codigo_acesso: hashedCodigo,
+        codigo_acesso,
         plan_type: 'corporate',
         subscription_status: 'active',
         parent_condominio_id: container.id,

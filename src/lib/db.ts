@@ -17,21 +17,6 @@ async function hashPassword(password: string): Promise<string> {
 }
 
 /**
- * Hash SHA-256 para o código de acesso (PIN) antes de armazenar no banco.
- * Reutiliza a SubtleCrypto API.
- */
-export async function hashCodigoAcesso(codigo: string): Promise<string> {
-  if (typeof window !== 'undefined' && window.crypto?.subtle) {
-    const encoder = new TextEncoder();
-    const data = encoder.encode(codigo);
-    const hashBuffer = await window.crypto.subtle.digest('SHA-256', data);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-  }
-  return btoa(codigo);
-}
-
-/**
  * Remove campos sensíveis do objeto Condominio antes de salvar no localStorage.
  */
 export function safeCondoForStorage(condo: Condominio): Condominio {
@@ -39,6 +24,7 @@ export function safeCondoForStorage(condo: Condominio): Condominio {
     id: condo.id,
     nome: condo.nome,
     slug: condo.slug,
+    codigo_acesso: condo.codigo_acesso,
     plan_type: condo.plan_type,
     subscription_status: condo.subscription_status,
     billing_type: condo.billing_type,
@@ -532,13 +518,12 @@ export const db = {
     codigoAcesso: string
   ): Promise<Condominio | null> {
     if (supabase) {
-      const hashedCodigo = await hashCodigoAcesso(codigoAcesso);
       const { data, error } = await supabase
         .from('condominios')
         .update({
           nome,
           slug,
-          codigo_acesso: hashedCodigo
+          codigo_acesso: codigoAcesso
         })
         .eq('id', id)
         .select()
@@ -682,13 +667,12 @@ export const db = {
       }
 
       // 2. Inserir o condomínio com plano grátis ativo por padrão
-      const hashedCodigo = await hashCodigoAcesso(dados.codigoAcesso);
       const { data: condoData, error: condoError } = await supabase
         .from('condominios')
         .insert({
           nome: dados.condominioNome,
           slug: dados.condominioSlug.trim().toLowerCase(),
-          codigo_acesso: hashedCodigo,
+          codigo_acesso: dados.codigoAcesso,
           plan_type: 'free',
           subscription_status: 'active'
         })
@@ -1007,13 +991,12 @@ export const db = {
     gestorNome: string;
   }): Promise<Condominio> {
     if (supabase) {
-      const hashedCodigo = await hashCodigoAcesso(params.codigo_acesso);
       const { data: condo, error: err1 } = await supabase
         .from('condominios')
         .insert({
           nome: params.nome,
           slug: params.slug,
-          codigo_acesso: hashedCodigo,
+          codigo_acesso: params.codigo_acesso,
           plan_type: 'corporate',
           subscription_status: 'active',
           parent_condominio_id: params.parentId,

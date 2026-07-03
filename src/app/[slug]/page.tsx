@@ -131,8 +131,8 @@ export default function MoradorPortal() {
             setMonthlyCount(count);
           }
 
-          // Verificar se já está autenticado para este condomínio no localStorage
-          const savedAuth = localStorage.getItem(`zelcon_auth_${condo.id}`);
+          // Verificar se já está autenticado para este condomínio no sessionStorage
+          const savedAuth = sessionStorage.getItem(`zelcon_auth_${condo.id}`);
           if (savedAuth) {
             try {
               const authData = JSON.parse(savedAuth);
@@ -146,10 +146,10 @@ export default function MoradorPortal() {
                 setValidated(true);
               } else {
                 // Dado inválido ou adulterado — limpar e forçar nova validação
-                localStorage.removeItem(`zelcon_auth_${condo.id}`);
+                sessionStorage.removeItem(`zelcon_auth_${condo.id}`);
               }
             } catch (e) {
-              localStorage.removeItem(`zelcon_auth_${condo.id}`);
+              sessionStorage.removeItem(`zelcon_auth_${condo.id}`);
             }
           }
           
@@ -202,39 +202,43 @@ export default function MoradorPortal() {
     e.preventDefault();
     setValidationError('');
 
-    // Verificar se o acesso está temporariamente bloqueado
-    if (blockedUntil && Date.now() < blockedUntil) {
-      const seconds = Math.ceil((blockedUntil - Date.now()) / 1000);
-      setValidationError(`Muitas tentativas incorretas. Aguarde ${seconds}s para tentar novamente.`);
-      return;
-    }
-
     if (!codigoAcesso || !bloco || !apartamento) {
       setValidationError('Por favor, preencha todos os campos.');
       return;
     }
 
+    if (codigoAcesso.length < 4 || codigoAcesso.length > 8) {
+      setValidationError('O código de acesso deve ter entre 4 e 8 dígitos.');
+      return;
+    }
+
     setValidating(true);
     try {
-      const isValid = await db.validateAcesso(condominio!.id, codigoAcesso);
-      if (isValid) {
+      const res = await fetch('/api/validate-acesso', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          condominioId: condominio!.id,
+          codigo: codigoAcesso,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (res.status === 429) {
+        setValidationError(data.error || 'Muitas tentativas. Aguarde e tente novamente.');
+        return;
+      }
+
+      if (data.valid) {
         // Login bem-sucedido: resetar contadores e salvar sessão
         setFailedAttempts(0);
         setBlockedUntil(null);
         const authData = { bloco, apartamento };
-        localStorage.setItem(`zelcon_auth_${condominio!.id}`, JSON.stringify(authData));
+        sessionStorage.setItem(`zelcon_auth_${condominio!.id}`, JSON.stringify(authData));
         setValidated(true);
       } else {
-        // Incrementar tentativas e bloquear se atingir o limite
-        const newAttempts = failedAttempts + 1;
-        setFailedAttempts(newAttempts);
-        if (newAttempts >= 5) {
-          setBlockedUntil(Date.now() + 60000); // Bloqueio de 60 segundos
-          setValidationError('Muitas tentativas incorretas. Acesso bloqueado por 60 segundos.');
-        } else {
-          const remaining = 5 - newAttempts;
-          setValidationError(`Código de acesso incorreto. ${remaining} tentativa${remaining > 1 ? 's' : ''} restante${remaining > 1 ? 's' : ''}.`);
-        }
+        setValidationError(data.error || 'Código de acesso incorreto.');
       }
     } catch (err) {
       setValidationError('Ocorreu um erro ao validar. Tente novamente.');
@@ -246,7 +250,7 @@ export default function MoradorPortal() {
   // Logout do morador
   const handleLogout = () => {
     if (confirm('Deseja sair do portal do condomínio?')) {
-      localStorage.removeItem(`zelcon_auth_${condominio!.id}`);
+      sessionStorage.removeItem(`zelcon_auth_${condominio!.id}`);
       setValidated(false);
       setCodigoAcesso('');
     }
@@ -497,14 +501,14 @@ export default function MoradorPortal() {
 
             <div>
               <label htmlFor="codigo" className="block text-[10px] font-bold uppercase tracking-wider text-zinc-400 mb-1.5">
-                Código de Acesso do Condomínio (4 dígitos)
+                Código de Acesso do Condomínio (4 a 8 dígitos)
               </label>
               <input
                 id="codigo"
                 type="password"
-                maxLength={4}
-                pattern="\d{4}"
-                placeholder="••••"
+                maxLength={8}
+                pattern="\d{4,8}"
+                placeholder="••••••••"
                 value={codigoAcesso}
                 onChange={(e) => setCodigoAcesso(e.target.value.replace(/\D/g, ''))}
                 className="w-full px-3 py-2 bg-zinc-950 border border-white/[0.06] rounded-lg text-sm text-center tracking-widest text-white placeholder-zinc-650 focus:outline-none focus:ring-1 focus:ring-brand/60 focus:border-brand/60 transition-all font-medium text-center"

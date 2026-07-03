@@ -85,9 +85,9 @@ function CadastroForm() {
       return;
     }
 
-    // Validar código de acesso (exatamente 4 números)
-    if (!/^\d{4}$/.test(codigoAcesso)) {
-      setError('O código de acesso dos moradores deve conter exatamente 4 números.');
+    // Validar código de acesso (4 a 8 números)
+    if (!/^\d{4,8}$/.test(codigoAcesso)) {
+      setError('O código de acesso dos moradores deve conter de 4 a 8 números.');
       return;
     }
 

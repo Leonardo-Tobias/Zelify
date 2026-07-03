@@ -309,8 +309,8 @@ export default function ConfiguracoesPage() {
       return;
     }
 
-    if (codigoAcesso.length !== 4 || !/^\d+$/.test(codigoAcesso)) {
-      setError('O código de acesso deve possuir exatamente 4 dígitos numéricos.');
+    if (codigoAcesso.length < 4 || codigoAcesso.length > 8 || !/^\d+$/.test(codigoAcesso)) {
+      setError('O código de acesso deve possuir entre 4 e 8 dígitos numéricos.');
       return;
     }
 

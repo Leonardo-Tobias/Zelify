@@ -131,13 +131,14 @@ export default function MoradorPortal() {
             setMonthlyCount(count);
           }
 
-          // Verificar se já está autenticado para este condomínio no sessionStorage
-          const savedAuth = sessionStorage.getItem(`zelcon_auth_${condo.id}`);
+          // Verificar se já está autenticado para este condomínio no localStorage
+          const savedAuth = localStorage.getItem(`zelcon_auth_${condo.id}`);
           if (savedAuth) {
             try {
               const authData = JSON.parse(savedAuth);
-              // Validar schema: bloco e apartamento devem ser strings não vazias
+              // Validar schema: bloco, apartamento e expiração
               if (
+                authData.expira > Date.now() &&
                 typeof authData?.bloco === 'string' && authData.bloco.trim() !== '' &&
                 typeof authData?.apartamento === 'string' && authData.apartamento.trim() !== ''
               ) {
@@ -145,11 +146,11 @@ export default function MoradorPortal() {
                 setApartamento(authData.apartamento);
                 setValidated(true);
               } else {
-                // Dado inválido ou adulterado — limpar e forçar nova validação
-                sessionStorage.removeItem(`zelcon_auth_${condo.id}`);
+                // Dado inválido, adulterado ou expirado — limpar e forçar nova validação
+                localStorage.removeItem(`zelcon_auth_${condo.id}`);
               }
             } catch (e) {
-              sessionStorage.removeItem(`zelcon_auth_${condo.id}`);
+              localStorage.removeItem(`zelcon_auth_${condo.id}`);
             }
           }
           
@@ -234,8 +235,12 @@ export default function MoradorPortal() {
         // Login bem-sucedido: resetar contadores e salvar sessão
         setFailedAttempts(0);
         setBlockedUntil(null);
-        const authData = { bloco, apartamento };
-        sessionStorage.setItem(`zelcon_auth_${condominio!.id}`, JSON.stringify(authData));
+        const authData = {
+          bloco,
+          apartamento,
+          expira: Date.now() + 8 * 60 * 60 * 1000, // 8 horas
+        };
+        localStorage.setItem(`zelcon_auth_${condominio!.id}`, JSON.stringify(authData));
         setValidated(true);
       } else {
         setValidationError(data.error || 'Código de acesso incorreto.');
@@ -250,7 +255,7 @@ export default function MoradorPortal() {
   // Logout do morador
   const handleLogout = () => {
     if (confirm('Deseja sair do portal do condomínio?')) {
-      sessionStorage.removeItem(`zelcon_auth_${condominio!.id}`);
+      localStorage.removeItem(`zelcon_auth_${condominio!.id}`);
       setValidated(false);
       setCodigoAcesso('');
     }

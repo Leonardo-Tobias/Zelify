@@ -327,8 +327,8 @@ function CadastroForm() {
                   <input
                     id="codigoAcesso"
                     type="text"
-                    placeholder="4 dígitos numéricos (ex: 4321)"
-                    maxLength={4}
+                    placeholder="4 a 8 dígitos (ex: 719283)"
+                    maxLength={8}
                     value={codigoAcesso}
                     onChange={(e) => setCodigoAcesso(e.target.value.replace(/\D/g, ''))}
                     className="w-full pl-3 pr-10 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-brand/50 focus:border-brand/50 hover:border-zinc-700 transition-all font-medium tracking-wider"

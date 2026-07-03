@@ -575,8 +575,8 @@ export default function ConfiguracoesPage() {
       return;
     }
 
-    if (!/^\d{4}$/.test(newCondoCodigo)) {
-      setInstanceError('O código de acesso deve conter exatamente 4 números.');
+    if (!/^\d{4,8}$/.test(newCondoCodigo)) {
+      setInstanceError('O código de acesso deve conter de 4 a 8 números.');
       return;
     }
 
@@ -1209,7 +1209,7 @@ export default function ConfiguracoesPage() {
               {/* CODIGO DE ACESSO */}
               <div className="space-y-2 pt-5">
                 <label htmlFor="codigoCondo" className="block text-[10px] font-bold uppercase tracking-wider text-zinc-500">
-                  Código de Acesso do Condomínio (4 Dígitos)
+                  Código de Acesso do Condomínio (4 a 8 Dígitos)
                 </label>
                 <div className="relative">
                   <span className="absolute inset-y-0 left-3 flex items-center text-zinc-400 dark:text-zinc-650">
@@ -1218,8 +1218,8 @@ export default function ConfiguracoesPage() {
                   <input
                     id="codigoCondo"
                     type="text"
-                    maxLength={4}
-                    placeholder="Ex: 1234"
+                    maxLength={8}
+                    placeholder="Ex: 719283"
                     value={codigoAcesso}
                     onChange={(e) => setCodigoAcesso(e.target.value.replace(/\D/g, ''))}
                     className="w-full pl-9 pr-3 py-2 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg text-xs text-zinc-900 dark:text-white text-left tracking-widest focus:outline-none focus:border-brand/50 focus:ring-4 focus:ring-brand/10 font-bold"
@@ -1227,7 +1227,7 @@ export default function ConfiguracoesPage() {
                   />
                 </div>
                 <p className="text-[10px] text-zinc-500 leading-tight font-medium">
-                  Código de 4 dígitos inserido pelo morador no primeiro acesso à página pública para evitar envios de spam.
+                  Código de 4 a 8 dígitos inserido pelo morador no primeiro acesso à página pública para evitar envios de spam.
                 </p>
               </div>
 
@@ -2284,10 +2284,10 @@ export default function ConfiguracoesPage() {
                     <input
                       type={showCodigo ? 'text' : 'password'}
                       required
-                      maxLength={4}
-                      placeholder="1234"
+                      maxLength={8}
+                      placeholder="Ex: 719283"
                       value={newCondoCodigo}
-                      onChange={(e) => setNewCondoCodigo(e.target.value.replace(/\D/g, '').substring(0, 4))}
+                      onChange={(e) => setNewCondoCodigo(e.target.value.replace(/\D/g, '').substring(0, 8))}
                       className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-brand/50 focus:border-brand/50 hover:border-zinc-700 transition-all font-medium text-center tracking-widest"
                     />
                     <button

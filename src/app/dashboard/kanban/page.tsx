@@ -200,7 +200,6 @@ export default function KanbanPage() {
           const themeStyles = {
             pendente: {
               border: 'border-amber-500/20 dark:border-amber-500/30',
-              borderTop: 'border-t-amber-500',
               bgHeader: 'bg-amber-500/5',
               badge: 'bg-amber-500 text-white',
               text: 'text-amber-600 dark:text-amber-500',
@@ -208,7 +207,6 @@ export default function KanbanPage() {
             },
             em_execucao: {
               border: 'border-blue-500/20 dark:border-blue-500/30',
-              borderTop: 'border-t-brand',
               bgHeader: 'bg-brand/5',
               badge: 'bg-brand text-white',
               text: 'text-brand',
@@ -216,7 +214,6 @@ export default function KanbanPage() {
             },
             resolvido: {
               border: 'border-emerald-500/20 dark:border-emerald-500/30',
-              borderTop: 'border-t-emerald-500',
               bgHeader: 'bg-emerald-500/5',
               badge: 'bg-emerald-500 text-white',
               text: 'text-emerald-600 dark:text-emerald-500',
@@ -232,7 +229,7 @@ export default function KanbanPage() {
               className={`bg-zinc-50/50 dark:bg-[#070A13] border ${themeStyles.border} rounded-xl flex flex-col h-full min-h-[400px] lg:max-h-[calc(100vh-220px)] overflow-hidden shadow-sm`}
             >
               {/* TÍTULO DA COLUNA */}
-              <div className={`p-4 border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between border-t-2 ${themeStyles.borderTop} shrink-0 ${themeStyles.bgHeader}`}>
+              <div className={`p-4 border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between shrink-0 ${themeStyles.bgHeader}`}>
                 <div className="flex items-center space-x-2">
                   <col.icon className={`w-4 h-4 ${themeStyles.text}`} />
                   <span className={`text-xs font-bold uppercase tracking-wider ${themeStyles.text}`}>{col.title}</span>

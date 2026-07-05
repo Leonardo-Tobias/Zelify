@@ -330,7 +330,7 @@ export default function KanbanPage() {
                                   e.stopPropagation();
                                   handleUpdateStatus(item.id, col.status === 'resolvido' ? 'em_execucao' : 'pendente');
                                 }}
-                                className="w-5 h-5 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-zinc-500 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors cursor-pointer border border-zinc-200 dark:border-zinc-750"
+                                className="w-5 h-5 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors cursor-pointer border border-zinc-200 dark:border-zinc-700"
                                 title="Mover para esquerda"
                               >
                                 <ChevronLeft className="w-3.5 h-3.5" />
@@ -342,7 +342,7 @@ export default function KanbanPage() {
                                   e.stopPropagation();
                                   handleUpdateStatus(item.id, col.status === 'pendente' ? 'em_execucao' : 'resolvido');
                                 }}
-                                className="w-5 h-5 rounded-full bg-zinc-850 dark:bg-zinc-200 text-white dark:text-zinc-900 flex items-center justify-center hover:bg-zinc-950 dark:hover:bg-white transition-colors cursor-pointer border border-zinc-700 dark:border-white"
+                                className="w-5 h-5 rounded-full bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 flex items-center justify-center hover:bg-zinc-800 dark:hover:bg-white transition-colors cursor-pointer border border-zinc-900 dark:border-zinc-100"
                                 title="Mover para direita"
                               >
                                 <ChevronRight className="w-3.5 h-3.5" />

@@ -320,58 +320,60 @@ export default function KanbanPage() {
                           {item.bloco === 'Portaria' ? 'Portaria' : `Bloco ${item.bloco} · Apt ${item.apartamento}`}
                         </span>
 
-                        <span className="font-mono text-[9px] text-zinc-400 dark:text-zinc-555 pl-2">
-                          {new Date(item.created_at).toLocaleDateString('pt-BR')}
-                        </span>
-                        
-                        {/* BOTÕES DE TRANSIÇÃO (CIRCULAR DESIGN) */}
-                        <div className="flex items-center space-x-1 shrink-0">
-                          {col.status !== 'pendente' ? (
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleUpdateStatus(item.id, col.status === 'resolvido' ? 'em_execucao' : 'pendente');
-                              }}
-                              className="w-5 h-5 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-zinc-500 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors cursor-pointer border border-zinc-200 dark:border-zinc-750"
-                              title="Mover para esquerda"
-                            >
-                              <ChevronLeft className="w-3.5 h-3.5" />
-                            </button>
-                          ) : (
-                            <div className="w-5 h-5 rounded-full bg-zinc-50/40 dark:bg-zinc-900/10 opacity-30 flex items-center justify-center text-zinc-300 dark:text-zinc-755 border border-zinc-100 dark:border-zinc-800/40">
-                              <ChevronLeft className="w-3.5 h-3.5" />
-                            </div>
-                          )}
-                          {col.status !== 'resolvido' ? (
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleUpdateStatus(item.id, col.status === 'pendente' ? 'em_execucao' : 'resolvido');
-                              }}
-                              className="w-5 h-5 rounded-full bg-zinc-800 dark:bg-zinc-200 text-white dark:text-zinc-900 flex items-center justify-center hover:bg-zinc-900 dark:hover:bg-white transition-colors cursor-pointer border border-zinc-750 dark:border-white"
-                              title="Mover para direita"
-                            >
-                              <ChevronRight className="w-3.5 h-3.5" />
-                            </button>
-                          ) : (
-                            <div className="w-5 h-5 rounded-full bg-zinc-50/40 dark:bg-zinc-900/10 opacity-30 flex items-center justify-center text-zinc-300 dark:text-zinc-755 border border-zinc-100 dark:border-zinc-800/40">
-                              <ChevronRight className="w-3.5 h-3.5" />
-                            </div>
-                          )}
-                          {col.status === 'resolvido' && (
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                if (window.confirm('Excluir este chamado permanentemente?')) {
-                                  handleDeleteChamado(item.id);
-                                }
-                              }}
-                              className="w-5 h-5 rounded-full bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-500 hover:text-red-450 flex items-center justify-center transition-colors cursor-pointer"
-                              title="Excluir chamado"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
-                          )}
+                        <div className="flex items-center space-x-3 shrink-0">
+                          <span className="font-mono text-[9px] text-zinc-400 dark:text-zinc-555 pl-2">
+                            {new Date(item.created_at).toLocaleDateString('pt-BR')}
+                          </span>
+                          
+                          {/* BOTÕES DE TRANSIÇÃO (CIRCULAR DESIGN) */}
+                          <div className="flex items-center space-x-1 shrink-0">
+                            {col.status !== 'pendente' ? (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleUpdateStatus(item.id, col.status === 'resolvido' ? 'em_execucao' : 'pendente');
+                                }}
+                                className="w-5 h-5 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-zinc-500 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors cursor-pointer border border-zinc-200 dark:border-zinc-750"
+                                title="Mover para esquerda"
+                              >
+                                <ChevronLeft className="w-3.5 h-3.5" />
+                              </button>
+                            ) : (
+                              <div className="w-5 h-5 rounded-full bg-zinc-50/40 dark:bg-zinc-900/10 opacity-30 flex items-center justify-center text-zinc-300 dark:text-zinc-755 border border-zinc-100 dark:border-zinc-800/40">
+                                <ChevronLeft className="w-3.5 h-3.5" />
+                              </div>
+                            )}
+                            {col.status !== 'resolvido' ? (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleUpdateStatus(item.id, col.status === 'pendente' ? 'em_execucao' : 'resolvido');
+                                }}
+                                className="w-5 h-5 rounded-full bg-zinc-850 dark:bg-zinc-200 text-white dark:text-zinc-900 flex items-center justify-center hover:bg-zinc-950 dark:hover:bg-white transition-colors cursor-pointer border border-zinc-700 dark:border-white"
+                                title="Mover para direita"
+                              >
+                                <ChevronRight className="w-3.5 h-3.5" />
+                              </button>
+                            ) : (
+                              <div className="w-5 h-5 rounded-full bg-zinc-50/40 dark:bg-zinc-900/10 opacity-30 flex items-center justify-center text-zinc-300 dark:text-zinc-755 border border-zinc-100 dark:border-zinc-800/40">
+                                <ChevronRight className="w-3.5 h-3.5" />
+                              </div>
+                            )}
+                            {col.status === 'resolvido' && (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (window.confirm('Excluir este chamado permanentemente?')) {
+                                    handleDeleteChamado(item.id);
+                                  }
+                                }}
+                                className="w-5 h-5 rounded-full bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-500 hover:text-red-450 flex items-center justify-center transition-colors cursor-pointer"
+                                title="Excluir chamado"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            )}
+                          </div>
                         </div>
                       </div>
 

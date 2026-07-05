@@ -324,7 +324,7 @@ export default function KanbanPage() {
                           
                           {/* BOTÕES DE TRANSIÇÃO (CIRCULAR DESIGN) */}
                           <div className="flex items-center space-x-1 shrink-0">
-                            {col.status !== 'pendente' ? (
+                            {col.status !== 'pendente' && (
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
@@ -335,12 +335,8 @@ export default function KanbanPage() {
                               >
                                 <ChevronLeft className="w-3.5 h-3.5" />
                               </button>
-                            ) : (
-                              <div className="w-5 h-5 rounded-full bg-zinc-50/40 dark:bg-zinc-900/10 opacity-30 flex items-center justify-center text-zinc-300 dark:text-zinc-755 border border-zinc-100 dark:border-zinc-800/40">
-                                <ChevronLeft className="w-3.5 h-3.5" />
-                              </div>
                             )}
-                            {col.status !== 'resolvido' ? (
+                            {col.status !== 'resolvido' && (
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
@@ -351,10 +347,6 @@ export default function KanbanPage() {
                               >
                                 <ChevronRight className="w-3.5 h-3.5" />
                               </button>
-                            ) : (
-                              <div className="w-5 h-5 rounded-full bg-zinc-50/40 dark:bg-zinc-900/10 opacity-30 flex items-center justify-center text-zinc-300 dark:text-zinc-755 border border-zinc-100 dark:border-zinc-800/40">
-                                <ChevronRight className="w-3.5 h-3.5" />
-                              </div>
                             )}
                             {col.status === 'resolvido' && (
                               <button

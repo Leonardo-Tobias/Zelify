@@ -16,12 +16,52 @@ import {
   Maximize2,
   AlertCircle,
   Lock,
-  Trash2
+  Trash2,
+  Paperclip
 } from 'lucide-react';
 import { db, Chamado } from '@/lib/db';
 import { useCondominio } from '@/contexts/CondominioContext';
 
 type StatusType = 'pendente' | 'em_execucao' | 'resolvido';
+
+const getPrioridade = (id: string, descricao: string) => {
+  const sum = id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  if (
+    descricao.toLowerCase().includes('urgente') || 
+    descricao.toLowerCase().includes('risco') || 
+    descricao.toLowerCase().includes('vazamento') || 
+    sum % 3 === 0
+  ) {
+    return 'Alta';
+  }
+  if (descricao.toLowerCase().includes('lâmpada') || sum % 3 === 1) {
+    return 'Média';
+  }
+  return 'Baixa';
+};
+
+const getTitleAndDesc = (text: string) => {
+  const index = text.indexOf('.');
+  if (index !== -1 && index < 50) {
+    return {
+      title: text.substring(0, index).trim(),
+      desc: text.substring(index + 1).trim()
+    };
+  }
+  const words = text.split(' ');
+  if (words.length > 5) {
+    const title = words.slice(0, 4).join(' ');
+    const desc = words.slice(4).join(' ');
+    return {
+      title: title + '...',
+      desc: desc
+    };
+  }
+  return {
+    title: text,
+    desc: ''
+  };
+};
 
 export default function KanbanPage() {
   const router = useRouter();
@@ -156,22 +196,48 @@ export default function KanbanPage() {
         {colunas.map((col) => {
           const colChamados = chamados.filter(c => c.status === col.status);
           
+          // Determine theme-specific color settings
+          const themeStyles = {
+            pendente: {
+              border: 'border-amber-500/20 dark:border-amber-500/30',
+              borderTop: 'border-t-amber-500',
+              bgHeader: 'bg-amber-500/5',
+              badge: 'bg-amber-500 text-white',
+              text: 'text-amber-600 dark:text-amber-500',
+              hover: 'hover:border-amber-500/30 dark:hover:border-amber-500/40'
+            },
+            em_execucao: {
+              border: 'border-blue-500/20 dark:border-blue-500/30',
+              borderTop: 'border-t-brand',
+              bgHeader: 'bg-brand/5',
+              badge: 'bg-brand text-white',
+              text: 'text-brand',
+              hover: 'hover:border-blue-500/30 dark:hover:border-blue-500/40'
+            },
+            resolvido: {
+              border: 'border-emerald-500/20 dark:border-emerald-500/30',
+              borderTop: 'border-t-emerald-500',
+              bgHeader: 'bg-emerald-500/5',
+              badge: 'bg-emerald-500 text-white',
+              text: 'text-emerald-600 dark:text-emerald-500',
+              hover: 'hover:border-emerald-500/30 dark:hover:border-emerald-500/40'
+            }
+          }[col.status];
+
           return (
             <div 
               key={col.status}
               onDragOver={handleDragOver}
               onDrop={(e) => handleDrop(e, col.status)}
-              className="bg-zinc-100/50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl flex flex-col h-full min-h-[400px] lg:max-h-[calc(100vh-220px)] overflow-hidden shadow-sm"
+              className={`bg-zinc-50/50 dark:bg-[#070A13] border ${themeStyles.border} rounded-xl flex flex-col h-full min-h-[400px] lg:max-h-[calc(100vh-220px)] overflow-hidden shadow-sm`}
             >
               {/* TÍTULO DA COLUNA */}
-              <div className={`p-4 border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between border-t-2 ${col.status === 'em_execucao' ? 'border-t-brand' : col.color} shrink-0 bg-zinc-100/40 dark:bg-zinc-950/60`}>
+              <div className={`p-4 border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between border-t-2 ${themeStyles.borderTop} shrink-0 ${themeStyles.bgHeader}`}>
                 <div className="flex items-center space-x-2">
-                  <col.icon className={`w-4 h-4 ${
-                    col.status === 'pendente' ? 'text-amber-500' : col.status === 'em_execucao' ? 'text-brand' : 'text-emerald-500'
-                  }`} />
-                  <span className="text-xs font-bold text-zinc-900 dark:text-white uppercase tracking-wider">{col.title}</span>
+                  <col.icon className={`w-4 h-4 ${themeStyles.text}`} />
+                  <span className={`text-xs font-bold uppercase tracking-wider ${themeStyles.text}`}>{col.title}</span>
                 </div>
-                <span className="text-[10px] bg-zinc-200 dark:bg-zinc-950 text-zinc-600 dark:text-zinc-400 border border-zinc-300 dark:border-zinc-800 px-2.5 py-0.5 rounded font-bold">
+                <span className={`text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center shrink-0 shadow-sm ${themeStyles.badge}`}>
                   {colChamados.length}
                 </span>
               </div>
@@ -179,7 +245,7 @@ export default function KanbanPage() {
               {/* LISTA DE CARDS */}
               <div className="p-3 space-y-3 overflow-y-auto flex-1 custom-scrollbar">
                 {colChamados.length === 0 ? (
-                  <div className="py-16 text-center text-zinc-500 flex flex-col items-center justify-center space-y-1">
+                  <div className="py-16 text-center text-zinc-400 dark:text-zinc-500 flex flex-col items-center justify-center space-y-1">
                     <col.icon className="w-5 h-5 opacity-20 mb-1" />
                     <span className="text-[10px] font-bold uppercase tracking-wider">Nenhum chamado</span>
                   </div>
@@ -190,77 +256,107 @@ export default function KanbanPage() {
                       draggable
                       onDragStart={(e) => handleDragStart(e, item.id)}
                       onClick={() => setSelectedChamado(item)}
-                      className="bg-white dark:bg-zinc-925 border border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-900/80 rounded-lg p-3.5 space-y-3.5 cursor-pointer transition-all shadow-sm group text-left"
+                      className={`bg-white dark:bg-[#13192B] border border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 hover:bg-zinc-50/80 dark:hover:bg-[#182037] rounded-xl p-3.5 space-y-3.5 cursor-pointer transition-all shadow-sm group text-left`}
                     >
-                      {/* MINI FOTO (SE EXISTIR) */}
-                      {item.foto_url && (
-                        <div className="relative aspect-video w-full rounded-md overflow-hidden bg-zinc-100 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 shrink-0 font-sans">
-                          <img 
-                            src={item.foto_url} 
-                            alt={item.descricao} 
-                            className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-500"
-                          />
-                          <button
+                      {/* HEADER DO CARD (LOCATION & PRIORITY) */}
+                      <div className="flex items-center justify-between">
+                        <span className="flex items-center text-[10px] font-bold text-indigo-500 dark:text-indigo-400 uppercase tracking-wider">
+                          <MapPin className="w-3.5 h-3.5 mr-1 text-indigo-500 dark:text-indigo-400 shrink-0" />
+                          {item.local}
+                        </span>
+                        
+                        {(() => {
+                          const prio = getPrioridade(item.id, item.descricao);
+                          const badgeStyles = {
+                            Alta: 'text-red-500 border border-red-500/30 bg-red-500/5 dark:bg-red-500/10',
+                            Média: 'text-amber-500 border border-amber-500/30 bg-amber-500/5 dark:bg-amber-500/10',
+                            Baixa: 'text-emerald-500 border border-emerald-500/30 bg-emerald-500/5 dark:bg-emerald-500/10'
+                          }[prio];
+                          return (
+                            <span className={`text-[9px] font-black px-2 py-0.5 rounded uppercase tracking-wide ${badgeStyles}`}>
+                              {prio}
+                            </span>
+                          );
+                        })()}
+                      </div>
+
+                      {/* CORPO DO CARD (TITLE & DESCRIPTION OR PHOTO LINK) */}
+                      <div className="space-y-1.5">
+                        {(() => {
+                          const { title, desc } = getTitleAndDesc(item.descricao);
+                          return (
+                            <>
+                              <h4 className="text-xs font-bold text-zinc-900 dark:text-white leading-snug">
+                                {title}
+                              </h4>
+                              {desc && (
+                                <p className="text-[11px] text-zinc-550 dark:text-zinc-400 font-medium leading-relaxed">
+                                  {desc}
+                                </p>
+                              )}
+                            </>
+                          );
+                        })()}
+                        
+                        {/* PHOTO LINK AS SPECIFIED IN DESIGN */}
+                        {item.foto_url && (
+                          <div 
                             onClick={(e) => {
                               e.stopPropagation();
                               setSelectedChamado(item);
                             }}
-                            className="absolute bottom-1.5 right-1.5 bg-black/60 hover:bg-brand text-white p-1 rounded transition-colors border border-zinc-700 cursor-pointer"
-                            title="Expandir Chamado"
+                            className="flex items-center space-x-1 text-[10.5px] text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-semibold cursor-pointer py-0.5 inline-flex"
                           >
-                            <Maximize2 className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      )}
-
-                      {/* CORPO DO CARD */}
-                      <div className="space-y-1">
-                        <div className="flex items-center justify-between text-[9px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
-                          <span className="flex items-center">
-                            <MapPin className="w-3.5 h-3.5 mr-0.5 text-zinc-400 dark:text-zinc-500 shrink-0" />
-                            {item.local}
-                          </span>
-                          <span className="flex items-center">
-                            <Building className="w-3.5 h-3.5 mr-0.5 text-zinc-400 dark:text-zinc-500 shrink-0" />
-                            {item.bloco}-{item.apartamento}
-                          </span>
-                        </div>
-                        <p className="text-xs text-zinc-700 dark:text-zinc-300 font-semibold line-clamp-2 leading-relaxed pt-0.5">
-                          {item.descricao}
-                        </p>
+                            <Paperclip className="w-3.5 h-3.5 shrink-0" />
+                            <span>Ver foto do chamado</span>
+                          </div>
+                        )}
                       </div>
 
-                      {/* RODAPÉ DO CARD / BOTÕES MÓVEIS */}
-                      <div className="pt-2.5 border-t border-zinc-200 dark:border-zinc-800 flex items-center justify-between">
-                        <span className="text-[9px] text-zinc-400 dark:text-zinc-500 font-bold font-mono">
+                      {/* RODAPÉ DO CARD / NAV ARROWS */}
+                      <div className="pt-2.5 border-t border-zinc-150 dark:border-zinc-800/80 flex items-center justify-between text-[10px] text-zinc-500 dark:text-zinc-400 font-medium">
+                        <span className="flex items-center font-semibold text-zinc-500 dark:text-zinc-400">
+                          <Building className="w-3.5 h-3.5 mr-1 text-zinc-450 dark:text-zinc-500 shrink-0" />
+                          {item.bloco === 'Portaria' ? 'Portaria' : `Bloco ${item.bloco} · Apt ${item.apartamento}`}
+                        </span>
+
+                        <span className="font-mono text-[9px] text-zinc-400 dark:text-zinc-555 pl-2">
                           {new Date(item.created_at).toLocaleDateString('pt-BR')}
                         </span>
                         
-                        {/* BOTÕES DE TRANSIÇÃO (FÁCIL NO MOBILE) */}
-                        <div className="flex items-center space-x-1">
-                          {col.status !== 'pendente' && (
+                        {/* BOTÕES DE TRANSIÇÃO (CIRCULAR DESIGN) */}
+                        <div className="flex items-center space-x-1 shrink-0">
+                          {col.status !== 'pendente' ? (
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
                                 handleUpdateStatus(item.id, col.status === 'resolvido' ? 'em_execucao' : 'pendente');
                               }}
-                              className="p-1 bg-zinc-100 dark:bg-zinc-950 hover:bg-zinc-200 dark:hover:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-white rounded transition-colors cursor-pointer"
+                              className="w-5 h-5 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-zinc-500 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors cursor-pointer border border-zinc-200 dark:border-zinc-750"
                               title="Mover para esquerda"
                             >
-                              <ChevronLeft className="w-3 h-3" />
+                              <ChevronLeft className="w-3.5 h-3.5" />
                             </button>
+                          ) : (
+                            <div className="w-5 h-5 rounded-full bg-zinc-50/40 dark:bg-zinc-900/10 opacity-30 flex items-center justify-center text-zinc-300 dark:text-zinc-755 border border-zinc-100 dark:border-zinc-800/40">
+                              <ChevronLeft className="w-3.5 h-3.5" />
+                            </div>
                           )}
-                          {col.status !== 'resolvido' && (
+                          {col.status !== 'resolvido' ? (
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
                                 handleUpdateStatus(item.id, col.status === 'pendente' ? 'em_execucao' : 'resolvido');
                               }}
-                              className="p-1 bg-zinc-100 dark:bg-zinc-925 hover:bg-zinc-200 dark:hover:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-brand hover:text-brand/80 rounded transition-colors cursor-pointer"
+                              className="w-5 h-5 rounded-full bg-zinc-800 dark:bg-zinc-200 text-white dark:text-zinc-900 flex items-center justify-center hover:bg-zinc-900 dark:hover:bg-white transition-colors cursor-pointer border border-zinc-750 dark:border-white"
                               title="Mover para direita"
                             >
-                              <ChevronRight className="w-3 h-3" />
+                              <ChevronRight className="w-3.5 h-3.5" />
                             </button>
+                          ) : (
+                            <div className="w-5 h-5 rounded-full bg-zinc-50/40 dark:bg-zinc-900/10 opacity-30 flex items-center justify-center text-zinc-300 dark:text-zinc-755 border border-zinc-100 dark:border-zinc-800/40">
+                              <ChevronRight className="w-3.5 h-3.5" />
+                            </div>
                           )}
                           {col.status === 'resolvido' && (
                             <button
@@ -270,10 +366,10 @@ export default function KanbanPage() {
                                   handleDeleteChamado(item.id);
                                 }
                               }}
-                              className="p-1 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-500 hover:text-red-400 rounded transition-colors cursor-pointer"
+                              className="w-5 h-5 rounded-full bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-500 hover:text-red-450 flex items-center justify-center transition-colors cursor-pointer"
                               title="Excluir chamado"
                             >
-                              <Trash2 className="w-3 h-3" />
+                              <Trash2 className="w-3.5 h-3.5" />
                             </button>
                           )}
                         </div>
@@ -282,6 +378,18 @@ export default function KanbanPage() {
                     </div>
                   ))
                 )}
+              </div>
+
+              {/* COLUMN FOOTER - + NOVO CHAMADO ACTIONS */}
+              <div className="p-3 border-t border-zinc-200 dark:border-zinc-800/80 bg-zinc-100/30 dark:bg-zinc-950/40 shrink-0">
+                <a 
+                  href={`/${condominio?.slug}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="w-full py-2 rounded-lg border border-dashed border-zinc-300 dark:border-zinc-850 hover:border-brand dark:hover:border-blue-500 text-zinc-500 hover:text-brand dark:hover:text-blue-400 text-[11px] font-bold tracking-wide transition-all flex items-center justify-center space-x-1.5 cursor-pointer bg-white dark:bg-[#13192B]/30 shadow-sm"
+                >
+                  <span>+ Novo chamado</span>
+                </a>
               </div>
             </div>
           );

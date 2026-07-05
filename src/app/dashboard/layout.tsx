@@ -360,120 +360,122 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
       )}
 
       {/* DESKTOP SIDEBAR */}
-      <aside className="hidden md:flex flex-col justify-between w-64 bg-zinc-50 dark:bg-[#09090b] border-r border-zinc-200 dark:border-white/[0.06] p-4 shrink-0 transition-colors duration-200">
-        <div className="space-y-6">
-          {/* LOGO E SELETOR DE CONDOMÍNIO */}
-          <div className="px-2">
-            <div className="flex items-center space-x-1 mb-5">
+      <aside className="hidden md:flex flex-col justify-between w-64 bg-zinc-50 dark:bg-[#09090b] border-r border-zinc-200 dark:border-white/[0.06] shrink-0 transition-colors duration-200 py-4">
+        <div className="space-y-0">
+          {/* LOGO */}
+          <div className="px-4 pb-4 border-b border-zinc-200 dark:border-zinc-800">
+            <div className="flex items-center space-x-1">
               <span className="text-xl font-black tracking-tight text-zinc-900 dark:text-white">Zelcon<span className="text-brand">.</span></span>
             </div>
-            
-            {/* DROPDOWN DE CONDOMÍNIOS */}
-            <div className="px-0 relative">
-              <button
-                type="button"
-                onClick={() => setCondoDropdownOpen(!condoDropdownOpen)}
-                className="w-full flex items-center justify-between p-2.5 rounded-xl text-left transition-all shadow-sm border bg-zinc-100 dark:bg-white/[0.04] border-zinc-200 dark:border-white/[0.06] hover:border-zinc-300 dark:hover:border-white/[0.12]"
-              >
-                <div className="flex items-center space-x-2.5 min-w-0 flex-1">
-                  <div className="w-6 h-6 rounded flex items-center justify-center text-[10px] font-extrabold shrink-0 border bg-brand/10 border-brand/20 text-brand">
-                    {condominio.nome.charAt(0)}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <span className="text-xs font-bold text-zinc-900 dark:text-white block truncate leading-none">
-                      {condominio.nome}
-                    </span>
-                  </div>
+          </div>
+          
+          {/* DROPDOWN DE CONDOMÍNIOS */}
+          <div className="py-4 px-4 border-b border-zinc-200 dark:border-zinc-800 relative">
+            <button
+              type="button"
+              onClick={() => setCondoDropdownOpen(!condoDropdownOpen)}
+              className="w-full flex items-center justify-between p-2.5 rounded-xl text-left transition-all shadow-sm border bg-white dark:bg-[#13192b] border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700"
+            >
+              <div className="flex items-center space-x-2.5 min-w-0 flex-1">
+                <div className="w-6 h-6 rounded flex items-center justify-center text-[10px] font-extrabold shrink-0 border bg-brand/10 border-brand/20 text-brand">
+                  {condominio.nome.charAt(0)}
                 </div>
-                {isCorporate && (
-                  <svg className={`w-3.5 h-3.5 text-zinc-500 transition-transform ${condoDropdownOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                )}
-              </button>
-
-              {isCorporate && condoDropdownOpen && (
-                <div className="absolute left-0 right-0 top-full mt-1.5 bg-zinc-900 border border-zinc-800 rounded-xl shadow-2xl z-30 py-1 animate-in fade-in slide-in-from-top-1 duration-150">
-
-                  {/* Lista de condomínios */}
-                  <div className="max-h-[200px] overflow-y-auto scrollbar-thin scrollbar-thumb-zinc-700 scrollbar-track-transparent">
-                    {condominios.map((c) => {
-                      const isActive = c.id === condominio.id;
-                      return (
-                        <button
-                          key={c.id}
-                          onClick={() => handleSwitchCondo(c)}
-                          className={`w-full flex items-center space-x-3 px-3 py-2.5 text-xs transition-colors ${
-                            isActive
-                              ? 'bg-zinc-800/60 text-white font-bold'
-                              : 'text-zinc-400 hover:text-white hover:bg-zinc-800/60 font-medium'
-                          }`}
-                        >
-                          <div className={`w-5 h-5 rounded flex items-center justify-center text-[8px] font-extrabold shrink-0 border ${
-                            isActive
-                              ? 'bg-brand/20 border-brand/40 text-brand'
-                              : 'bg-zinc-800 border-zinc-700 text-zinc-500'
-                          }`}>
-                            {c.nome.charAt(0)}
-                          </div>
-                          <span className="truncate">{c.nome}</span>
-                          {c.plan_type !== 'free' && (
-                            <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded uppercase ml-auto shrink-0 ${
-                              c.plan_type === 'corporate'
-                                ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20'
-                                : 'bg-brand/10 text-brand border border-brand/20'
-                            }`}>
-                              {c.plan_type === 'corporate' ? 'Corp' : 'Pro'}
-                            </span>
-                          )}
-                          {isActive && (
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0 shadow-[0_0_6px_rgba(16,185,129,0.6)]"></span>
-                          )}
-                        </button>
-                      );
-                    })}
-                  </div>
-
-                  <div className="h-px bg-zinc-800/60 mx-3 my-1"></div>
-
-                  <button
-                    onClick={() => {
-                      setCondoDropdownOpen(false);
-                      router.push('/dashboard/configuracoes?tab=faturamento&addCondo=true');
-                    }}
-                    className="w-full flex items-center space-x-2 px-3 py-2.5 text-xs text-brand hover:bg-zinc-800/60 font-semibold transition-colors"
-                  >
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                    </svg>
-                    <span>Adicionar Condomínio</span>
-                  </button>
+                <div className="min-w-0 flex-1">
+                  <span className="text-xs font-bold text-zinc-900 dark:text-white block truncate leading-none">
+                    {condominio.nome}
+                  </span>
                 </div>
+              </div>
+              {isCorporate && condominios.length > 1 ? (
+                <svg className={`w-3.5 h-3.5 text-zinc-500 transition-transform ${condoDropdownOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              ) : (
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0 shadow-[0_0_8px_rgba(16,185,129,0.7)] animate-pulse ml-2"></span>
               )}
-            </div>
+            </button>
+
+            {isCorporate && condoDropdownOpen && (
+              <div className="absolute left-4 right-4 top-full mt-1.5 bg-zinc-900 border border-zinc-800 rounded-xl shadow-2xl z-30 py-1 animate-in fade-in slide-in-from-top-1 duration-150">
+
+                {/* Lista de condomínios */}
+                <div className="max-h-[200px] overflow-y-auto scrollbar-thin scrollbar-thumb-zinc-700 scrollbar-track-transparent">
+                  {condominios.map((c) => {
+                    const isActive = c.id === condominio.id;
+                    return (
+                      <button
+                        key={c.id}
+                        onClick={() => handleSwitchCondo(c)}
+                        className={`w-full flex items-center space-x-3 px-3 py-2.5 text-xs transition-colors ${
+                          isActive
+                            ? 'bg-zinc-800/60 text-white font-bold'
+                            : 'text-zinc-400 hover:text-white hover:bg-zinc-800/60 font-medium'
+                        }`}
+                      >
+                        <div className={`w-5 h-5 rounded flex items-center justify-center text-[8px] font-extrabold shrink-0 border ${
+                          isActive
+                            ? 'bg-brand/20 border-brand/40 text-brand'
+                            : 'bg-zinc-800 border-zinc-700 text-zinc-500'
+                        }`}>
+                          {c.nome.charAt(0)}
+                        </div>
+                        <span className="truncate">{c.nome}</span>
+                        {c.plan_type !== 'free' && (
+                          <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded uppercase ml-auto shrink-0 ${
+                            c.plan_type === 'corporate'
+                              ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20'
+                              : 'bg-brand/10 text-brand border border-brand/20'
+                          }`}>
+                            {c.plan_type === 'corporate' ? 'Corp' : 'Pro'}
+                          </span>
+                        )}
+                        {isActive && (
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0 shadow-[0_0_6px_rgba(16,185,129,0.6)]"></span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <div className="h-px bg-zinc-800/60 mx-3 my-1"></div>
+
+                <button
+                  onClick={() => {
+                    setCondoDropdownOpen(false);
+                    router.push('/dashboard/configuracoes?tab=faturamento&addCondo=true');
+                  }}
+                  className="w-full flex items-center space-x-2 px-3 py-2.5 text-xs text-brand hover:bg-zinc-800/60 font-semibold transition-colors"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                  <span>Adicionar Condomínio</span>
+                </button>
+              </div>
+            )}
           </div>
 
           {/* BOTÃO DE PLACA / LINK DO MORADOR */}
           {!isPortfolioView && condominio?.slug && (
-            <div className="px-2">
+            <div className="py-4 px-4 border-b border-zinc-200 dark:border-zinc-800">
               <button
                 type="button"
                 onClick={() => setShowPosterModal(true)}
-                className="w-full flex flex-col p-2.5 bg-zinc-100 dark:bg-white/[0.04] border border-zinc-200 dark:border-white/[0.06] rounded-xl text-left transition-all group hover:border-zinc-300 dark:hover:border-white/[0.12] shadow-sm cursor-pointer"
+                className="w-full flex flex-col p-2.5 bg-zinc-100 dark:bg-[#13192b]/40 border border-zinc-200 dark:border-zinc-800/65 rounded-xl text-left transition-all group hover:border-zinc-300 dark:hover:border-zinc-700 shadow-sm cursor-pointer"
               >
-                <div className="flex items-center space-x-2 text-[11px] font-bold text-zinc-600 dark:text-zinc-300 group-hover:text-brand transition-colors w-full">
+                <div className="flex items-center space-x-2 text-[11px] font-bold text-zinc-650 dark:text-zinc-300 group-hover:text-brand transition-colors w-full">
                   <ExternalLink className="w-3.5 h-3.5 text-zinc-500 group-hover:text-brand shrink-0 transition-colors" />
-                  <span className="truncate">Placa do Condomínio</span>
+                  <span className="truncate">Link do Morador</span>
                 </div>
                 <span className="text-[10px] font-mono text-zinc-400 dark:text-zinc-550 group-hover:text-brand truncate max-w-full block mt-1 transition-colors pl-5.5">
-                  zelify.vercel.app/{condominio.slug}
+                  zelify.app/{condominio.slug}
                 </span>
               </button>
             </div>
           )}
 
           {/* NAV */}
-          <nav className="space-y-1 px-1">
+          <nav className="space-y-1 py-4 px-4">
             {navigation.map((item) => {
               const isActive = item.active;
               return (
@@ -500,7 +502,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
         </div>
 
         {/* BOTTOM SECTION */}
-        <div className="space-y-4 pt-4 mt-auto">
+        <div className="space-y-4 pt-4 mt-auto px-4">
           {/* UPGRADE CARD FOR FREE PLAN */}
           {!isPortfolioView && condominio?.plan_type === 'free' && (
             <div className="mx-1 p-4 rounded-xl bg-gradient-to-br from-brand/15 via-brand/5 to-transparent border border-brand/20 relative overflow-hidden shadow-sm animate-in fade-in duration-300">

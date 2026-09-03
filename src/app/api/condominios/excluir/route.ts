@@ -1,15 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || ''
-
-function getSupabaseAdmin() {
-  if (!supabaseServiceKey) return null
-  return createClient(supabaseUrl, supabaseServiceKey, {
-    auth: { autoRefreshToken: false, persistSession: false },
-  })
-}
+import { authErrorResponse, requireCondominioRole } from '@/lib/serverAuth'
 
 export async function POST(req: NextRequest) {
   try {
@@ -19,10 +9,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'condominioId é obrigatório.' }, { status: 400 })
     }
 
-    const supabase = getSupabaseAdmin()
-    if (!supabase) {
-      return NextResponse.json({ error: 'Servidor não configurado.' }, { status: 500 })
-    }
+    const { admin: supabase } = await requireCondominioRole(req, condominioId)
 
     // Verifica se é uma instância corporate (tem parent)
     const { data: condo } = await supabase
@@ -59,6 +46,8 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ success: true, nome: condo.nome })
   } catch (err) {
+    const authResponse = authErrorResponse(err)
+    if (authResponse) return authResponse
     console.error('[EXCLUIR CONDOMINIO ERROR]', err)
     return NextResponse.json({ error: 'Erro ao excluir condomínio.' }, { status: 500 })
   }

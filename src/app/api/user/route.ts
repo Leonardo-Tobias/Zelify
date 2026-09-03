@@ -1,46 +1,83 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || ''
+import { authErrorResponse, requireUser } from '@/lib/serverAuth'
+import { cancelAsaasSubscription } from '@/lib/asaas'
 
 export async function DELETE(req: NextRequest) {
   try {
-    const authHeader = req.headers.get('authorization')
-    if (!authHeader) {
-      return NextResponse.json({ error: 'Não autorizado.' }, { status: 401 })
+    const { admin: supabase, user } = await requireUser(req)
+
+    // Transfere condomínios compartilhados e remove os que pertencem só ao usuário.
+    const { data: ownedCondos, error: ownedError } = await supabase
+      .from('condominios')
+      .select('id, parent_condominio_id, asaas_subscription_id')
+      .eq('created_by', user.id)
+    if (ownedError) throw ownedError
+
+    const ownedIds = (ownedCondos || []).map(condo => condo.id)
+    const { data: otherManagers, error: managersError } = ownedIds.length
+      ? await supabase
+          .from('usuarios_gestores')
+          .select('condominio_id, user_id, papel')
+          .in('condominio_id', ownedIds)
+          .in('papel', ['sindico', 'admin'])
+          .neq('user_id', user.id)
+      : { data: [], error: null }
+    if (managersError) throw managersError
+
+    const sharedIds = new Set<string>()
+    for (const manager of otherManagers || []) {
+      if (sharedIds.has(manager.condominio_id)) continue
+      const { error } = await supabase
+        .from('condominios')
+        .update({ created_by: manager.user_id })
+        .eq('id', manager.condominio_id)
+      if (error) throw error
+      sharedIds.add(manager.condominio_id)
     }
 
-    const supabase = createClient(supabaseUrl, supabaseServiceKey, {
-      auth: { autoRefreshToken: false, persistSession: false },
-      global: { headers: { authorization: authHeader } },
-    })
+    const exclusiveIds = ownedIds.filter(id => !sharedIds.has(id))
+    if (exclusiveIds.length) {
+      const subscriptionIds = new Set(
+        (ownedCondos || [])
+          .filter(condo => exclusiveIds.includes(condo.id) && condo.asaas_subscription_id)
+          .map(condo => condo.asaas_subscription_id as string),
+      )
+      for (const subscriptionId of subscriptionIds) {
+        try {
+          await cancelAsaasSubscription(subscriptionId)
+        } catch (error) {
+          console.warn('[DELETE USER] Falha ao cancelar assinatura no Asaas', error)
+        }
+      }
 
-    const { data: { user }, error: userError } = await supabase.auth.getUser()
-    if (userError || !user) {
-      return NextResponse.json({ error: 'Usuário não encontrado.' }, { status: 401 })
+      // Evita referências órfãs quando um container é removido, mas uma instância foi transferida.
+      const { error: detachError } = await supabase
+        .from('condominios')
+        .update({ parent_condominio_id: null, plan_type: 'free' })
+        .in('parent_condominio_id', exclusiveIds)
+        .not('id', 'in', `(${exclusiveIds.join(',')})`)
+      if (detachError) throw detachError
+
+      const childIds = (ownedCondos || [])
+        .filter(condo => exclusiveIds.includes(condo.id) && condo.parent_condominio_id)
+        .map(condo => condo.id)
+      if (childIds.length) {
+        const { error } = await supabase.from('condominios').delete().in('id', childIds)
+        if (error) throw error
+      }
+
+      const rootIds = exclusiveIds.filter(id => !childIds.includes(id))
+      if (rootIds.length) {
+        const { error } = await supabase.from('condominios').delete().in('id', rootIds)
+        if (error) throw error
+      }
     }
 
-    // Buscar gestor e condomínios vinculados
-    const { data: gestores } = await supabase
+    const { error: linksError } = await supabase
       .from('usuarios_gestores')
-      .select('condominio_id')
+      .delete()
       .eq('user_id', user.id)
-
-    const condoIds = gestores?.map(g => g.condominio_id) || []
-
-    // Deletar chamados dos condomínios
-    for (const condoId of condoIds) {
-      await supabase.from('chamados').delete().eq('condominio_id', condoId)
-    }
-
-    // Deletar gestores
-    await supabase.from('usuarios_gestores').delete().eq('user_id', user.id)
-
-    // Deletar condomínios
-    for (const condoId of condoIds) {
-      await supabase.from('condominios').delete().eq('id', condoId)
-    }
+    if (linksError) throw linksError
 
     // Deletar usuário do auth
     const { error: deleteUserError } = await supabase.auth.admin.deleteUser(user.id)
@@ -49,8 +86,10 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json({ error: 'Erro ao deletar usuário.' }, { status: 500 })
     }
 
-    return NextResponse.json({ success: true, message: 'Conta e todos os dados foram excluídos permanentemente.' })
+    return NextResponse.json({ success: true, message: 'Conta excluída. Condomínios compartilhados foram preservados.' })
   } catch (err) {
+    const authResponse = authErrorResponse(err)
+    if (authResponse) return authResponse
     console.error('[DELETE USER ERROR]', err)
     return NextResponse.json({ error: 'Erro ao excluir conta.' }, { status: 500 })
   }

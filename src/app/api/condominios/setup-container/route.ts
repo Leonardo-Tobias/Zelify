@@ -1,8 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || ''
+import { authErrorResponse, requireCondominioRole } from '@/lib/serverAuth'
 
 export async function POST(req: NextRequest) {
   try {
@@ -12,9 +9,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'condominioId é obrigatório.' }, { status: 400 })
     }
 
-    const supabase = createClient(supabaseUrl, supabaseServiceKey, {
-      auth: { autoRefreshToken: false, persistSession: false },
-    })
+    const { admin: supabase } = await requireCondominioRole(req, condominioId)
 
     // Verificar se o condomínio existe e é corporate
     const { data: condo } = await supabase
@@ -53,6 +48,8 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ success: true, message: 'Container criado com sucesso.' })
   } catch (err) {
+    const authResponse = authErrorResponse(err)
+    if (authResponse) return authResponse
     console.error('[SETUP CONTAINER ERROR]', err)
     return NextResponse.json({ error: 'Erro ao configurar container.' }, { status: 500 })
   }

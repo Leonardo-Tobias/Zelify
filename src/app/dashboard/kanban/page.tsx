@@ -7,14 +7,11 @@ import {
   Wrench, 
   CheckCircle2, 
   MapPin, 
-  Calendar,
   Building,
   ChevronRight,
   ChevronLeft,
   ArrowRightLeft,
   X,
-  Maximize2,
-  AlertCircle,
   Lock,
   Trash2,
   Paperclip
@@ -148,7 +145,7 @@ export default function KanbanPage() {
   }
 
   // Filtrar chamados por coluna
-  const colunas: { title: string; status: StatusType; color: string; icon: any }[] = [
+  const colunas: { title: string; status: StatusType; color: string; icon: React.ComponentType<{ className?: string }> }[] = [
     { title: 'Pendentes', status: 'pendente', color: 'border-t-amber-500', icon: Clock },
     { title: 'Em Execução', status: 'em_execucao', color: 'border-t-blue-500', icon: Wrench },
     { title: 'Resolvidos', status: 'resolvido', color: 'border-t-emerald-500', icon: CheckCircle2 }

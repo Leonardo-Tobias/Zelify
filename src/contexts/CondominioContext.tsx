@@ -87,7 +87,7 @@ export function CondominioProvider({ children }: { children: React.ReactNode }) 
     }
     window.addEventListener('focus', onFocus)
     return () => window.removeEventListener('focus', onFocus)
-  }, [userId, condominio?.id])
+  }, [userId, condominio])
 
   const switchCondo = useCallback(
     (target: Condominio) => {

@@ -23,8 +23,8 @@
   --color-zinc-650: #494951;
   --color-zinc-925: #111114;
   --color-emerald-450: #2dd4a0;
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: Arial, Helvetica, sans-serif;
+  --font-mono: "Cascadia Mono", Consolas, monospace;
 }
 
 body {

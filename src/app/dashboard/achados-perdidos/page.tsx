@@ -11,10 +11,8 @@ import {
   Clock, 
   Camera, 
   Loader2, 
-  CheckCircle2, 
   X,
   Maximize2,
-  AlertCircle,
   Lock,
   Trash2
 } from 'lucide-react';

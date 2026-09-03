@@ -1,36 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || ''
+import { authErrorResponse, requireUser } from '@/lib/serverAuth'
 
 export async function GET(req: NextRequest) {
   try {
-    const authHeader = req.headers.get('authorization')
-    if (!authHeader) {
-      return NextResponse.json({ error: 'Não autorizado.' }, { status: 401 })
-    }
+    const { admin: supabase, user } = await requireUser(req)
 
-    const supabase = createClient(supabaseUrl, supabaseServiceKey, {
-      auth: { autoRefreshToken: false, persistSession: false },
-      global: { headers: { authorization: authHeader } },
-    })
-
-    const { data: { user }, error: userError } = await supabase.auth.getUser()
-    if (userError || !user) {
-      return NextResponse.json({ error: 'Usuário não encontrado.' }, { status: 401 })
-    }
-
-    const { data: gestor } = await supabase
+    const { data: gestores } = await supabase
       .from('usuarios_gestores')
       .select('*')
       .eq('user_id', user.id)
-      .maybeSingle()
 
     const { data: condominios } = await supabase
       .from('condominios')
       .select('*')
-      .in('id', gestor ? [gestor.condominio_id] : [])
+      .in('id', gestores?.map(gestor => gestor.condominio_id) || [])
 
     const { data: chamados } = await supabase
       .from('chamados')
@@ -44,13 +27,13 @@ export async function GET(req: NextRequest) {
         email: user.email,
         created_at: user.created_at,
       },
-      gestor: gestor ? {
+      gestores: (gestores || []).map(gestor => ({
         id: gestor.id,
         nome: gestor.nome,
         papel: gestor.papel,
         condominio_id: gestor.condominio_id,
         created_at: gestor.created_at,
-      } : null,
+      })),
       condominios: (condominios || []).map(c => ({
         id: c.id,
         nome: c.nome,
@@ -72,6 +55,8 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(exportData)
   } catch (err) {
+    const authResponse = authErrorResponse(err)
+    if (authResponse) return authResponse
     console.error('[DATA-EXPORT ERROR]', err)
     return NextResponse.json({ error: 'Erro ao exportar dados.' }, { status: 500 })
   }

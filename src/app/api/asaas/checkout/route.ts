@@ -1,30 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
-import { createAsaasCustomer, createAsaasSubscription, createAsaasPixPayment, updateAsaasCustomer, cancelAsaasSubscription } from '@/lib/asaas'
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || ''
-
-function getSupabaseAdmin() {
-  if (!supabaseServiceKey) return null
-  return createClient(supabaseUrl, supabaseServiceKey, {
-    auth: { autoRefreshToken: false, persistSession: false },
-  })
-}
+import { createAsaasCustomer, createAsaasSubscription, getPixPaymentData, updateAsaasCustomer } from '@/lib/asaas'
+import { authErrorResponse, requireCondominioRole } from '@/lib/serverAuth'
+import { calculateSubscriptionPrice } from '@/lib/billing'
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
     const {
       condominioId,
-      nome,
-      email,
       cpfCnpj,
       phone,
       planType,        // 'pro' | 'corporate'
       billingType,     // 'PIX' | 'CREDIT_CARD'
       cycle,           // 'MONTHLY' | 'YEARLY'
-      value,
       creditCard,
       holderInfo,
       numCondos,       // corporate: max_instances
@@ -37,37 +25,31 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // Recalcula o preço no servidor (não confia no value do cliente)
-    const isAnnual = cycle === 'YEARLY'
-    const getCorporatePerCondoPrice = (n: number, annual: boolean) => {
-      if (n >= 16 && n <= 50) return annual ? 39 : 49
-      if (n > 50 && n < 100) return annual ? 29 : 39
-      return annual ? 49 : 59 // 5-15 condos
-    }
-    let calculatedValue: number
-    if (planType === 'pro') {
-      calculatedValue = isAnnual ? 1488 : 149
-    } else {
-      const condoCount = Math.max(5, Math.min(numCondos || 5, 99))
-      const perCondo = getCorporatePerCondoPrice(condoCount, isAnnual)
-      calculatedValue = condoCount * perCondo
-      if (isAnnual) calculatedValue *= 12
+    if ((planType !== 'pro' && planType !== 'corporate') ||
+        (billingType !== 'PIX' && billingType !== 'CREDIT_CARD') ||
+        (cycle !== 'MONTHLY' && cycle !== 'YEARLY')) {
+      return NextResponse.json({ error: 'Plano ou forma de cobrança inválidos.' }, { status: 400 })
     }
 
-    const supabase = getSupabaseAdmin()
+    const { admin: supabase, user } = await requireCondominioRole(req, condominioId)
+    const { data: sourceCondo, error: sourceCondoError } = await supabase
+      .from('condominios')
+      .select('nome')
+      .eq('id', condominioId)
+      .single()
+    if (sourceCondoError || !sourceCondo) throw sourceCondoError || new Error('Condomínio não encontrado.')
+    if (!user.email) return NextResponse.json({ error: 'Usuário sem e-mail de cobrança.' }, { status: 400 })
+    const billingName = sourceCondo.nome
+    const billingEmail = user.email
+
+    // Recalcula o preço no servidor (não confia no value do cliente)
+    const { value: calculatedValue, condominios: normalizedCondoCount } =
+      calculateSubscriptionPrice(planType, cycle, numCondos)
 
     // 0. Se for corporate, cria ou recupera o container
     let targetCondominioId = condominioId
-    if (planType === 'corporate' && supabase) {
-      const { data: gestorRows } = await supabase
-        .from('usuarios_gestores')
-        .select('user_id')
-        .eq('condominio_id', condominioId)
-        .limit(1)
-
-      const userId = gestorRows?.[0]?.user_id
-
-      if (userId) {
+    if (planType === 'corporate') {
+      const userId = user.id
         // Buscar todos os condomínios do gestor
         const { data: allGestorRows } = await supabase
           .from('usuarios_gestores')
@@ -88,10 +70,11 @@ export async function POST(req: NextRequest) {
           const { data: container, error: containerErr } = await supabase
             .from('condominios')
             .insert({
-              nome: `Corporate - ${nome}`,
+              nome: `Corporate - ${billingName}`,
+              created_by: userId,
               plan_type: 'corporate',
-              subscription_status: 'active',
-              max_instances: numCondos || 5,
+              subscription_status: 'past_due',
+              max_instances: normalizedCondoCount || 5,
             })
             .select()
             .single()
@@ -112,7 +95,7 @@ export async function POST(req: NextRequest) {
               .insert({
                 user_id: userId,
                 condominio_id: container.id,
-                nome: gestorData?.nome || nome,
+                nome: gestorData?.nome || billingName,
                 papel: 'admin',
               })
           }
@@ -122,8 +105,6 @@ export async function POST(req: NextRequest) {
             .from('condominios')
             .update({
               parent_condominio_id: container.id,
-              plan_type: 'corporate',
-              subscription_status: 'active',
             })
             .eq('id', condominioId)
 
@@ -131,55 +112,29 @@ export async function POST(req: NextRequest) {
         } else {
           // Container já existe — atualiza max_instances e usa ele
           targetCondominioId = existingContainer.id
-          const newMaxInstances = Math.max(5, numCondos || 5)
-          if (existingContainer.max_instances !== newMaxInstances) {
-            await supabase
-              .from('condominios')
-              .update({ max_instances: newMaxInstances })
-              .eq('id', existingContainer.id)
-          }
         }
-      }
-    }
-
-    // Cancela assinatura anterior se existir (ex: upgrade Pro → Corporate ou mudança de plano)
-    if (supabase) {
-      const { data: currentCondo } = await supabase
-        .from('condominios')
-        .select('asaas_subscription_id')
-        .eq('id', condominioId)
-        .single()
-
-      if (currentCondo?.asaas_subscription_id) {
-        try {
-          console.log('[CHECKOUT] Cancelando assinatura anterior:', currentCondo.asaas_subscription_id)
-          await cancelAsaasSubscription(currentCondo.asaas_subscription_id)
-        } catch (err) {
-          console.warn('[CHECKOUT] Erro ao cancelar assinatura anterior (pode já estar cancelada):', err)
-        }
-      }
     }
 
     // 1. Buscar ou criar customer no Asaas
     let customerId: string | null = null
+    let customerName = billingName
 
     if (supabase) {
       const { data: condo } = await supabase
         .from('condominios')
-        .select('asaas_customer_id')
-        .eq('id', condominioId)
+        .select('asaas_customer_id, nome')
+        .eq('id', targetCondominioId)
         .single()
 
       if (condo?.asaas_customer_id) {
         customerId = condo.asaas_customer_id
       }
+      if (condo?.nome) customerName = condo.nome
     }
 
     if (!customerId) {
-      console.log('[CHECKOUT] Criando customer...', { nome, email, cpfCnpj, phone })
-      const customer = await createAsaasCustomer(nome, email, cpfCnpj, phone)
+      const customer = await createAsaasCustomer(customerName, billingEmail, cpfCnpj, phone)
       customerId = customer.id
-      console.log('[CHECKOUT] Customer criado:', customerId)
 
       // Salvar customer_id no Supabase (no container se corporate)
       if (supabase) {
@@ -190,8 +145,7 @@ export async function POST(req: NextRequest) {
       }
     } else {
       // Atualiza customer existente com CPF e telefone mais recentes
-      console.log('[CHECKOUT] Atualizando customer existente:', customerId, { nome, email, cpfCnpj, phone })
-      await updateAsaasCustomer(customerId, nome, email, cpfCnpj, phone)
+      await updateAsaasCustomer(customerId, customerName, billingEmail, cpfCnpj, phone)
     }
 
     // Usa o valor recalculado pelo servidor
@@ -211,18 +165,13 @@ export async function POST(req: NextRequest) {
 
     // 3. Salvar subscription_id no Supabase (no container se corporate, senão no próprio condomínio)
     if (supabase) {
-      const days = cycle === 'YEARLY' ? 365 : 30
-      const periodEnd = new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString()
-
       const updateData: Record<string, unknown> = {
-        asaas_subscription_id: subscription.id,
-        plan_type: planType,
-        subscription_status: 'active',
-        billing_type: billingType,
-        current_period_end: periodEnd,
+        pending_subscription_id: subscription.id,
+        pending_plan_type: planType,
+        pending_billing_type: billingType,
       }
       if (planType === 'corporate') {
-        updateData.max_instances = Math.max(5, numCondos || 5)
+        updateData.pending_max_instances = normalizedCondoCount || 5
       }
 
       await supabase
@@ -231,34 +180,27 @@ export async function POST(req: NextRequest) {
         .eq('id', targetCondominioId)
     }
 
-    // 4. Se for PIX, cria primeiro pagamento avulso com vencimento imediato
-    //    (a assinatura em si não gera QR Code PIX automaticamente)
+    // 4. No PIX, obtém a cobrança pertencente à assinatura para que o webhook
+    //    consiga associar o pagamento ao plano pendente.
     let pixData = null
     if (billingType === 'PIX') {
-      const dueDate = new Date(Date.now() + 86400000).toISOString().split('T')[0] // amanhã
-      const payment = await createAsaasPixPayment({
-        customer: customerId,
-        value: finalValue,
-        dueDate,
-        description: planType === 'pro' ? 'Zelcon Pro - 1º mês' : 'Zelcon Corporate - 1º mês',
-      })
-      if (payment) {
-        pixData = {
-          qrCode: payment.pixQrCode,
-          copyPaste: payment.pixCopyPaste,
-          invoiceUrl: payment.invoiceUrl,
-          status: payment.status,
-        }
+      try {
+        pixData = await getPixPaymentData(subscription.id)
+      } catch (error) {
+        // A cobrança pode levar alguns segundos para ficar disponível; o cliente continua via polling.
+        console.warn('[CHECKOUT] QR Code PIX ainda não disponível', error)
       }
     }
 
     return NextResponse.json({
       success: true,
       subscriptionId: subscription.id,
-      status: subscription.status,
+      status: 'pending_payment',
       pix: pixData,
     })
   } catch (err: unknown) {
+    const authResponse = authErrorResponse(err)
+    if (authResponse) return authResponse
     const message = err instanceof Error ? err.message : 'Erro interno no checkout'
     console.error('[CHECKOUT ERROR]', err)
     console.error('[CHECKOUT ERROR stack]', err instanceof Error ? err.stack : '')

@@ -1,21 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || ''
-
-function getSupabaseAdmin() {
-  if (!supabaseServiceKey) return null
-  return createClient(supabaseUrl, supabaseServiceKey, {
-    auth: { autoRefreshToken: false, persistSession: false },
-  })
-}
+import { authErrorResponse, requireUser } from '@/lib/serverAuth'
 
 export async function POST(req: NextRequest) {
   try {
-    const { nome, slug, codigo_acesso, userId, gestorNome } = await req.json()
+    const { nome, slug, codigo_acesso } = await req.json()
 
-    if (!nome || !slug || !codigo_acesso || !userId || !gestorNome) {
+    if (!nome || !slug || !codigo_acesso) {
       return NextResponse.json({ error: 'Dados obrigatórios ausentes.' }, { status: 400 })
     }
 
@@ -24,22 +14,22 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Slug inválido.' }, { status: 400 })
     }
 
-    const supabase = getSupabaseAdmin()
-    if (!supabase) {
-      return NextResponse.json({ error: 'Servidor não configurado.' }, { status: 500 })
-    }
+    const { admin: supabase, user } = await requireUser(req)
 
     // Buscar container corporate do usuário
     const { data: gestorRows } = await supabase
       .from('usuarios_gestores')
-      .select('condominio_id')
-      .eq('user_id', userId)
+      .select('condominio_id, nome, papel')
+      .eq('user_id', user.id)
 
-    if (!gestorRows?.length) {
+    if (!gestorRows?.some(row => row.papel === 'sindico' || row.papel === 'admin')) {
       return NextResponse.json({ error: 'Usuário não encontrado.' }, { status: 404 })
     }
 
-    const condoIds = gestorRows.map(r => r.condominio_id)
+    const authorizedGestor = gestorRows.find(row => row.papel === 'sindico' || row.papel === 'admin')!
+    const condoIds = gestorRows
+      .filter(row => row.papel === 'sindico' || row.papel === 'admin')
+      .map(row => row.condominio_id)
 
     const { data: condos } = await supabase
       .from('condominios')
@@ -88,6 +78,7 @@ export async function POST(req: NextRequest) {
         nome,
         slug: cleanSlug,
         codigo_acesso,
+        created_by: user.id,
         plan_type: 'corporate',
         subscription_status: 'active',
         parent_condominio_id: container.id,
@@ -104,9 +95,9 @@ export async function POST(req: NextRequest) {
     const { error: linkError } = await supabase
       .from('usuarios_gestores')
       .insert({
-        user_id: userId,
+        user_id: user.id,
         condominio_id: newCondo.id,
-        nome: gestorNome,
+        nome: authorizedGestor.nome,
         papel: 'admin',
       })
 
@@ -119,6 +110,8 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ success: true, condominio: newCondo })
   } catch (err) {
+    const authResponse = authErrorResponse(err)
+    if (authResponse) return authResponse
     console.error('[INSTANCIA ERROR]', err)
     const message = err instanceof Error ? err.message : 'Erro ao criar condomínio.'
     return NextResponse.json({ error: message }, { status: 500 })

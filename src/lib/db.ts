@@ -24,7 +24,7 @@ export function safeCondoForStorage(condo: Condominio): Condominio {
     id: condo.id,
     nome: condo.nome,
     slug: condo.slug,
-    codigo_acesso: condo.codigo_acesso,
+    codigo_acesso: undefined,
     plan_type: condo.plan_type,
     subscription_status: condo.subscription_status,
     billing_type: condo.billing_type,
@@ -58,9 +58,9 @@ const LOCAL_STORAGE_SAFE_LIMIT_KB = 4096;
 
 export function logClient(msg: string) {
   if (typeof window !== 'undefined') {
-    const w = window as any;
-    w.clientLogs = w.clientLogs || [];
-    w.clientLogs.push(`[${new Date().toLocaleTimeString('pt-BR')}] ${msg}`);
+    const clientWindow = window as Window & { clientLogs?: string[] };
+    clientWindow.clientLogs = clientWindow.clientLogs || [];
+    clientWindow.clientLogs.push(`[${new Date().toLocaleTimeString('pt-BR')}] ${msg}`);
   }
 }
 
@@ -90,6 +90,8 @@ export interface UsuarioGestor {
   papel: 'sindico' | 'zelador' | 'admin';
   created_at: string;
 }
+
+type GestorComCondominio = UsuarioGestor & { condominios: Condominio | null };
 
 export interface Chamado {
   id: string;
@@ -325,17 +327,14 @@ export const db = {
     if (supabase) {
       logClient(`getCondominioBySlug: Usando Supabase`);
       try {
-        const { data, error } = await supabase
-          .from('condominios')
-          .select('id, nome, slug, plan_type, subscription_status, billing_type, current_period_end, parent_condominio_id, max_instances, created_at')
-          .eq('slug', slug)
-          .maybeSingle();
-        if (error) {
-          logClient(`getCondominioBySlug: Erro Supabase = ${error.message}`);
-          console.error('Erro getCondominioBySlug:', error);
-        }
-        logClient(`getCondominioBySlug: Sucesso Supabase = ${JSON.stringify(data)}`);
-        return data;
+        const response = await fetch(`/api/portal/condominio?slug=${encodeURIComponent(slug)}`, {
+          cache: 'no-store',
+        });
+        if (response.status === 404) return null;
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || 'Erro ao carregar condomínio.');
+        logClient(`getCondominioBySlug: Sucesso = ${JSON.stringify(result.condominio)}`);
+        return result.condominio as Condominio;
       } catch (err) {
         logClient(`getCondominioBySlug: Crash Supabase = ${err instanceof Error ? err.message : String(err)}`);
         throw err;
@@ -355,24 +354,54 @@ export const db = {
     }
   },
 
-  /**
-   * Valida o código de acesso de um condomínio.
-   */
-  async validateAcesso(condominioId: string, codigo: string): Promise<boolean> {
-    if (supabase) {
-      // SEGURANÇA: Usa RPC com SECURITY DEFINER para validar o código sem expô-lo via SELECT.
-      // A ANON_KEY nunca acessa o campo codigo_acesso diretamente.
-      const { data, error } = await supabase.rpc('validar_codigo_acesso', {
-        p_condominio_id: condominioId,
-        p_codigo: codigo
-      });
-      if (error) return false;
-      return data === true;
-    } else {
-      const condominios = localDB.getCondominios();
-      const condo = condominios.find(c => c.id === condominioId);
-      return condo?.codigo_acesso === codigo;
+  async getPortalChamados(token: string): Promise<{ chamados: Chamado[]; monthlyCount: number }> {
+    const response = await fetch('/api/portal/chamados', {
+      headers: { authorization: `Bearer ${token}` },
+      cache: 'no-store',
+    });
+    if (!response.ok) {
+      const result = await response.json();
+      throw new Error(result.error || 'Erro ao carregar chamados.');
     }
+    return response.json();
+  },
+
+  async createPortalChamado(
+    token: string,
+    chamado: Pick<Chamado, 'tipo' | 'local' | 'descricao' | 'foto_url'>,
+  ): Promise<Chamado> {
+    const response = await fetch('/api/portal/chamados', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(chamado),
+    });
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error || 'Erro ao criar chamado.');
+    return result.chamado as Chamado;
+  },
+
+  async uploadPortalImagem(token: string, dataUrl: string): Promise<string> {
+    const response = await fetch('/api/portal/upload', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ dataUrl }),
+    });
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error || 'Erro ao enviar imagem.');
+    return result.url as string;
+  },
+
+  async getAccessToken(): Promise<string | null> {
+    if (!supabase) return null;
+    const { data, error } = await supabase.auth.getSession();
+    if (error) return null;
+    return data.session?.access_token || null;
   },
 
   /**
@@ -566,18 +595,20 @@ export const db = {
       if (gestorError || !gestorRows?.length) return null;
 
       // Se tiver múltiplos vínculos, prioriza quem tem slug (não é container)
-      const filtered = gestorRows.filter((r: any) => (r as any).condominios?.slug)
+      const rows = gestorRows as GestorComCondominio[];
+      const filtered = rows.filter(row => row.condominios?.slug)
       if (filtered.length === 0) return null // só tem container, não faz sentido logar
       // Pega o melhor papel: sindico > admin > zelador
       const papelOrder: Record<string, number> = { sindico: 0, admin: 1, zelador: 2 }
-      const sorted = [...filtered].sort((a: any, b: any) => {
+      const sorted = [...filtered].sort((a, b) => {
         const aScore = papelOrder[a.papel] ?? 99
         const bScore = papelOrder[b.papel] ?? 99
         return aScore - bScore
       })
       const best = sorted[0]
       
-      const { condominios: condo, ...gestor } = best as any;
+      const { condominios: condo, ...gestor } = best;
+      if (!condo) return null;
       return {
         gestor,
         condominio: condo
@@ -673,6 +704,7 @@ export const db = {
           nome: dados.condominioNome,
           slug: dados.condominioSlug.trim().toLowerCase(),
           codigo_acesso: dados.codigoAcesso,
+          created_by: authData.user.id,
           plan_type: 'free',
           subscription_status: 'active'
         })

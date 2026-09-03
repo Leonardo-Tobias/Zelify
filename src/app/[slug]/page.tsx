@@ -2,7 +2,7 @@
 
 
 import React, { useState, useEffect, useRef } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import { 
   Wrench, 
   Package, 
@@ -15,9 +15,6 @@ import {
   Check, 
   MapPin, 
   Building,
-  Image as ImageIcon,
-  ChevronRight,
-  ArrowLeft,
   X
 } from 'lucide-react';
 import { db, Condominio, Chamado, isSupabaseConfigured } from '@/lib/db';
@@ -25,7 +22,6 @@ import { compressImage } from '@/lib/imageCompressor';
 
 export default function MoradorPortal() {
   const params = useParams();
-  const router = useRouter();
   const slug = params.slug as string;
 
   // Estados de Carregamento e Dados do Condomínio
@@ -33,12 +29,11 @@ export default function MoradorPortal() {
   const [condominio, setCondominio] = useState<Condominio | null>(null);
   const [debugError, setDebugError] = useState<string | null>(null);
   const [logs, setLogs] = useState<string[]>([]);
-  const [showDebug, setShowDebug] = useState(false);
+  const [showDebug] = useState(() => typeof window !== 'undefined' && window.location.search.includes('debug=true'));
 
   // Capturar erros globais e logs no navegador
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      setShowDebug(window.location.search.includes('debug=true'));
       const handleError = (e: ErrorEvent) => {
         setDebugError(`Erro Runtime: ${e.message} em ${e.filename}:${e.lineno}`);
       };
@@ -50,9 +45,9 @@ export default function MoradorPortal() {
 
       // Polling para os logs de execução interna
       const interval = setInterval(() => {
-        const w = window as any;
-        if (w.clientLogs) {
-          setLogs([...w.clientLogs]);
+        const clientWindow = window as Window & { clientLogs?: string[] };
+        if (clientWindow.clientLogs) {
+          setLogs([...clientWindow.clientLogs]);
         }
       }, 300);
 
@@ -66,6 +61,7 @@ export default function MoradorPortal() {
 
   // Estados de Validação do Morador
   const [validated, setValidated] = useState(false);
+  const [portalToken, setPortalToken] = useState('');
   const [codigoAcesso, setCodigoAcesso] = useState('');
   const [bloco, setBloco] = useState('');
   const [apartamento, setApartamento] = useState('');
@@ -73,8 +69,6 @@ export default function MoradorPortal() {
   const [validating, setValidating] = useState(false);
 
   // Rate limiting: bloquear após 5 tentativas erradas por 60 segundos
-  const [failedAttempts, setFailedAttempts] = useState(0);
-  const [blockedUntil, setBlockedUntil] = useState<number | null>(null);
 
   // Estados do Painel do Morador
   const [activeTab, setActiveTab] = useState<'manutencao' | 'achados' | 'historico'>('manutencao');
@@ -90,7 +84,7 @@ export default function MoradorPortal() {
   // Modais de Criação e Visualização
   const [showManutencaoModal, setShowManutencaoModal] = useState(false);
   const [showAchadoModal, setShowAchadoModal] = useState(false);
-  const [selectedChamado, setSelectedChamado] = useState<any | null>(null);
+  const [selectedChamado, setSelectedChamado] = useState<Chamado | null>(null);
 
   // Formulário: Relatar Problema
   const [localProblema, setLocalProblema] = useState('Garagem');
@@ -126,11 +120,6 @@ export default function MoradorPortal() {
         
         if (condo) {
           // Carregar contagem mensal se for plano grátis
-          if (condo.plan_type === 'free') {
-            const count = await db.getMonthlyChamadosCount(condo.id);
-            setMonthlyCount(count);
-          }
-
           // Verificar se já está autenticado para este condomínio no localStorage
           const savedAuth = localStorage.getItem(`zelcon_auth_${condo.id}`);
           if (savedAuth) {
@@ -140,16 +129,18 @@ export default function MoradorPortal() {
               if (
                 authData.expira > Date.now() &&
                 typeof authData?.bloco === 'string' && authData.bloco.trim() !== '' &&
-                typeof authData?.apartamento === 'string' && authData.apartamento.trim() !== ''
+                typeof authData?.apartamento === 'string' && authData.apartamento.trim() !== '' &&
+                (!isSupabaseConfigured || (typeof authData?.token === 'string' && authData.token.length > 20))
               ) {
                 setBloco(authData.bloco);
                 setApartamento(authData.apartamento);
+                setPortalToken(authData.token || 'mock');
                 setValidated(true);
               } else {
                 // Dado inválido, adulterado ou expirado — limpar e forçar nova validação
                 localStorage.removeItem(`zelcon_auth_${condo.id}`);
               }
-            } catch (e) {
+            } catch {
               localStorage.removeItem(`zelcon_auth_${condo.id}`);
             }
           }
@@ -165,7 +156,7 @@ export default function MoradorPortal() {
               } else {
                 localStorage.removeItem(`zelcon_meus_chamados_${condo.id}`);
               }
-            } catch (e) {
+            } catch {
               localStorage.removeItem(`zelcon_meus_chamados_${condo.id}`);
             }
           }
@@ -182,13 +173,20 @@ export default function MoradorPortal() {
 
   // Carregar chamados sempre que validação ou aba mudar
   useEffect(() => {
-    if (!condominio || !validated) return;
+    if (!condominio || !validated || !portalToken) return;
 
     async function loadData() {
       setLoadingChamados(true);
       try {
-        const data = await db.getChamados(condominio!.id);
-        setChamados(data);
+        if (isSupabaseConfigured) {
+          const data = await db.getPortalChamados(portalToken);
+          setChamados(data.chamados);
+          setMonthlyCount(data.monthlyCount);
+        } else {
+          const data = await db.getChamados(condominio!.id);
+          setChamados(data);
+          setMonthlyCount(await db.getMonthlyChamadosCount(condominio!.id));
+        }
       } catch (err) {
         console.error('Erro ao carregar chamados:', err);
       } finally {
@@ -196,7 +194,7 @@ export default function MoradorPortal() {
       }
     }
     loadData();
-  }, [condominio, validated, problemaSuccess, achadoSuccess]);
+  }, [condominio, validated, portalToken, problemaSuccess, achadoSuccess]);
 
   // Validar acesso do morador
   const handleValidate = async (e: React.FormEvent) => {
@@ -221,6 +219,8 @@ export default function MoradorPortal() {
         body: JSON.stringify({
           condominioId: condominio!.id,
           codigo: codigoAcesso,
+          bloco: bloco.trim(),
+          apartamento: apartamento.trim(),
         }),
       });
 
@@ -233,19 +233,19 @@ export default function MoradorPortal() {
 
       if (data.valid) {
         // Login bem-sucedido: resetar contadores e salvar sessão
-        setFailedAttempts(0);
-        setBlockedUntil(null);
         const authData = {
           bloco,
           apartamento,
+          token: data.token || 'mock',
           expira: Date.now() + 8 * 60 * 60 * 1000, // 8 horas
         };
         localStorage.setItem(`zelcon_auth_${condominio!.id}`, JSON.stringify(authData));
+        setPortalToken(data.token || 'mock');
         setValidated(true);
       } else {
         setValidationError(data.error || 'Código de acesso incorreto.');
       }
-    } catch (err) {
+    } catch {
       setValidationError('Ocorreu um erro ao validar. Tente novamente.');
     } finally {
       setValidating(false);
@@ -256,6 +256,7 @@ export default function MoradorPortal() {
   const handleLogout = () => {
     if (confirm('Deseja sair do portal do condomínio?')) {
       localStorage.removeItem(`zelcon_auth_${condominio!.id}`);
+      setPortalToken('');
       setValidated(false);
       setCodigoAcesso('');
     }
@@ -298,22 +299,31 @@ export default function MoradorPortal() {
       // Upload da foto (em modo mock retorna base64, em supabase envia para storage)
       let finalFotoUrl = '';
       if (fotoProblema) {
-        finalFotoUrl = await db.uploadImagem(fotoProblema, condominio!.id);
+        finalFotoUrl = isSupabaseConfigured
+          ? await db.uploadPortalImagem(portalToken, fotoProblema)
+          : await db.uploadImagem(fotoProblema, condominio!.id);
       }
 
-      const novoChamado = await db.createChamado({
-        condominio_id: condominio!.id,
-        tipo: 'manutencao',
-        local: localReal || 'Outro',
-        bloco,
-        apartamento,
-        descricao: descricaoProblema,
-        foto_url: finalFotoUrl,
-        status: 'pendente'
-      });
+      const novoChamado = isSupabaseConfigured
+        ? await db.createPortalChamado(portalToken, {
+            tipo: 'manutencao',
+            local: localReal || 'Outro',
+            descricao: descricaoProblema,
+            foto_url: finalFotoUrl,
+          })
+        : await db.createChamado({
+            condominio_id: condominio!.id,
+            tipo: 'manutencao',
+            local: localReal || 'Outro',
+            bloco,
+            apartamento,
+            descricao: descricaoProblema,
+            foto_url: finalFotoUrl,
+            status: 'pendente'
+          });
 
       // Re-fetch contagem mensal após envio bem-sucedido
-      if (condominio!.plan_type === 'free') {
+      if (!isSupabaseConfigured && condominio!.plan_type === 'free') {
         const count = await db.getMonthlyChamadosCount(condominio!.id);
         setMonthlyCount(count);
       }
@@ -355,22 +365,33 @@ export default function MoradorPortal() {
     try {
       let finalFotoUrl = '';
       if (fotoAchado) {
-        finalFotoUrl = await db.uploadImagem(fotoAchado, condominio!.id);
+        finalFotoUrl = isSupabaseConfigured
+          ? await db.uploadPortalImagem(portalToken, fotoAchado)
+          : await db.uploadImagem(fotoAchado, condominio!.id);
       }
 
-      await db.createChamado({
-        condominio_id: condominio!.id,
-        tipo: 'achado_perdido',
-        local: localAchado,
-        bloco,
-        apartamento,
-        descricao: descricaoAchado,
-        foto_url: finalFotoUrl,
-        status: 'encontrado'
-      });
+      if (isSupabaseConfigured) {
+        await db.createPortalChamado(portalToken, {
+          tipo: 'achado_perdido',
+          local: localAchado,
+          descricao: descricaoAchado,
+          foto_url: finalFotoUrl,
+        });
+      } else {
+        await db.createChamado({
+          condominio_id: condominio!.id,
+          tipo: 'achado_perdido',
+          local: localAchado,
+          bloco,
+          apartamento,
+          descricao: descricaoAchado,
+          foto_url: finalFotoUrl,
+          status: 'encontrado'
+        });
+      }
 
       // Re-fetch contagem mensal após envio bem-sucedido
-      if (condominio!.plan_type === 'free') {
+      if (!isSupabaseConfigured && condominio!.plan_type === 'free') {
         const count = await db.getMonthlyChamadosCount(condominio!.id);
         setMonthlyCount(count);
       }
@@ -414,7 +435,7 @@ export default function MoradorPortal() {
         {showDebug && (
           <div className="mt-4 p-4 bg-[#0c0c0e]/60 border border-white/[0.05] rounded-xl text-left max-w-xs w-full text-xs font-mono space-y-2 text-zinc-400 shadow-2xl backdrop-blur-md relative z-10">
             <div className="font-bold text-white border-b border-white/[0.05] pb-1">Diagnóstico Zelcon</div>
-            <div>Slug da URL: <span className="text-white font-bold">"{slug || 'Aguardando router...'}"</span></div>
+            <div>Slug da URL: <span className="text-white font-bold">&quot;{slug || 'Aguardando router...'}&quot;</span></div>
             <div>Params Router: {JSON.stringify(params)}</div>
             <div>Supabase Ativo: <span className="text-white font-bold">{String(isSupabaseConfigured)}</span></div>
             <div>Condomínio: {condominio ? 'Carregado' : 'Nulo'}</div>

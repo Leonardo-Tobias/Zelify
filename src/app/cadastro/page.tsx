@@ -1,14 +1,13 @@
 'use client';
 
-import React, { useState, useEffect, Suspense } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { Loader2, AlertCircle, Eye, EyeOff, ShieldCheck, ArrowRight, ArrowLeft, Building, User, Mail, Lock, Key } from 'lucide-react';
+import React, { useState, Suspense } from 'react';
+import { useRouter } from 'next/navigation';
+import { Loader2, AlertCircle, Eye, EyeOff, ArrowRight, ArrowLeft, Building, User, Key } from 'lucide-react';
 import { db, safeCondoForStorage } from '@/lib/db';
 import Checkbox from '@/components/ui/checkbox';
 
 function CadastroForm() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   
@@ -127,8 +126,8 @@ function CadastroForm() {
       localStorage.setItem('zelcon_gestor', JSON.stringify(session.gestor));
       localStorage.setItem('zelcon_condominio_gestao', JSON.stringify(safeCondoForStorage(session.condominio)));
       router.push('/dashboard');
-    } catch (err: any) {
-      setError(err?.message || 'Falha ao efetuar o cadastro. Verifique os dados ou tente novamente.');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Falha ao efetuar o cadastro. Verifique os dados ou tente novamente.');
       console.error(err);
     } finally {
       setLoading(false);

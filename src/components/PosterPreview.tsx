@@ -1,6 +1,8 @@
 'use client'
 
 import React, { useRef } from 'react'
+import Link from 'next/link'
+import { APP_HOST, APP_URL } from '@/lib/appUrl'
 
 interface PosterPreviewProps {
   nome: string
@@ -27,7 +29,7 @@ export default function PosterPreview({
 }: PosterPreviewProps) {
   const printRef = useRef<HTMLDivElement>(null)
   const qrUrl = (size: number, format?: string) =>
-    `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(`https://zelify.vercel.app/${slug}`)}${format ? `&format=${format}` : ''}`
+    `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(`${APP_URL}/${slug}`)}${format ? `&format=${format}` : ''}`
 
   const handlePrint = () => {
     const printWindow = window.open('', '_blank')
@@ -78,7 +80,7 @@ export default function PosterPreview({
             <div class="info-box">
               <div class="info-label">Código de Acesso</div>
               <div class="info-code">${codigoAcesso}</div>
-              <div class="info-link">zelify.vercel.app/${slug}</div>
+              <div class="info-link">${APP_HOST}/${slug}</div>
             </div>
             <div class="footer">Gerado automaticamente pelo Zelcon</div>
           </div>
@@ -90,7 +92,7 @@ export default function PosterPreview({
   }
 
   const handleCopyLink = () => {
-    navigator.clipboard.writeText(`https://zelify.vercel.app/${slug}`)
+    navigator.clipboard.writeText(`${APP_URL}/${slug}`)
   }
 
   const handleDownloadQR = async (format: 'png' | 'svg' | 'pdf') => {
@@ -176,7 +178,7 @@ export default function PosterPreview({
               {codigoAcesso || '----'}
             </div>
             <div className="text-[10px] text-zinc-500 font-mono">
-              zelify.vercel.app/{slug}
+              {APP_HOST}/{slug}
             </div>
           </div>
           )}
@@ -234,13 +236,13 @@ export default function PosterPreview({
             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
             <span>Copiar Link</span>
           </button>
-          <a
+          <Link
             href="/dashboard/configuracoes?tab=geral"
             className="flex items-center justify-center space-x-2 py-2.5 bg-brand hover:bg-brand/90 text-white text-xs font-semibold rounded-xl transition-all active:scale-[0.98]"
           >
             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
             <span>Editar Placa</span>
-          </a>
+          </Link>
         </div>
         {isPremium && (
           <div className="grid grid-cols-2 gap-2">

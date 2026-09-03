@@ -8,16 +8,12 @@ import {
   CheckCircle2, 
   Clock, 
   MapPin, 
-  Plus, 
   ArrowRight,
   TrendingUp,
   AlertTriangle,
   Building2,
   Activity,
-  ArrowUpRight,
   Loader2,
-  Lock,
-  Layers,
   FileText,
   FileSpreadsheet,
   X,
@@ -130,7 +126,7 @@ function DashboardHomeContent() {
     }
     
     loadConfig();
-  }, [router, isPortfolioView]);
+  }, [router, isPortfolioView, condominio?.id, condominio?.plan_type]);
 
   // Sincronizar dados quando o condominio mudar no localStorage (ex: switch via dropdown)
   useEffect(() => {

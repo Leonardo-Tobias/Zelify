@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { 
-  Settings, 
   Save, 
   Copy, 
   Check, 
@@ -33,6 +32,7 @@ import { db, Condominio, safeCondoForStorage } from '@/lib/db';
 import { useCondominio } from '@/contexts/CondominioContext';
 import { BillingSwitch } from '@/components/ui/switch';
 import Checkbox from '@/components/ui/checkbox';
+import { APP_HOST, APP_URL } from '@/lib/appUrl';
 
 export default function ConfiguracoesPage() {
   const router = useRouter();
@@ -85,7 +85,6 @@ export default function ConfiguracoesPage() {
   const [pixQrCode, setPixQrCode] = useState<string | null>(null);
   const [pixCopyPaste, setPixCopyPaste] = useState<string | null>(null);
   const [checkoutSubscriptionId, setCheckoutSubscriptionId] = useState<string | null>(null);
-  const [pixPaid, setPixPaid] = useState(false);
   const [awaitingPixQrCode, setAwaitingPixQrCode] = useState(false);
 
   // Toast de sucesso
@@ -148,7 +147,7 @@ export default function ConfiguracoesPage() {
     if (!condominio) return;
     setNome(condominio.nome);
     setSlug(condominio.slug || '');
-    setCodigoAcesso(condominio.codigo_acesso || '');
+    setCodigoAcesso(condominio.codigo_acesso?.startsWith('$2') ? '' : (condominio.codigo_acesso || ''));
     setLoading(false);
   }, [condominio]);
 
@@ -179,7 +178,7 @@ export default function ConfiguracoesPage() {
         router.replace('/dashboard/configuracoes?tab=faturamento');
       }
     }
-  }, [searchParams, showAddCondoModal]);
+  }, [searchParams, showAddCondoModal, router]);
 
   // Carrega contagem de chamados do mês se estiver no plano grátis
   useEffect(() => {
@@ -216,7 +215,7 @@ export default function ConfiguracoesPage() {
 
   const handleCopyLink = () => {
     if (!condominio) return;
-    const fullUrl = `https://zelify.vercel.app/${condominio.slug}`;
+    const fullUrl = `${APP_URL}/${condominio.slug}`;
     
     navigator.clipboard.writeText(fullUrl);
     setCopied(true);
@@ -235,7 +234,7 @@ export default function ConfiguracoesPage() {
   const handleDownloadQR = async (format: 'png' | 'svg' | 'pdf') => {
     try {
       if (!condominio) return;
-      const targetUrl = `https://zelify.vercel.app/${condominio.slug}`;
+      const targetUrl = `${APP_URL}/${condominio.slug}`;
 
       if (format === 'pdf') {
         const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=${encodeURIComponent(targetUrl)}`;
@@ -325,9 +324,10 @@ export default function ConfiguracoesPage() {
       );
 
       if (updated) {
-        setCondominio(updated);
+        const updatedForSession = { ...updated, codigo_acesso: codigoAcesso.trim() };
+        setCondominio(updatedForSession);
         // Atualizar localStorage para refletir na navegação do layout
-        localStorage.setItem('zelcon_condominio_gestao', JSON.stringify(safeCondoForStorage(updated)));
+        localStorage.setItem('zelcon_condominio_gestao', JSON.stringify(safeCondoForStorage(updatedForSession)));
         
         // Disparar evento para atualizar outros componentes ouvindo storage
         if (typeof window !== 'undefined') {
@@ -390,13 +390,15 @@ export default function ConfiguracoesPage() {
     setProcessingCheckout(true);
 
     try {
+      const authToken = await db.getAccessToken();
+      if (!authToken) throw new Error('Sessão expirada. Faça login novamente.');
       const basePrice = selectedUpgrade === 'pro'
         ? (isAnnual ? 124 : 149)
         : Math.round(totalCorporatePrice * 100) / 100;
       const price = isAnnual ? basePrice * 12 : basePrice;
 
-      let cpfClean = cardCpf.replace(/\D/g, '')
-      let phoneClean = cardPhone.replace(/\D/g, '')
+      const cpfClean = cardCpf.replace(/\D/g, '')
+      const phoneClean = cardPhone.replace(/\D/g, '')
 
       const body: Record<string, unknown> = {
         condominioId: condominio!.id,
@@ -433,7 +435,10 @@ export default function ConfiguracoesPage() {
 
       const res = await fetch('/api/asaas/checkout', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          authorization: `Bearer ${authToken}`,
+        },
         body: JSON.stringify(body),
       });
 
@@ -450,16 +455,6 @@ export default function ConfiguracoesPage() {
         setProcessingCheckout(false);
 
         // Atualiza localStorage com o novo plano
-        const updatedPix: Condominio = {
-          ...condominio!,
-          plan_type: selectedUpgrade,
-          subscription_status: 'active',
-          billing_type: 'PIX' as const,
-          current_period_end: new Date(Date.now() + (isAnnual ? 365 : 30) * 86400000).toISOString(),
-        };
-        setCondominio(updatedPix);
-        localStorage.setItem('zelcon_condominio_gestao', JSON.stringify(safeCondoForStorage(updatedPix)));
-        window.dispatchEvent(new Event('storage'));
         localStorage.removeItem('zelcon_selected_plan_on_signup');
         localStorage.removeItem('zelcon_redirected_to_checkout');
 
@@ -472,20 +467,10 @@ export default function ConfiguracoesPage() {
       }
 
       // Cartão: já confirmado, atualiza local
-      const updated: Condominio = {
-        ...condominio!,
-        plan_type: selectedUpgrade,
-        subscription_status: 'active',
-        billing_type: 'CREDIT_CARD' as const,
-        current_period_end: new Date(Date.now() + (isAnnual ? 365 : 30) * 86400000).toISOString(),
-      };
-      setCondominio(updated);
-      localStorage.setItem('zelcon_condominio_gestao', JSON.stringify(safeCondoForStorage(updated)));
-      window.dispatchEvent(new Event('storage'));
       setShowCheckoutModal(false);
       setCardNumber(''); setCardName(''); setCardExpiry(''); setCardCvv(''); setCardEmail(''); setCardCpf(''); setCardPhone(''); setCardCep(''); setCardAddressNumber(''); setCardAddressComplement('');
       localStorage.removeItem('zelcon_selected_plan_on_signup');
-      setToast({ message: `Assinatura ativada com sucesso! Seu condomínio agora está no plano ${selectedUpgrade === 'pro' ? 'Zelcon Pro' : 'Zelcon Corporate'}.` });
+      setToast({ message: 'Pagamento enviado. O plano será ativado após a confirmação do Asaas.' });
     } catch (err) {
       console.error(err);
       setCheckoutError(err instanceof Error ? err.message : 'Erro de processamento da transação. Tente novamente.');
@@ -495,50 +480,38 @@ export default function ConfiguracoesPage() {
   };
 
   const handleCopyPix = () => {
-    const key = pixCopyPaste || '00020126580014br.gov.bcb.pix0136kpgmpwthrnlrikkplrul5204000053039865405149.005802BR5914Zelcon%20Condominio6009Sao%20Paulo62070503***6304ABCD';
-    navigator.clipboard.writeText(key);
+    if (!pixCopyPaste) {
+      setCheckoutError('O código PIX ainda está sendo gerado. Aguarde alguns segundos.');
+      return;
+    }
+    navigator.clipboard.writeText(pixCopyPaste);
     setCopiedPix(true);
     setTimeout(() => setCopiedPix(false), 2000);
   };
 
   const handlePixPaid = async () => {
     if (!checkoutSubscriptionId) return;
-    try {
-      const updated = await db.updateCondominioPlan(
-        condominio!.id,
-        selectedUpgrade,
-        'active',
-        isAnnual ? 'yearly' : 'monthly',
-        'PIX'
-      );
-      if (updated) {
-        setCondominio(updated);
-        localStorage.setItem('zelcon_condominio_gestao', JSON.stringify(safeCondoForStorage(updated)));
-        window.dispatchEvent(new Event('storage'));
-        setShowCheckoutModal(false);
-        setPixQrCode(null);
-        setPixCopyPaste(null);
-        setCheckoutSubscriptionId(null);
-        setPixPaid(true);
-        localStorage.removeItem('zelcon_selected_plan_on_signup');
-        localStorage.removeItem('zelcon_redirected_to_checkout');
-        setTimeout(() => setPixPaid(false), 4000);
-      }
-    } catch {
-      // fallback: mesmo sem confirmação do webhook, ativa localmente
-      setShowCheckoutModal(false);
-    }
+    await refreshCondo();
+    setToast({ message: 'Assim que o Asaas confirmar o PIX, o plano será ativado automaticamente.' });
   };
 
   const pollPixQrCode = async (subscriptionId: string) => {
     setAwaitingPixQrCode(true);
     setCheckoutSubscriptionId(subscriptionId);
+    const authToken = await db.getAccessToken();
+    if (!authToken) {
+      setCheckoutError('Sessão expirada. Faça login novamente.');
+      setAwaitingPixQrCode(false);
+      return;
+    }
 
     // Tenta até 10 vezes com 2s de intervalo
     for (let i = 0; i < 10; i++) {
       await new Promise(resolve => setTimeout(resolve, 2000));
       try {
-        const res = await fetch(`/api/asaas/pix-poll?subscriptionId=${subscriptionId}`);
+        const res = await fetch(`/api/asaas/pix-poll?subscriptionId=${subscriptionId}`, {
+          headers: { authorization: `Bearer ${authToken}` },
+        });
         if (res.ok) {
           const data = await res.json();
           if (data.qrCode || data.copyPaste) {
@@ -594,19 +567,18 @@ export default function ConfiguracoesPage() {
 
     const savedGestor = localStorage.getItem('zelcon_gestor');
     if (!savedGestor) return;
-    const gestor = JSON.parse(savedGestor);
 
     setSavingInstance(true);
     try {
+      const authToken = await db.getAccessToken();
+      if (!authToken) throw new Error('Sessão expirada. Faça login novamente.');
       const res = await fetch('/api/condominios/instancia', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', authorization: `Bearer ${authToken}` },
         body: JSON.stringify({
           nome: newCondoNome.trim(),
           slug: cleanSlug,
           codigo_acesso: newCondoCodigo.trim(),
-          userId: gestor.user_id,
-          gestorNome: gestor.nome,
         }),
       });
 
@@ -640,9 +612,11 @@ export default function ConfiguracoesPage() {
     if (!corporateCondoId) return;
     setSettingUpContainer(true);
     try {
+      const authToken = await db.getAccessToken();
+      if (!authToken) throw new Error('Sessão expirada. Faça login novamente.');
       const res = await fetch('/api/condominios/setup-container', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', authorization: `Bearer ${authToken}` },
         body: JSON.stringify({ condominioId: corporateCondoId, maxInstances: 10 }),
       });
       const data = await res.json();
@@ -655,8 +629,8 @@ export default function ConfiguracoesPage() {
       if (savedGestor) {
         const gestor = JSON.parse(savedGestor);
         const condos = await db.getCondominiosByGestorUser(gestor.user_id);
-        const containerId = condos.find((c: any) => c.plan_type === 'corporate' && !c.parent_condominio_id && !c.slug)?.id;
-        const list = condos.filter((c: any) => c.id !== containerId);
+        const containerId = condos.find(c => c.plan_type === 'corporate' && !c.parent_condominio_id && !c.slug)?.id;
+        const list = condos.filter(c => c.id !== containerId);
         setInstanciaList(list);
         setInstanciaCount(list.length);
       }
@@ -672,9 +646,11 @@ export default function ConfiguracoesPage() {
 
     setExcluindoId(id);
     try {
+      const authToken = await db.getAccessToken();
+      if (!authToken) throw new Error('Sessão expirada. Faça login novamente.');
       const res = await fetch('/api/condominios/excluir', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', authorization: `Bearer ${authToken}` },
         body: JSON.stringify({ condominioId: id }),
       });
       if (!res.ok) {
@@ -701,9 +677,11 @@ export default function ConfiguracoesPage() {
 
     setProcessingCheckout(true);
     try {
+      const authToken = await db.getAccessToken();
+      if (!authToken) throw new Error('Sessão expirada. Faça login novamente.');
       const res = await fetch('/api/asaas/cancel', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', authorization: `Bearer ${authToken}` },
         body: JSON.stringify({ condominioId: condominio.id }),
       });
 
@@ -712,10 +690,9 @@ export default function ConfiguracoesPage() {
         throw new Error(data.error || 'Erro ao cancelar assinatura');
       }
 
-      const updated = await db.resetToFreePlan(condominio.id);
-      if (updated) {
-        setCondominio(updated);
-        localStorage.setItem('zelcon_condominio_gestao', JSON.stringify(safeCondoForStorage(updated)));
+      if (data.condominio) {
+        setCondominio(data.condominio);
+        localStorage.setItem('zelcon_condominio_gestao', JSON.stringify(safeCondoForStorage(data.condominio)));
         window.dispatchEvent(new Event('storage'));
         setToast({ message: 'Assinatura cancelada. Seu condomínio agora está no Zelcon Starter.' });
       }
@@ -793,7 +770,7 @@ export default function ConfiguracoesPage() {
       });
       if (!res.ok) throw new Error('Erro ao excluir conta');
       localStorage.clear();
-      window.location.href = '/';
+      router.replace('/');
     } catch (err) {
       console.error(err);
       setToast({ message: 'Erro ao excluir conta. Tente novamente.' });
@@ -878,7 +855,7 @@ export default function ConfiguracoesPage() {
             <input
               type="text"
               readOnly
-              value={condominio ? `https://zelify.vercel.app/${condominio.slug}` : ''}
+              value={condominio ? `${APP_URL}/${condominio.slug}` : ''}
               className="bg-transparent flex-1 text-xs text-zinc-800 dark:text-zinc-300 font-mono focus:outline-none select-all"
             />
             <div className="flex shrink-0 gap-1.5">
@@ -891,7 +868,7 @@ export default function ConfiguracoesPage() {
                 {copied ? <Check className="w-3.5 h-3.5 text-emerald-500 dark:text-emerald-450 animate-pulse" /> : <Copy className="w-3.5 h-3.5" />}
               </button>
               <a
-                href={condominio ? `https://zelify.vercel.app/${condominio.slug}` : '#'}
+                href={condominio ? `${APP_URL}/${condominio.slug}` : '#'}
                 target="_blank"
                 rel="noreferrer"
                 className="p-2 bg-zinc-100 dark:bg-zinc-900 hover:bg-brand border border-zinc-200 dark:border-zinc-800 text-zinc-500 dark:text-zinc-400 hover:text-white rounded-md transition-colors"
@@ -1106,7 +1083,7 @@ export default function ConfiguracoesPage() {
                     : 'border-zinc-200'
                 }`}>
                   <img
-                    src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(condominio ? `https://zelify.vercel.app/${condominio.slug}` : '')}`}
+                    src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(condominio ? `${APP_URL}/${condominio.slug}` : '')}`}
                     alt="QR Code de Acesso"
                     className="w-24 h-24 object-contain"
                   />
@@ -1128,7 +1105,7 @@ export default function ConfiguracoesPage() {
                     {codigoAcesso || '----'}
                   </div>
                   <div className="text-[6px] text-zinc-400 font-mono truncate">
-                    {condominio?.slug ? `zelify.vercel.app/${condominio.slug}` : 'link'}
+                    {condominio?.slug ? `${APP_HOST}/${condominio.slug}` : 'link'}
                   </div>
                 </div>
                 )}
@@ -1184,7 +1161,7 @@ export default function ConfiguracoesPage() {
                 </label>
                 <div className="flex rounded-lg border border-zinc-200 dark:border-zinc-800 overflow-hidden bg-zinc-50 dark:bg-zinc-950 focus-within:border-brand/50 focus-within:ring-4 focus-within:ring-brand/10 transition-all">
                   <span className="flex items-center bg-zinc-100 dark:bg-zinc-900 border-r border-zinc-200 dark:border-zinc-800 px-3 text-zinc-500 dark:text-zinc-400 font-mono text-xs font-semibold select-none">
-                    zelify.vercel.app/
+                    {APP_HOST}/
                   </span>
                   <input
                     id="slugCondo"
@@ -1197,7 +1174,7 @@ export default function ConfiguracoesPage() {
                   />
                 </div>
                 <p className="text-[10px] text-zinc-500 leading-tight font-medium">
-                  Apenas letras minúsculas, números e hífens. O link final ficará: <span className="font-mono">https://zelify.vercel.app/{slug}</span>
+                  Apenas letras minúsculas, números e hífens. O link final ficará: <span className="font-mono">{APP_URL}/{slug}</span>
                 </p>
               </div>
 
@@ -1767,13 +1744,6 @@ export default function ConfiguracoesPage() {
       )}
 
       {/* Banner PIX pago com sucesso */}
-      {pixPaid && (
-        <div className="mb-4 p-4 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-xl text-xs font-semibold flex items-center space-x-2">
-          <CheckCircle2 className="w-4 h-4 shrink-0" />
-          <span>Pagamento PIX confirmado! Seu plano foi ativado com sucesso.</span>
-        </div>
-      )}
-
       {/* MODAL DE CHECKOUT */}
       {showCheckoutModal && (
         <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 backdrop-blur-md animate-in fade-in duration-200">
@@ -1865,7 +1835,7 @@ export default function ConfiguracoesPage() {
                               )}
                             </button>
                             <p className="text-[10px] text-zinc-600 text-center leading-relaxed">
-                              Após pagar, clique em "Já paguei" para ativar seu plano.<br />
+                              Após pagar, aguarde a confirmação automática do Asaas.<br />
                               O sistema também atualiza automaticamente.
                             </p>
                             <button
@@ -1874,7 +1844,7 @@ export default function ConfiguracoesPage() {
                               className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold rounded-xl border border-emerald-700 flex items-center justify-center space-x-2 transition-colors cursor-pointer"
                             >
                               <Check className="w-4 h-4" />
-                              <span>Já paguei! Ativar Plano</span>
+                              <span>Já paguei — verificar status</span>
                             </button>
                           </div>
                         ) : (
@@ -2388,7 +2358,7 @@ export default function ConfiguracoesPage() {
             : 'border-zinc-300'
         }`}>
           <img
-            src={`https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(condominio ? `https://zelify.vercel.app/${condominio.slug}` : '')}`}
+            src={`https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(condominio ? `${APP_URL}/${condominio.slug}` : '')}`}
             alt="QR Code de Acesso"
             className="w-64 h-64 object-contain mx-auto"
           />
@@ -2410,7 +2380,7 @@ export default function ConfiguracoesPage() {
             {codigoAcesso || '----'}
           </div>
           <div className="text-sm text-zinc-500 font-mono pt-1">
-            Link de Acesso: <span className="font-bold underline">https://zelify.vercel.app/{condominio?.slug || ''}</span>
+            Link de Acesso: <span className="font-bold underline">{APP_URL}/{condominio?.slug || ''}</span>
           </div>
         </div>
         )}

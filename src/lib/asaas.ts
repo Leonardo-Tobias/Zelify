@@ -1,5 +1,5 @@
 const ASAAS_API_KEY = process.env.ASAAS_API_KEY || ''
-const ASAAS_API_URL = process.env.ASAAS_BASE_URL || 'https://sandbox.asaas.com/api/v3'
+const ASAAS_API_URL = process.env.ASAAS_BASE_URL || 'https://api-sandbox.asaas.com/v3'
 
 interface AsaasCustomer {
   id: string
@@ -96,11 +96,17 @@ const api = {
   async listPaymentsBySubscription(subscriptionId: string): Promise<{ data: Array<{
     id: string
     status: string
-    pixQrCode?: string | null
-    pixCopyPaste?: string | null
     invoiceUrl?: string
   }> }> {
     return this.request('GET', `/payments?subscription=${subscriptionId}`)
+  },
+
+  async getPixQrCode(paymentId: string): Promise<{
+    encodedImage: string
+    payload: string
+    expirationDate: string
+  }> {
+    return this.request('GET', `/payments/${paymentId}/pixQrCode`)
   },
 
   async tokenizeCreditCard(cardData: CreditCardData, customer: string): Promise<{ creditCardId: string }> {
@@ -110,22 +116,6 @@ const api = {
     })
   },
 
-  async createPaymentWithPix(params: {
-    customer: string
-    billingType: 'PIX'
-    value: number
-    dueDate: string
-    description?: string
-    externalReference?: string
-  }): Promise<{
-    id: string
-    status: string
-    pixQrCode: string | null
-    pixCopyPaste: string | null
-    invoiceUrl: string
-  }> {
-    return this.request('POST', '/payments', params)
-  },
 }
 
 export async function createAsaasCustomer(name: string, email: string, cpfCnpj?: string, phone?: string) {
@@ -145,11 +135,10 @@ export async function createAsaasSubscription(
   creditCardData?: CreditCardData,
   holderInfo?: { name: string; email: string; cpfCnpj: string; postalCode: string; addressNumber: string; addressComplement?: string }
 ) {
-  const nextDueDate = cycle === 'YEARLY'
-    ? new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
-    : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+  // A primeira cobrança vence hoje; o ciclo controla somente as renovações seguintes.
+  const nextDueDate = new Date().toISOString().split('T')[0]
 
-  const params: Record<string, unknown> = {
+  const params: Parameters<typeof api.createSubscription>[0] = {
     customer: customerId,
     billingType,
     value,
@@ -165,32 +154,17 @@ export async function createAsaasSubscription(
     }
   }
 
-  return api.createSubscription(params as any)
+  return api.createSubscription(params)
 }
 
 export async function getPixPaymentData(subscriptionId: string) {
-  // Aguarda o pagamento ser gerado (pode levar alguns segundos)
-  for (let i = 0; i < 10; i++) {
-    const result = await api.listPaymentsBySubscription(subscriptionId)
-    const payment = result.data?.[0]
-    if (payment && (payment.pixQrCode || payment.pixCopyPaste || payment.invoiceUrl)) {
-      return {
-        qrCode: payment.pixQrCode,
-        copyPaste: payment.pixCopyPaste,
-        invoiceUrl: payment.invoiceUrl,
-        status: payment.status,
-      }
-    }
-    // Espera 1 segundo antes de tentar de novo
-    await new Promise(resolve => setTimeout(resolve, 1000))
-  }
-  // Última tentativa, retorna o que tiver
   const result = await api.listPaymentsBySubscription(subscriptionId)
   const payment = result.data?.[0]
   if (!payment) return null
+  const qrCode = await api.getPixQrCode(payment.id)
   return {
-    qrCode: payment.pixQrCode,
-    copyPaste: payment.pixCopyPaste,
+    qrCode: qrCode.encodedImage,
+    copyPaste: qrCode.payload,
     invoiceUrl: payment.invoiceUrl,
     status: payment.status,
   }
@@ -203,22 +177,6 @@ export async function cancelAsaasSubscription(subscriptionId: string) {
 export async function getSubscriptionStatus(subscriptionId: string) {
   const sub = await api.getSubscription(subscriptionId)
   return sub.status
-}
-
-export async function createAsaasPixPayment(params: {
-  customer: string
-  value: number
-  dueDate: string
-  description?: string
-}) {
-  const payment = await api.createPaymentWithPix({
-    customer: params.customer,
-    billingType: 'PIX',
-    value: params.value,
-    dueDate: params.dueDate,
-    description: params.description,
-  })
-  return payment
 }
 
 export { api }

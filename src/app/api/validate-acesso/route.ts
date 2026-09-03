@@ -1,77 +1,68 @@
+import crypto from 'crypto'
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { getSupabaseAdmin } from '@/lib/serverAuth'
+import { createPortalSession } from '@/lib/portalSession'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || ''
-
-// Rate limit: armazena tentativas por condominio_id + IP
-const attemptStore = new Map<string, { count: number; until: number }>()
-
-function getKey(condominioId: string, ip: string): string {
-  return `${condominioId}:${ip}`
+interface AccessResult {
+  valid: boolean
+  blocked?: boolean
+  remaining?: number
+  retry_after?: number
 }
 
 export async function POST(req: NextRequest) {
   try {
-    const { condominioId, codigo } = await req.json()
-
-    if (!condominioId || !codigo) {
-      return NextResponse.json({ error: 'Dados obrigatórios ausentes.' }, { status: 400 })
+    const { condominioId, codigo, bloco, apartamento } = await req.json()
+    if (
+      typeof condominioId !== 'string' ||
+      typeof codigo !== 'string' ||
+      typeof bloco !== 'string' ||
+      typeof apartamento !== 'string' ||
+      !/^[0-9]{4,8}$/.test(codigo) ||
+      !bloco.trim() ||
+      !apartamento.trim() ||
+      bloco.length > 40 ||
+      apartamento.length > 20
+    ) {
+      return NextResponse.json({ error: 'Dados de acesso inválidos.' }, { status: 400 })
     }
 
-    // Rate limit check
     const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown'
-    const key = getKey(condominioId, ip)
-    const now = Date.now()
-    const record = attemptStore.get(key)
-
-    if (record && now < record.until) {
-      const secondsLeft = Math.ceil((record.until - now) / 1000)
-      return NextResponse.json({
-        error: `Muitas tentativas. Aguarde ${secondsLeft}s.`,
-        blocked: true,
-        secondsLeft,
-      }, { status: 429 })
-    }
-
-    // Validar via RPC (SECURITY DEFINER — não expõe o código)
-    const supabase = createClient(supabaseUrl, supabaseServiceKey, {
-      auth: { autoRefreshToken: false, persistSession: false },
-    })
-
-    const { data, error } = await supabase.rpc('validar_codigo_acesso', {
+    const rateLimitSecret = process.env.PORTAL_SESSION_SECRET || process.env.SUPABASE_SERVICE_ROLE_KEY || ''
+    const ipHash = crypto.createHmac('sha256', rateLimitSecret).update(ip).digest('hex')
+    const admin = getSupabaseAdmin()
+    const { data, error } = await admin.rpc('validar_acesso_portal', {
       p_condominio_id: condominioId,
       p_codigo: codigo,
+      p_ip_hash: ipHash,
     })
 
-    if (error || data !== true) {
-      // Incrementar contagem de tentativas
-      const current = attemptStore.get(key)
-      const newCount = (current?.count || 0) + 1
-
-      if (newCount >= 5) {
-        attemptStore.set(key, { count: newCount, until: now + 120000 }) // bloqueia 2min
-        return NextResponse.json({
-          error: 'Código inválido. Muitas tentativas — acesso bloqueado por 2 minutos.',
-          blocked: true,
-        }, { status: 429 })
-      }
-
-      attemptStore.set(key, { count: newCount, until: 0 })
-      const remaining = 5 - newCount
+    if (error) throw error
+    const result = data as AccessResult
+    if (result.blocked) {
       return NextResponse.json({
-        error: `Código de acesso incorreto. ${remaining} tentativa${remaining > 1 ? 's' : ''} restante${remaining > 1 ? 's' : ''}.`,
+        error: `Muitas tentativas. Aguarde ${result.retry_after || 120}s.`,
+        blocked: true,
+        secondsLeft: result.retry_after || 120,
+      }, { status: 429 })
+    }
+    if (!result.valid) {
+      return NextResponse.json({
+        error: `Código de acesso incorreto. ${result.remaining || 0} tentativa(s) restante(s).`,
         valid: false,
-        remaining,
-      })
+        remaining: result.remaining || 0,
+      }, { status: 401 })
     }
 
-    // Sucesso — resetar contagem
-    attemptStore.delete(key)
+    const token = createPortalSession({
+      condominioId,
+      bloco: bloco.trim(),
+      apartamento: apartamento.trim(),
+    })
 
-    return NextResponse.json({ valid: true })
-  } catch (err) {
-    console.error('[VALIDATE-ACESSO ERROR]', err)
-    return NextResponse.json({ error: 'Erro interno.' }, { status: 500 })
+    return NextResponse.json({ valid: true, token, expiresIn: 8 * 60 * 60 })
+  } catch (error) {
+    console.error('[VALIDATE-ACESSO ERROR]', error)
+    return NextResponse.json({ error: 'Não foi possível validar o acesso.' }, { status: 500 })
   }
 }

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Loader2, AlertCircle, Eye, EyeOff, ShieldCheck } from 'lucide-react';
+import { Loader2, AlertCircle, Eye, EyeOff } from 'lucide-react';
 import { db, isSupabaseConfigured, safeCondoForStorage } from '@/lib/db';
 
 export default function LoginPage() {

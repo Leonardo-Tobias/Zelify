@@ -1,16 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
 import { cancelAsaasSubscription } from '@/lib/asaas'
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || ''
-
-function getSupabaseAdmin() {
-  if (!supabaseServiceKey) return null
-  return createClient(supabaseUrl, supabaseServiceKey, {
-    auth: { autoRefreshToken: false, persistSession: false },
-  })
-}
+import { authErrorResponse, requireCondominioRole } from '@/lib/serverAuth'
 
 export async function POST(req: NextRequest) {
   try {
@@ -20,10 +10,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'condominioId é obrigatório.' }, { status: 400 })
     }
 
-    const supabase = getSupabaseAdmin()
-    if (!supabase) {
-      return NextResponse.json({ error: 'Sem permissão do servidor.' }, { status: 500 })
-    }
+    const { admin: supabase } = await requireCondominioRole(req, condominioId)
 
     // Buscar dados do condomínio
     const { data: condo } = await supabase
@@ -44,11 +31,13 @@ export async function POST(req: NextRequest) {
     let containerId = condominioId
     if (condo.parent_condominio_id) {
       containerId = condo.parent_condominio_id
+      // Gerenciar uma instância não concede permissão para cancelar todo o contrato.
+      await requireCondominioRole(req, containerId)
     }
 
     const { data: container } = await supabase
       .from('condominios')
-      .select('id, asaas_subscription_id')
+      .select('id, asaas_subscription_id, slug')
       .eq('id', containerId)
       .single()
 
@@ -63,7 +52,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Se for container corporate, resetar todas as instâncias + container
-    if (!condo.parent_condominio_id && !condo.slug) {
+    if (container && !container.slug) {
       // É o container corporate — resetar todas as instâncias
       const { data: instances } = await supabase
         .from('condominios')
@@ -110,8 +99,18 @@ export async function POST(req: NextRequest) {
         .eq('id', condominioId)
     }
 
-    return NextResponse.json({ success: true })
+    return NextResponse.json({ success: true, condominio: {
+      ...condo,
+      plan_type: 'free',
+      subscription_status: 'active',
+      billing_type: null,
+      current_period_end: null,
+      asaas_subscription_id: null,
+      parent_condominio_id: null,
+    } })
   } catch (err) {
+    const authResponse = authErrorResponse(err)
+    if (authResponse) return authResponse
     const message = err instanceof Error ? err.message : 'Erro ao cancelar assinatura'
     console.error('[CANCEL ERROR]', err)
     return NextResponse.json({ error: message }, { status: 500 })

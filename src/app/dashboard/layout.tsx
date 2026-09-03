@@ -4,27 +4,23 @@ import React, { useState, useEffect } from 'react';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { 
   LayoutDashboard, 
-  Kanban, 
   ClipboardList,
   Package, 
   Settings, 
   LogOut, 
   Loader2, 
-  User, 
   ExternalLink,
-  ShieldAlert,
   Menu,
   X,
   Sun,
   Moon,
-  Building2,
-  ArrowLeft,
   Lock,
   Sparkles
 } from 'lucide-react';
 import { db, Condominio, UsuarioGestor, isSupabaseConfigured } from '@/lib/db';
 import { CondominioProvider, useCondominio } from '@/contexts/CondominioContext';
 import PosterPreview from '@/components/PosterPreview';
+import { APP_HOST } from '@/lib/appUrl';
 
 function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -33,7 +29,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   const view = searchParams.get('view');
   const isPortfolioView = view === 'portfolio';
 
-  const { condominio, condominios, isCorporate, loading: ctxLoading, switchCondo: contextSwitch, refreshCondo } = useCondominio();
+  const { condominio, condominios, isCorporate, loading: ctxLoading, switchCondo: contextSwitch } = useCondominio();
 
   const [loading, setLoading] = useState(true);
   const [gestor, setGestor] = useState<UsuarioGestor | null>(null);
@@ -91,7 +87,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
         }
 
         setGestor(gestorData);
-      } catch (e) {
+      } catch {
         localStorage.removeItem('zelcon_gestor');
         localStorage.removeItem('zelcon_condominio_gestao');
         router.push('/login');
@@ -468,7 +464,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                   <span className="truncate">Link do Morador</span>
                 </div>
                 <span className="text-[10px] font-mono text-zinc-400 dark:text-zinc-550 group-hover:text-brand truncate max-w-full block mt-1 transition-colors pl-5.5">
-                  zelify.app/{condominio.slug}
+                  {APP_HOST}/{condominio.slug}
                 </span>
               </button>
             </div>
@@ -566,7 +562,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
               <PosterPreview
                 nome={condominio.nome}
                 slug={condominio.slug}
-                codigoAcesso={condominio.codigo_acesso || '----'}
+                codigoAcesso={condominio.codigo_acesso?.startsWith('$2') ? '••••' : (condominio.codigo_acesso || '----')}
                 posterTitle="Portal do Morador"
                 posterInstructions="Escaneie o QR Code abaixo com seu celular para abrir o Portal do Morador, relatar problemas de manutenção ou cadastrar achados e perdidos."
                 posterTheme="blue"

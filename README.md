@@ -1,36 +1,51 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Zelcon
 
-## Getting Started
+Plataforma de zeladoria condominial. Síndicos e administradoras organizam chamados em um painel Kanban; moradores acessam o portal do condomínio pelo QR Code e por um código compartilhado.
 
-First, run the development server:
+## Desenvolvimento local
+
+Requisitos: Node.js 20+ e um projeto Supabase.
 
 ```bash
+npm install
+copy .env.example .env.local
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Abra `http://localhost:3000`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Banco de dados
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- Instalação nova: execute `supabase/schema.sql` no SQL Editor do Supabase.
+- Banco já existente: execute uma única vez `supabase/security_hardening.sql` antes de publicar esta versão.
 
-## Learn More
+A migração remove o acesso anônimo direto às tabelas, transforma códigos de acesso existentes em hashes bcrypt e adiciona limitação persistente de tentativas. Como o código deixa de ser recuperável, o gestor deve definir um novo código se não lembrar do atual.
 
-To learn more about Next.js, take a look at the following resources:
+O bucket `chamados` precisa aceitar JPEG, PNG e WebP de até 2 MB. O upload de moradores passa exclusivamente pela API autenticada do portal.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Variáveis de ambiente
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Copie `.env.example` para `.env.local` e preencha todos os valores. Em produção, cadastre os mesmos nomes nas configurações do projeto na Vercel.
 
-## Deploy on Vercel
+`PORTAL_SESSION_SECRET` deve ser um segredo longo e diferente das demais chaves. `SUPABASE_SERVICE_ROLE_KEY`, `ASAAS_API_KEY` e `ASAAS_WEBHOOK_SECRET` nunca podem usar o prefixo `NEXT_PUBLIC_`.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+No Asaas, configure o webhook para:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- URL: `https://SEU-DOMINIO/api/asaas/webhook`
+- Token de autenticação: o mesmo valor de `ASAAS_WEBHOOK_SECRET`
+- Eventos: `PAYMENT_CONFIRMED`, `PAYMENT_RECEIVED`, `PAYMENT_OVERDUE`, `PAYMENT_REFUNDED` e os eventos de chargeback necessários.
+
+O plano só é ativado depois de um evento de pagamento confirmado/recebido.
+
+## Verificação
+
+```bash
+npm run lint
+npm test
+npm run build
+npm audit
+```
+
+## Publicação
+
+O repositório pode permanecer conectado à Vercel. Depois de aplicar a migração e cadastrar as variáveis, faça o push para a branch configurada como produção. Não publique a aplicação antes de executar a migração do banco.

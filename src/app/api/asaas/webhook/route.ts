@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import crypto from 'crypto'
+import { api, cancelAsaasSubscription } from '@/lib/asaas'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || ''
@@ -14,25 +15,14 @@ function getSupabaseAdmin() {
   })
 }
 
-function verifySignature(rawBody: string, signatureHeader: string): boolean {
-  if (!WEBHOOK_SECRET) return true
-  if (!signatureHeader) return false
-
-  const expectedSignature = crypto
-    .createHmac('sha256', WEBHOOK_SECRET)
-    .update(rawBody, 'utf8')
-    .digest('hex')
+function verifyWebhookToken(receivedToken: string): boolean {
+  if (!WEBHOOK_SECRET) return false
+  if (!receivedToken) return false
 
   try {
-    const receivedSignatures = signatureHeader.split(',').map(s => s.trim())
-    return receivedSignatures.some(sig => {
-      const match = sig.match(/^sha256=([a-f0-9]+)$/i)
-      if (!match) return false
-      return crypto.timingSafeEqual(
-        Buffer.from(match[1]),
-        Buffer.from(expectedSignature)
-      )
-    })
+    const expected = Buffer.from(WEBHOOK_SECRET, 'utf8')
+    const received = Buffer.from(receivedToken, 'utf8')
+    return expected.length === received.length && crypto.timingSafeEqual(expected, received)
   } catch {
     return false
   }
@@ -40,15 +30,19 @@ function verifySignature(rawBody: string, signatureHeader: string): boolean {
 
 export async function POST(req: NextRequest) {
   try {
-    const rawBody = await req.text()
-    const signature = req.headers.get('asaas-signature') || ''
-
-    if (WEBHOOK_SECRET && !verifySignature(rawBody, signature)) {
-      console.warn('[WEBHOOK] Signature inválida — rejeitando')
-      return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
+    if (!WEBHOOK_SECRET) {
+      console.error('[WEBHOOK] ASAAS_WEBHOOK_SECRET não configurado')
+      return NextResponse.json({ error: 'Webhook não configurado' }, { status: 503 })
     }
 
-    const event = JSON.parse(rawBody)
+    const receivedToken = req.headers.get('asaas-access-token') || ''
+
+    if (!verifyWebhookToken(receivedToken)) {
+      console.warn('[WEBHOOK] Token inválido — rejeitando')
+      return NextResponse.json({ error: 'Invalid webhook token' }, { status: 401 })
+    }
+
+    const event = await req.json()
     const { event: eventName, subscription, payment } = event
 
     if (!subscription?.id && !payment?.subscription) {
@@ -58,14 +52,13 @@ export async function POST(req: NextRequest) {
     const subscriptionId = subscription?.id || payment?.subscription
     const supabase = getSupabaseAdmin()
     if (!supabase) {
-      console.warn('[WEBHOOK] Sem service role key, pulando')
-      return NextResponse.json({ received: true })
+      console.error('[WEBHOOK] SUPABASE_SERVICE_ROLE_KEY ausente')
+      return NextResponse.json({ error: 'Banco não configurado' }, { status: 503 })
     }
 
     let newStatus: 'active' | 'past_due' | 'canceled' | null = null
 
     switch (eventName) {
-      case 'SUBSCRIPTION_CREATED':
       case 'PAYMENT_CONFIRMED':
       case 'PAYMENT_RECEIVED':
         newStatus = 'active'
@@ -81,7 +74,64 @@ export async function POST(req: NextRequest) {
         break
     }
 
-    if (newStatus) {
+    if (newStatus === 'active') {
+      const subscriptionDetails = subscription?.nextDueDate
+        ? subscription
+        : await api.getSubscription(subscriptionId)
+      const { data: pendingCondo, error: pendingError } = await supabase
+        .from('condominios')
+        .select('id, asaas_subscription_id, pending_plan_type, pending_billing_type, pending_max_instances')
+        .eq('pending_subscription_id', subscriptionId)
+        .maybeSingle()
+      if (pendingError) throw pendingError
+
+      if (pendingCondo) {
+        const previousSubscriptionId = pendingCondo.asaas_subscription_id
+        const updateData: Record<string, unknown> = {
+          asaas_subscription_id: subscriptionId,
+          plan_type: pendingCondo.pending_plan_type,
+          billing_type: pendingCondo.pending_billing_type,
+          subscription_status: 'active',
+          pending_subscription_id: null,
+          pending_plan_type: null,
+          pending_billing_type: null,
+          pending_max_instances: null,
+        }
+        if (pendingCondo.pending_max_instances) {
+          updateData.max_instances = pendingCondo.pending_max_instances
+        }
+        if (subscriptionDetails.nextDueDate) {
+          updateData.current_period_end = new Date(subscriptionDetails.nextDueDate).toISOString()
+        }
+
+        const { error: activationError } = await supabase
+          .from('condominios')
+          .update(updateData)
+          .eq('id', pendingCondo.id)
+        if (activationError) throw activationError
+
+        if (pendingCondo.pending_plan_type === 'corporate') {
+          const { error: instancesError } = await supabase
+            .from('condominios')
+            .update({ plan_type: 'corporate', subscription_status: 'active' })
+            .eq('parent_condominio_id', pendingCondo.id)
+          if (instancesError) throw instancesError
+        }
+
+        if (previousSubscriptionId && previousSubscriptionId !== subscriptionId) {
+          try {
+            await cancelAsaasSubscription(previousSubscriptionId)
+          } catch (error) {
+            console.warn('[WEBHOOK] Não foi possível cancelar a assinatura anterior', error)
+          }
+        }
+      } else {
+        await supabase
+          .from('condominios')
+          .update({ subscription_status: 'active' })
+          .eq('asaas_subscription_id', subscriptionId)
+      }
+    } else if (newStatus) {
       const updateData: Record<string, unknown> = {
         subscription_status: newStatus,
       }
@@ -98,6 +148,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ received: true })
   } catch (err) {
     console.error('[WEBHOOK ERROR]', err)
-    return NextResponse.json({ received: true }, { status: 200 })
+    return NextResponse.json({ error: 'Falha ao processar webhook' }, { status: 500 })
   }
 }

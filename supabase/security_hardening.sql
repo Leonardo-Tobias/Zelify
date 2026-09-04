@@ -24,7 +24,7 @@ CREATE OR REPLACE FUNCTION public.hash_codigo_acesso()
 RETURNS TRIGGER
 LANGUAGE plpgsql
 SECURITY INVOKER
-SET search_path = public
+SET search_path = public, extensions
 AS $$
 BEGIN
   IF NEW.codigo_acesso IS NOT NULL
@@ -64,7 +64,7 @@ CREATE OR REPLACE FUNCTION public.validar_acesso_portal(
 RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public
+SET search_path = public, extensions
 AS $$
 DECLARE
   v_codigo_hash TEXT;

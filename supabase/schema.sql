@@ -65,7 +65,7 @@ ALTER TABLE public.chamados ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.portal_access_attempts ENABLE ROW LEVEL SECURITY;
 
 CREATE OR REPLACE FUNCTION public.hash_codigo_acesso()
-RETURNS TRIGGER LANGUAGE plpgsql SECURITY INVOKER SET search_path = public AS $$
+RETURNS TRIGGER LANGUAGE plpgsql SECURITY INVOKER SET search_path = public, extensions AS $$
 BEGIN
   IF NEW.codigo_acesso IS NOT NULL AND NEW.codigo_acesso !~ '^\$2[aby]\$' THEN
     NEW.codigo_acesso := crypt(NEW.codigo_acesso, gen_salt('bf', 10));
@@ -82,7 +82,7 @@ FOR EACH ROW EXECUTE FUNCTION public.hash_codigo_acesso();
 CREATE OR REPLACE FUNCTION public.validar_acesso_portal(
   p_condominio_id UUID, p_codigo TEXT, p_ip_hash TEXT
 ) RETURNS JSONB
-LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, extensions AS $$
 DECLARE
   v_codigo_hash TEXT;
   v_status TEXT;

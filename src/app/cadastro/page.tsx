@@ -119,7 +119,8 @@ function CadastroForm() {
         password,
         condominioNome: condominioNome.trim(),
         condominioSlug: condominioSlug.trim(),
-        codigoAcesso
+        codigoAcesso,
+        aceiteTermos: aceiteLGPD
       });
 
       // 3. Salvar dados de login no localStorage e redirecionar

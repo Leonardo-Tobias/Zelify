@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { authErrorResponse, requireCondominioRole } from '@/lib/serverAuth'
+import { removeCondominioFiles } from '@/lib/serverStorage'
 
 export async function POST(req: NextRequest) {
   try {
@@ -26,23 +27,28 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Não é possível excluir o container corporate.' }, { status: 400 })
     }
 
-    // Remove vínculos dos gestores
-    await supabase
+    // Remove as imagens antes dos registros para não deixar dados pessoais órfãos.
+    await removeCondominioFiles(supabase, [condominioId])
+
+    const { error: managersError } = await supabase
       .from('usuarios_gestores')
       .delete()
       .eq('condominio_id', condominioId)
+    if (managersError) throw managersError
 
     // Remove chamados
-    await supabase
+    const { error: chamadosError } = await supabase
       .from('chamados')
       .delete()
       .eq('condominio_id', condominioId)
+    if (chamadosError) throw chamadosError
 
     // Remove o condomínio
-    await supabase
+    const { error: condoError } = await supabase
       .from('condominios')
       .delete()
       .eq('id', condominioId)
+    if (condoError) throw condoError
 
     return NextResponse.json({ success: true, nome: condo.nome })
   } catch (err) {

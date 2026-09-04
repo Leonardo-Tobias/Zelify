@@ -47,7 +47,11 @@ export async function POST(req: NextRequest) {
         await cancelAsaasSubscription(container.asaas_subscription_id)
         console.log('[CANCEL] Assinatura cancelada no Asaas:', container.asaas_subscription_id)
       } catch (err) {
-        console.warn('[CANCEL] Erro ao cancelar no Asaas (pode já estar cancelado):', err)
+        console.error('[CANCEL] Falha ao cancelar no Asaas:', err)
+        return NextResponse.json(
+          { error: 'Não foi possível confirmar o cancelamento no Asaas. Nenhuma alteração foi feita no plano.' },
+          { status: 502 },
+        )
       }
     }
 

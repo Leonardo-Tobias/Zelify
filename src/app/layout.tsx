@@ -9,8 +9,6 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
 };
 
 export default function RootLayout({
@@ -29,7 +27,7 @@ export default function RootLayout({
           __html: `
             (function() {
               try {
-                var t = localStorage.getItem('zelcore_theme');
+                var t = localStorage.getItem('zelcon_theme');
                 if (t === 'light') {
                   document.documentElement.classList.remove('dark');
                 }

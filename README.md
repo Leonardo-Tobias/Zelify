@@ -17,11 +17,13 @@ Abra `http://localhost:3000`.
 ## Banco de dados
 
 - Instalação nova: execute `supabase/schema.sql` no SQL Editor do Supabase.
-- Banco já existente: execute uma única vez `supabase/security_hardening.sql` antes de publicar esta versão.
+- Banco já existente: execute, nesta ordem, `supabase/security_hardening.sql` (se ainda não foi aplicado) e `supabase/product_review_hardening.sql`.
 
 A migração remove o acesso anônimo direto às tabelas, transforma códigos de acesso existentes em hashes bcrypt e adiciona limitação persistente de tentativas. Como o código deixa de ser recuperável, o gestor deve definir um novo código se não lembrar do atual.
 
 O bucket `chamados` precisa aceitar JPEG, PNG e WebP de até 2 MB. O upload de moradores passa exclusivamente pela API autenticada do portal.
+
+Em **Authentication > URL Configuration** no Supabase, mantenha `https://zelcon.vercel.app` como Site URL e adicione `https://zelcon.vercel.app/redefinir-senha` às Redirect URLs para a recuperação de senha.
 
 ## Variáveis de ambiente
 

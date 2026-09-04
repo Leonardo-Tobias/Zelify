@@ -2,6 +2,7 @@ import crypto from 'crypto'
 import { NextRequest, NextResponse } from 'next/server'
 import { getPortalBearerToken, verifyPortalSession } from '@/lib/portalSession'
 import { getSupabaseAdmin } from '@/lib/serverAuth'
+import { hasValidImageSignature } from '@/lib/serverImage'
 
 const MAX_IMAGE_BYTES = 2 * 1024 * 1024
 const ALLOWED_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp'])
@@ -22,13 +23,23 @@ export async function POST(req: NextRequest) {
     }
 
     const buffer = Buffer.from(match[2], 'base64')
-    if (!buffer.length || buffer.length > MAX_IMAGE_BYTES) {
+    if (!buffer.length || buffer.length > MAX_IMAGE_BYTES || !hasValidImageSignature(buffer, match[1])) {
       return NextResponse.json({ error: 'Imagem inválida ou muito grande.' }, { status: 400 })
     }
 
     const extension = match[1] === 'image/jpeg' ? 'jpg' : match[1].split('/')[1]
     const path = `${session.condominioId}/${crypto.randomUUID()}.${extension}`
     const admin = getSupabaseAdmin()
+    const { data: condo, error: condoError } = await admin
+      .from('condominios')
+      .select('subscription_status')
+      .eq('id', session.condominioId)
+      .maybeSingle()
+    if (condoError) throw condoError
+    if (!condo || condo.subscription_status !== 'active') {
+      return NextResponse.json({ error: 'Portal temporariamente suspenso.' }, { status: 403 })
+    }
+
     const { error } = await admin.storage.from('chamados').upload(path, buffer, {
       contentType: match[1],
       cacheControl: '3600',

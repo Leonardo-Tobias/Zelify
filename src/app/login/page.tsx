@@ -12,6 +12,8 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [resettingPassword, setResettingPassword] = useState(false);
+  const [resetMessage, setResetMessage] = useState('');
 
   // Redirecionar se já estiver logado
   useEffect(() => {
@@ -49,6 +51,25 @@ export default function LoginPage() {
     }
   };
 
+  const handlePasswordReset = async () => {
+    setError('');
+    setResetMessage('');
+    if (!email.trim()) {
+      setError('Digite seu e-mail para recuperar a senha.');
+      return;
+    }
+    setResettingPassword(true);
+    try {
+      await db.requestPasswordReset(email);
+      setResetMessage('Se o e-mail estiver cadastrado, você receberá o link de recuperação.');
+    } catch (resetError) {
+      console.error(resetError);
+      setError('Não foi possível enviar o link de recuperação agora.');
+    } finally {
+      setResettingPassword(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#070709] flex flex-col items-center justify-center p-4 antialiased text-zinc-300 relative overflow-hidden">
       
@@ -83,6 +104,11 @@ export default function LoginPage() {
                 <span>{error}</span>
               </div>
             )}
+            {resetMessage && (
+              <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/10 p-3 text-xs font-semibold text-emerald-400">
+                {resetMessage}
+              </div>
+            )}
 
             <div>
               <label htmlFor="email" className="block text-xs font-bold uppercase tracking-wider text-zinc-300 mb-1.5">
@@ -104,6 +130,14 @@ export default function LoginPage() {
                 <label htmlFor="password" className="block text-xs font-bold uppercase tracking-wider text-zinc-300">
                   Senha
                 </label>
+                <button
+                  type="button"
+                  onClick={handlePasswordReset}
+                  disabled={resettingPassword}
+                  className="text-[11px] font-semibold text-brand hover:underline disabled:opacity-50"
+                >
+                  {resettingPassword ? 'Enviando...' : 'Esqueci minha senha'}
+                </button>
               </div>
               <div className="relative">
                 <input
@@ -119,6 +153,7 @@ export default function LoginPage() {
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-2.5 text-zinc-500 hover:text-zinc-300 transition-colors"
+                  aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>

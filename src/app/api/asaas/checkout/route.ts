@@ -115,6 +115,31 @@ export async function POST(req: NextRequest) {
         }
     }
 
+    const { data: pendingCheckout, error: pendingCheckoutError } = await supabase
+      .from('condominios')
+      .select('pending_subscription_id, pending_plan_type, pending_billing_type')
+      .eq('id', targetCondominioId)
+      .single()
+    if (pendingCheckoutError) throw pendingCheckoutError
+    if (pendingCheckout.pending_subscription_id) {
+      if (pendingCheckout.pending_plan_type === planType &&
+          pendingCheckout.pending_billing_type === billingType &&
+          billingType === 'PIX') {
+        let pixData = null
+        try { pixData = await getPixPaymentData(pendingCheckout.pending_subscription_id) } catch { /* ainda processando */ }
+        return NextResponse.json({
+          success: true,
+          subscriptionId: pendingCheckout.pending_subscription_id,
+          status: 'pending_payment',
+          pix: pixData,
+        })
+      }
+      return NextResponse.json(
+        { error: 'Já existe um pagamento pendente. Aguarde a confirmação ou cancele antes de tentar novamente.' },
+        { status: 409 },
+      )
+    }
+
     // 1. Buscar ou criar customer no Asaas
     let customerId: string | null = null
     let customerName = billingName

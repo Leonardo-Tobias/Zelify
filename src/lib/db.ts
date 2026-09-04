@@ -404,6 +404,28 @@ export const db = {
     return data.session?.access_token || null;
   },
 
+  async logoutGestor(): Promise<void> {
+    if (supabase) {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+    }
+  },
+
+  async requestPasswordReset(email: string): Promise<void> {
+    if (!supabase) throw new Error('Recuperação de senha disponível apenas com o Supabase configurado.');
+    const redirectTo = typeof window !== 'undefined'
+      ? `${window.location.origin}/redefinir-senha`
+      : undefined;
+    const { error } = await supabase.auth.resetPasswordForEmail(email.trim().toLowerCase(), { redirectTo });
+    if (error) throw error;
+  },
+
+  async updatePassword(password: string): Promise<void> {
+    if (!supabase) throw new Error('Supabase não configurado.');
+    const { error } = await supabase.auth.updateUser({ password });
+    if (error) throw error;
+  },
+
   /**
    * Retorna os chamados de um condomínio, opcionalmente filtrados por tipo.
    */
@@ -486,11 +508,15 @@ export const db = {
    */
   async deleteChamado(id: string): Promise<void> {
     if (supabase) {
-      const { error } = await supabase
-        .from('chamados')
-        .delete()
-        .eq('id', id);
-      if (error) throw error;
+      const accessToken = await this.getAccessToken();
+      if (!accessToken) throw new Error('Sessão expirada. Faça login novamente.');
+      const response = await fetch('/api/chamados/excluir', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', authorization: `Bearer ${accessToken}` },
+        body: JSON.stringify({ chamadoId: id }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'Erro ao excluir chamado.');
     } else {
       const chamados = localDB.getChamadosRaw();
       const index = chamados.findIndex(c => c.id === id);
@@ -682,6 +708,7 @@ export const db = {
     condominioNome: string;
     condominioSlug: string;
     codigoAcesso: string;
+    aceiteTermos: boolean;
   }): Promise<{ gestor: UsuarioGestor; condominio: Condominio }> {
     if (supabase) {
       const response = await fetch('/api/cadastro', {

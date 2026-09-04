@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { authErrorResponse, requireUser } from '@/lib/serverAuth'
 import { cancelAsaasSubscription } from '@/lib/asaas'
+import { removeCondominioFiles } from '@/lib/serverStorage'
 
 export async function DELETE(req: NextRequest) {
   try {
@@ -27,11 +28,6 @@ export async function DELETE(req: NextRequest) {
     const sharedIds = new Set<string>()
     for (const manager of otherManagers || []) {
       if (sharedIds.has(manager.condominio_id)) continue
-      const { error } = await supabase
-        .from('condominios')
-        .update({ created_by: manager.user_id })
-        .eq('id', manager.condominio_id)
-      if (error) throw error
       sharedIds.add(manager.condominio_id)
     }
 
@@ -43,13 +39,24 @@ export async function DELETE(req: NextRequest) {
           .map(condo => condo.asaas_subscription_id as string),
       )
       for (const subscriptionId of subscriptionIds) {
-        try {
-          await cancelAsaasSubscription(subscriptionId)
-        } catch (error) {
-          console.warn('[DELETE USER] Falha ao cancelar assinatura no Asaas', error)
-        }
+        await cancelAsaasSubscription(subscriptionId)
       }
 
+      // Se o Storage falhar, a exclusão é interrompida antes de apagar qualquer registro.
+      await removeCondominioFiles(supabase, exclusiveIds)
+    }
+
+    for (const manager of otherManagers || []) {
+      if (!sharedIds.has(manager.condominio_id)) continue
+      const { error } = await supabase
+        .from('condominios')
+        .update({ created_by: manager.user_id })
+        .eq('id', manager.condominio_id)
+      if (error) throw error
+      sharedIds.delete(manager.condominio_id)
+    }
+
+    if (exclusiveIds.length) {
       // Evita referências órfãs quando um container é removido, mas uma instância foi transferida.
       const { error: detachError } = await supabase
         .from('condominios')

@@ -133,8 +133,13 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
     }
   }, [pathname]);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     if (confirm('Deseja sair do painel administrativo?')) {
+      try {
+        await db.logoutGestor();
+      } catch (error) {
+        console.error('Erro ao encerrar sessão no Supabase:', error);
+      }
       localStorage.removeItem('zelcon_gestor');
       localStorage.removeItem('zelcon_condominio_gestao');
       router.push('/login');
@@ -183,9 +188,10 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
       href: '/dashboard/configuracoes', 
       icon: Settings, 
       active: !isPortfolioView && pathname === '/dashboard/configuracoes', 
-      disabled: isPortfolioView || isSubscriptionLocked 
+      disabled: isPortfolioView || isSubscriptionLocked,
+      hidden: gestor.papel === 'zelador',
     },
-  ];
+  ].filter(item => !item.hidden);
 
   return (
     <div className="min-h-screen bg-white dark:bg-[#09090b] text-zinc-700 dark:text-zinc-300 font-sans antialiased flex flex-col md:flex-row transition-colors duration-200">

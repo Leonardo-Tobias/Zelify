@@ -42,7 +42,7 @@ const sections = [
         <div>
           <p className="font-semibold text-zinc-300 mb-1.5">Durante o cadastro do gestor (síndico/administradora):</p>
           <ul className="space-y-1">
-            {['Nome completo', 'Endereço de e-mail', 'Senha de acesso (armazenada de forma segura pelo Supabase Auth)', 'CPF e telefone (apenas durante o checkout de planos pagos)', 'Dados de cartão de crédito (processados diretamente pelo Asaas — não armazenamos)'].map((item, i) => (
+            {['Nome completo', 'Endereço de e-mail', 'Senha de acesso (armazenada de forma segura pelo Supabase Auth)', 'CPF e telefone (apenas durante o checkout de planos pagos)', 'Dados de cartão de crédito (transmitidos ao Asaas pelo nosso servidor e não armazenados pela Zelcon)'].map((item, i) => (
               <li key={i} className="flex items-start space-x-2">
                 <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0 mt-0.5" />
                 <span>{item}</span>
@@ -129,9 +129,10 @@ const sections = [
     title: '6. Retenção de dados',
     content: (
       <p>
-        Mantemos seus dados pessoais enquanto sua conta estiver ativa. Ao cancelar a assinatura,
-        seus dados permanecem retidos pelo período de 12 meses para cumprimento de obrigações
-        legais e fiscais, sendo após esse período automaticamente anonimizados ou excluídos.
+        Mantemos os dados operacionais enquanto sua conta estiver ativa. Cancelar uma assinatura
+        não exclui a conta nem os chamados. Quando você solicita a exclusão da conta, removemos os
+        dados operacionais e as imagens dos condomínios exclusivamente seus; registros que precisem
+        ser preservados por obrigação legal ou fiscal ficam restritos pelo prazo exigido em lei.
       </p>
     )
   },
@@ -142,8 +143,8 @@ const sections = [
     content: (
       <p>
         Utilizamos criptografia em trânsito (TLS/SSL), controle de acesso via RLS (Row Level Security)
-        no banco de dados, e autenticação gerenciada pelo Supabase Auth. Dados de pagamento são
-        processados diretamente pelo Asaas (certificado PCI DSS), sem armazenamento local.
+        no banco de dados, e autenticação gerenciada pelo Supabase Auth. Dados de pagamento trafegam
+        pelo nosso servidor apenas para serem enviados ao Asaas e não são persistidos pela Zelcon.
       </p>
     )
   },
@@ -153,9 +154,9 @@ const sections = [
     title: '8. Cookies',
     content: (
       <p>
-        Utilizamos apenas cookies estritamente necessários para o funcionamento da plataforma
-        (autenticação de sessão). Não utilizamos cookies de rastreamento, publicidade ou análise
-        comportamental.
+        Utilizamos armazenamento local do navegador para manter a sessão e as preferências da
+        plataforma. Cookies podem ser usados quando tecnicamente necessários. Não utilizamos
+        cookies de publicidade ou análise comportamental.
       </p>
     )
   },
@@ -214,7 +215,7 @@ function PrivacidadeContent() {
                 Política de Privacidade
               </h1>
               <p className="text-xs text-zinc-500 font-medium mt-0.5">
-                Última atualização: 02 de julho de 2026
+                Última atualização: 04 de setembro de 2026
               </p>
             </div>
           </div>

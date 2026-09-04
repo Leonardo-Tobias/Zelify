@@ -39,6 +39,17 @@ export default function ConfiguracoesPage() {
   const { condominio, setCondominio, refreshCondo } = useCondominio();
   const [loading, setLoading] = useState(true);
 
+  useEffect(() => {
+    try {
+      const savedGestor = localStorage.getItem('zelcon_gestor');
+      if (savedGestor && JSON.parse(savedGestor).papel === 'zelador') {
+        router.replace('/dashboard');
+      }
+    } catch {
+      router.replace('/login');
+    }
+  }, [router]);
+
   // Navegação por abas
   const [activeTab, setActiveTab] = useState<'geral' | 'faturamento'>('geral');
 
@@ -704,21 +715,10 @@ export default function ConfiguracoesPage() {
     }
   };
 
-  const getSupabaseToken = (): string | null => {
-    try {
-      const data = localStorage.getItem('sb-kpgmpwthrnlrikkplrul-auth-token');
-      if (!data) return null;
-      const parsed = JSON.parse(data);
-      return parsed?.access_token || null;
-    } catch {
-      return null;
-    }
-  };
-
   const handleExportUserData = async () => {
     setExportingData(true);
     try {
-      const authToken = getSupabaseToken();
+      const authToken = await db.getAccessToken();
       if (!authToken) {
         setToast({ message: 'Sessão expirada. Faça login novamente.' });
         return;
@@ -759,7 +759,7 @@ export default function ConfiguracoesPage() {
 
     setDeletingAccount(true);
     try {
-      const authToken = getSupabaseToken();
+      const authToken = await db.getAccessToken();
       if (!authToken) {
         setToast({ message: 'Sessão expirada. Faça login novamente.' });
         return;

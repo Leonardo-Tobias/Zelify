@@ -29,6 +29,8 @@ function verifyWebhookToken(receivedToken: string): boolean {
 }
 
 export async function POST(req: NextRequest) {
+  let claimedEventId: string | null = null
+  let webhookAdmin: ReturnType<typeof getSupabaseAdmin> = null
   try {
     if (!WEBHOOK_SECRET) {
       console.error('[WEBHOOK] ASAAS_WEBHOOK_SECRET não configurado')
@@ -54,6 +56,19 @@ export async function POST(req: NextRequest) {
     if (!supabase) {
       console.error('[WEBHOOK] SUPABASE_SERVICE_ROLE_KEY ausente')
       return NextResponse.json({ error: 'Banco não configurado' }, { status: 503 })
+    }
+    webhookAdmin = supabase
+
+    const eventId = typeof event.id === 'string' ? event.id : null
+    if (eventId) {
+      const { error: claimError } = await supabase.from('asaas_webhook_events').insert({
+        event_id: eventId,
+        event_name: String(eventName || 'UNKNOWN'),
+      })
+      if (claimError?.code === '23505') return NextResponse.json({ received: true, duplicate: true })
+      if (claimError && claimError.code !== '42P01' && claimError.code !== 'PGRST205') throw claimError
+      if (!claimError) claimedEventId = eventId
+      else console.warn('[WEBHOOK] Migration de idempotência ainda não aplicada.')
     }
 
     let newStatus: 'active' | 'past_due' | 'canceled' | null = null
@@ -104,6 +119,11 @@ export async function POST(req: NextRequest) {
           updateData.current_period_end = new Date(subscriptionDetails.nextDueDate).toISOString()
         }
 
+        if (previousSubscriptionId && previousSubscriptionId !== subscriptionId) {
+          // Se falhar, devolvemos 500 para o Asaas reenviar o evento e não escondemos uma cobrança duplicada.
+          await cancelAsaasSubscription(previousSubscriptionId)
+        }
+
         const { error: activationError } = await supabase
           .from('condominios')
           .update(updateData)
@@ -116,14 +136,6 @@ export async function POST(req: NextRequest) {
             .update({ plan_type: 'corporate', subscription_status: 'active' })
             .eq('parent_condominio_id', pendingCondo.id)
           if (instancesError) throw instancesError
-        }
-
-        if (previousSubscriptionId && previousSubscriptionId !== subscriptionId) {
-          try {
-            await cancelAsaasSubscription(previousSubscriptionId)
-          } catch (error) {
-            console.warn('[WEBHOOK] Não foi possível cancelar a assinatura anterior', error)
-          }
         }
       } else {
         await supabase
@@ -145,8 +157,19 @@ export async function POST(req: NextRequest) {
         .eq('asaas_subscription_id', subscriptionId)
     }
 
+    if (claimedEventId) {
+      const { error: processedError } = await supabase
+        .from('asaas_webhook_events')
+        .update({ processed_at: new Date().toISOString() })
+        .eq('event_id', claimedEventId)
+      if (processedError) throw processedError
+    }
+
     return NextResponse.json({ received: true })
   } catch (err) {
+    if (claimedEventId && webhookAdmin) {
+      await webhookAdmin.from('asaas_webhook_events').delete().eq('event_id', claimedEventId)
+    }
     console.error('[WEBHOOK ERROR]', err)
     return NextResponse.json({ error: 'Falha ao processar webhook' }, { status: 500 })
   }

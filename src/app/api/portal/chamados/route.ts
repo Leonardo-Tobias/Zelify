@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getPortalBearerToken, verifyPortalSession } from '@/lib/portalSession'
 import { getSupabaseAdmin } from '@/lib/serverAuth'
+import { isChamadoUrlForCondominio, removeChamadoFile } from '@/lib/serverStorage'
 
 function getSession(req: NextRequest) {
   return verifyPortalSession(getPortalBearerToken(req.headers.get('authorization')))
@@ -56,8 +57,39 @@ export async function POST(req: NextRequest) {
     if (!tipo || !local || !descricao || local.length > 100 || descricao.length > 2000 || fotoUrl.length > 2048) {
       return NextResponse.json({ error: 'Dados do chamado inválidos.' }, { status: 400 })
     }
+    if (fotoUrl && !isChamadoUrlForCondominio(fotoUrl, session.condominioId)) {
+      return NextResponse.json({ error: 'Endereço da imagem inválido.' }, { status: 400 })
+    }
 
     const admin = getSupabaseAdmin()
+    const { data: atomicChamado, error: atomicError } = await admin.rpc('criar_chamado_portal', {
+      p_condominio_id: session.condominioId,
+      p_tipo: tipo,
+      p_local: local,
+      p_bloco: session.bloco,
+      p_apartamento: session.apartamento,
+      p_descricao: descricao,
+      p_foto_url: fotoUrl || null,
+    })
+    const rpcUnavailable = atomicError?.code === 'PGRST202' || atomicError?.code === '42883'
+    if (!rpcUnavailable) {
+      if (atomicError) {
+        if (fotoUrl) await removeChamadoFile(admin, fotoUrl).catch(cleanupError => console.error('[PORTAL IMAGE CLEANUP]', cleanupError))
+        if (atomicError.message.includes('PORTAL_SUSPENSO')) {
+          return NextResponse.json({ error: 'Portal temporariamente suspenso.' }, { status: 403 })
+        }
+        if (atomicError.message.includes('LIMITE_MENSAL')) {
+          return NextResponse.json({ error: 'Limite mensal de chamados atingido.' }, { status: 403 })
+        }
+        if (atomicError.message.includes('CONDOMINIO_NAO_ENCONTRADO')) {
+          return NextResponse.json({ error: 'Condomínio não encontrado.' }, { status: 404 })
+        }
+        throw atomicError
+      }
+      return NextResponse.json({ chamado: atomicChamado }, { status: 201 })
+    }
+
+    console.warn('[PORTAL CHAMADOS] Migration de criação atômica ainda não aplicada.')
     const { data: condo, error: condoError } = await admin
       .from('condominios')
       .select('id, plan_type, subscription_status')
@@ -65,6 +97,7 @@ export async function POST(req: NextRequest) {
       .single()
     if (condoError || !condo) return NextResponse.json({ error: 'Condomínio não encontrado.' }, { status: 404 })
     if (condo.subscription_status !== 'active') {
+      if (fotoUrl) await removeChamadoFile(admin, fotoUrl).catch(cleanupError => console.error('[PORTAL IMAGE CLEANUP]', cleanupError))
       return NextResponse.json({ error: 'Portal temporariamente suspenso.' }, { status: 403 })
     }
 
@@ -76,6 +109,7 @@ export async function POST(req: NextRequest) {
         .gte('created_at', startOfMonth)
       if (countError) throw countError
       if ((count || 0) >= 15) {
+        if (fotoUrl) await removeChamadoFile(admin, fotoUrl).catch(cleanupError => console.error('[PORTAL IMAGE CLEANUP]', cleanupError))
         return NextResponse.json({ error: 'Limite mensal de chamados atingido.' }, { status: 403 })
       }
     }
@@ -94,7 +128,14 @@ export async function POST(req: NextRequest) {
       updated_at: timestamp,
     }).select().single()
 
-    if (error) throw error
+    if (error) {
+      if (fotoUrl) {
+        try { await removeChamadoFile(admin, fotoUrl) } catch (cleanupError) {
+          console.error('[PORTAL CHAMADO IMAGE ROLLBACK ERROR]', cleanupError)
+        }
+      }
+      throw error
+    }
     return NextResponse.json({ chamado: data }, { status: 201 })
   } catch (error) {
     console.error('[PORTAL CHAMADOS POST ERROR]', error)

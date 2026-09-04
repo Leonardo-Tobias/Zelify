@@ -684,64 +684,30 @@ export const db = {
     codigoAcesso: string;
   }): Promise<{ gestor: UsuarioGestor; condominio: Condominio }> {
     if (supabase) {
-      // 1. Criar o usuário no Auth
-      const { data: authData, error: authError } = await supabase.auth.signUp({
+      const response = await fetch('/api/cadastro', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(dados),
+      });
+
+      const result = await response.json() as {
+        error?: string;
+        gestor?: UsuarioGestor;
+        condominio?: Condominio;
+      };
+      if (!response.ok || !result.gestor || !result.condominio) {
+        throw new Error(result.error || 'Falha ao concluir o cadastro.');
+      }
+
+      const { error: loginError } = await supabase.auth.signInWithPassword({
         email: dados.email,
         password: dados.password,
-        options: {
-          data: {
-            nome: dados.nome
-          }
-        }
       });
-      if (authError || !authData.user) {
-        throw new Error(authError?.message || 'Falha ao criar usuário de autenticação.');
-      }
-
-      // 2. Inserir o condomínio com plano grátis ativo por padrão
-      const { data: condoData, error: condoError } = await supabase
-        .from('condominios')
-        .insert({
-          nome: dados.condominioNome,
-          slug: dados.condominioSlug.trim().toLowerCase(),
-          codigo_acesso: dados.codigoAcesso,
-          created_by: authData.user.id,
-          plan_type: 'free',
-          subscription_status: 'active'
-        })
-        .select()
-        .single();
-      if (condoError || !condoData) {
-        throw new Error(condoError?.message || 'Falha ao registrar o condomínio.');
-      }
-
-      // 3. Inserir o gestor vinculado
-      const gestorId = crypto.randomUUID();
-      const { error: gestorError } = await supabase
-        .from('usuarios_gestores')
-        .insert({
-          id: gestorId,
-          user_id: authData.user.id,
-          condominio_id: condoData.id,
-          nome: dados.nome,
-          papel: 'sindico'
-        });
-      if (gestorError) {
-        throw new Error(gestorError.message || 'Falha ao registrar o perfil do gestor.');
-      }
-
-      const gestorData: UsuarioGestor = {
-        id: gestorId,
-        user_id: authData.user.id,
-        condominio_id: condoData.id,
-        nome: dados.nome,
-        papel: 'sindico',
-        created_at: new Date().toISOString()
-      };
+      if (loginError) throw new Error('Cadastro concluído, mas não foi possível iniciar a sessão. Entre pelo painel.');
 
       return {
-        gestor: gestorData,
-        condominio: condoData
+        gestor: result.gestor,
+        condominio: result.condominio
       };
     } else {
       // 1. Validar unicidade do e-mail no Mock

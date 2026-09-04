@@ -31,6 +31,7 @@ export function safeCondoForStorage(condo: Condominio): Condominio {
     current_period_end: condo.current_period_end,
     parent_condominio_id: condo.parent_condominio_id,
     max_instances: condo.max_instances,
+    identificacao_ocorrencias: condo.identificacao_ocorrencias,
     created_at: condo.created_at,
   }
 }
@@ -79,6 +80,7 @@ export interface Condominio {
   current_period_end?: string | null;
   parent_condominio_id?: string | null;
   max_instances?: number | null;
+  identificacao_ocorrencias?: 'anonima' | 'opcional' | 'obrigatoria';
   created_at: string;
 }
 
@@ -101,10 +103,43 @@ export interface Chamado {
   bloco: string;
   apartamento: string;
   descricao: string;
+  titulo?: string | null;
+  categoria?: string | null;
+  categoria_outro?: string | null;
+  prioridade?: 'baixa' | 'normal' | 'alta' | 'urgente';
+  solicitante_tipo?: 'morador' | 'sindico' | 'zelador' | 'porteiro' | 'funcionario' | 'prestador_servico' | 'conselheiro' | 'outro';
+  solicitante_tipo_outro?: string | null;
+  solicitante_nome?: string | null;
+  solicitante_whatsapp?: string | null;
+  anonimo?: boolean;
+  responsavel?: string | null;
   foto_url?: string;
   status: 'pendente' | 'em_execucao' | 'resolvido' | 'encontrado' | 'aguardando_retirada' | 'entregue';
   created_at: string;
   updated_at: string;
+  completed_at?: string | null;
+}
+
+export interface OcorrenciaHistorico {
+  id: string;
+  chamado_id: string;
+  condominio_id: string;
+  evento: string;
+  descricao: string;
+  visibilidade: 'publico' | 'interno';
+  autor_id?: string | null;
+  created_at: string;
+}
+
+export interface OcorrenciaComentario {
+  id: string;
+  chamado_id: string;
+  condominio_id: string;
+  conteudo: string;
+  visibilidade: 'publico' | 'interno';
+  autor_id?: string | null;
+  autor_nome?: string | null;
+  created_at: string;
 }
 
 // --- Detecção do Supabase ---
@@ -354,7 +389,12 @@ export const db = {
     }
   },
 
-  async getPortalChamados(token: string): Promise<{ chamados: Chamado[]; monthlyCount: number }> {
+  async getPortalChamados(token: string): Promise<{
+    chamados: Chamado[];
+    monthlyCount: number;
+    historico?: OcorrenciaHistorico[];
+    comentarios?: OcorrenciaComentario[];
+  }> {
     const response = await fetch('/api/portal/chamados', {
       headers: { authorization: `Bearer ${token}` },
       cache: 'no-store',
@@ -368,7 +408,9 @@ export const db = {
 
   async createPortalChamado(
     token: string,
-    chamado: Pick<Chamado, 'tipo' | 'local' | 'descricao' | 'foto_url'>,
+    chamado: Pick<Chamado, 'tipo' | 'local' | 'descricao' | 'foto_url'> & Partial<Pick<Chamado,
+      'titulo' | 'categoria' | 'categoria_outro' | 'prioridade' | 'solicitante_tipo' |
+      'solicitante_tipo_outro' | 'solicitante_nome' | 'solicitante_whatsapp' | 'anonimo'>>,
   ): Promise<Chamado> {
     const response = await fetch('/api/portal/chamados', {
       method: 'POST',
@@ -563,6 +605,79 @@ export const db = {
     }
   },
 
+  async updateChamadoResponsavel(id: string, responsavel: string): Promise<Chamado | null> {
+    const value = responsavel.trim() || null;
+    if (supabase) {
+      const { data, error } = await supabase.from('chamados').update({ responsavel: value }).eq('id', id).select().maybeSingle();
+      if (error) throw error;
+      return data;
+    }
+    const chamados = localDB.getChamadosRaw();
+    const index = chamados.findIndex(item => item.id === id);
+    if (index < 0) return null;
+    chamados[index] = { ...chamados[index], responsavel: value, updated_at: new Date().toISOString() };
+    localDB.saveChamados(chamados);
+    return chamados[index];
+  },
+
+  async getOcorrenciaDetalhes(chamadoId: string): Promise<{
+    historico: OcorrenciaHistorico[];
+    comentarios: OcorrenciaComentario[];
+  }> {
+    if (!supabase) return { historico: [], comentarios: [] };
+    const [historyResult, commentsResult] = await Promise.all([
+      supabase.from('ocorrencia_historico').select('*').eq('chamado_id', chamadoId).order('created_at'),
+      supabase.from('ocorrencia_comentarios').select('*').eq('chamado_id', chamadoId).order('created_at'),
+    ]);
+    if (historyResult.error) throw historyResult.error;
+    if (commentsResult.error) throw commentsResult.error;
+    return {
+      historico: (historyResult.data || []) as OcorrenciaHistorico[],
+      comentarios: (commentsResult.data || []) as OcorrenciaComentario[],
+    };
+  },
+
+  async addOcorrenciaComentario(
+    chamado: Chamado,
+    conteudo: string,
+    visibilidade: 'publico' | 'interno',
+    autorNome?: string,
+  ): Promise<OcorrenciaComentario> {
+    if (!supabase) {
+      return {
+        id: `comentario-${Date.now()}`,
+        chamado_id: chamado.id,
+        condominio_id: chamado.condominio_id,
+        conteudo,
+        visibilidade,
+        autor_nome: autorNome || 'Administração',
+        created_at: new Date().toISOString(),
+      };
+    }
+    const { data: authData } = await supabase.auth.getUser();
+    if (!authData.user) throw new Error('Sessão expirada. Faça login novamente.');
+    const { data, error } = await supabase.from('ocorrencia_comentarios').insert({
+      chamado_id: chamado.id,
+      condominio_id: chamado.condominio_id,
+      conteudo: conteudo.trim(),
+      visibilidade,
+      autor_id: authData.user.id,
+      autor_nome: autorNome || 'Administração',
+    }).select().single();
+    if (error) throw error;
+    if (visibilidade === 'publico') {
+      await supabase.from('ocorrencia_historico').insert({
+        chamado_id: chamado.id,
+        condominio_id: chamado.condominio_id,
+        evento: 'atualizacao',
+        descricao: 'Atualização adicionada pela administração',
+        visibilidade: 'publico',
+        autor_id: authData.user.id,
+      });
+    }
+    return data as OcorrenciaComentario;
+  },
+
   /**
    * Atualiza as configurações de slug, nome e código do condomínio.
    */
@@ -570,7 +685,8 @@ export const db = {
     id: string,
     nome: string,
     slug: string,
-    codigoAcesso: string
+    codigoAcesso: string,
+    identificacaoOcorrencias?: Condominio['identificacao_ocorrencias']
   ): Promise<Condominio | null> {
     if (supabase) {
       const { data, error } = await supabase
@@ -578,7 +694,8 @@ export const db = {
         .update({
           nome,
           slug,
-          codigo_acesso: codigoAcesso
+          codigo_acesso: codigoAcesso,
+          ...(identificacaoOcorrencias ? { identificacao_ocorrencias: identificacaoOcorrencias } : {})
         })
         .eq('id', id)
         .select()
@@ -594,7 +711,8 @@ export const db = {
         ...condominios[index],
         nome,
         slug,
-        codigo_acesso: codigoAcesso
+        codigo_acesso: codigoAcesso,
+        ...(identificacaoOcorrencias ? { identificacao_ocorrencias: identificacaoOcorrencias } : {})
       };
       localDB.saveCondominios(condominios);
       return condominios[index];

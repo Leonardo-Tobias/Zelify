@@ -11,7 +11,7 @@ export async function GET(req: NextRequest) {
     const admin = getSupabaseAdmin()
     const { data, error } = await admin
       .from('condominios')
-      .select('id, nome, slug, plan_type, subscription_status, current_period_end, created_at')
+      .select('id, nome, slug, plan_type, subscription_status, current_period_end, identificacao_ocorrencias, created_at')
       .eq('slug', slug)
       .maybeSingle()
     if (error) throw error

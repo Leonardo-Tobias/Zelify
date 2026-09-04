@@ -57,6 +57,7 @@ export default function ConfiguracoesPage() {
   const [nome, setNome] = useState('');
   const [slug, setSlug] = useState('');
   const [codigoAcesso, setCodigoAcesso] = useState('');
+  const [identificacaoOcorrencias, setIdentificacaoOcorrencias] = useState<'anonima' | 'opcional' | 'obrigatoria'>('opcional');
   
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -159,6 +160,7 @@ export default function ConfiguracoesPage() {
     setNome(condominio.nome);
     setSlug(condominio.slug || '');
     setCodigoAcesso(condominio.codigo_acesso?.startsWith('$2') ? '' : (condominio.codigo_acesso || ''));
+    setIdentificacaoOcorrencias(condominio.identificacao_ocorrencias || 'opcional');
     setLoading(false);
   }, [condominio]);
 
@@ -331,7 +333,8 @@ export default function ConfiguracoesPage() {
         condominio!.id,
         nome.trim(),
         slug.trim(),
-        codigoAcesso.trim()
+        codigoAcesso.trim(),
+        identificacaoOcorrencias
       );
 
       if (updated) {
@@ -1203,6 +1206,16 @@ export default function ConfiguracoesPage() {
                 </p>
               </div>
 
+              <div className="space-y-2 pt-5">
+                <label htmlFor="identificacaoOcorrencias" className="block text-[10px] font-bold uppercase tracking-wider text-zinc-500">Identificação nas ocorrências</label>
+                <select id="identificacaoOcorrencias" value={identificacaoOcorrencias} onChange={(e) => setIdentificacaoOcorrencias(e.target.value as typeof identificacaoOcorrencias)} className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg text-xs text-zinc-900 dark:text-white focus:outline-none focus:border-brand/50 font-semibold">
+                  <option value="anonima">Permitir ocorrências anônimas</option>
+                  <option value="opcional">Identificação opcional</option>
+                  <option value="obrigatoria">Identificação obrigatória</option>
+                </select>
+                <p className="text-[10px] text-zinc-500 leading-tight font-medium">O tipo de solicitante e o WhatsApp continuam opcionais. O telefone nunca bloqueia o envio.</p>
+              </div>
+
             </div>
 
             <div className="pt-4 border-t border-zinc-200 dark:border-zinc-800 flex justify-end">
@@ -1328,7 +1341,7 @@ export default function ConfiguracoesPage() {
             {condominio?.plan_type === 'free' && (
               <div className="pt-4 border-t border-zinc-150 dark:border-zinc-800/65 space-y-2">
                 <div className="flex justify-between items-center text-xs font-semibold">
-                  <span className="text-zinc-550 dark:text-zinc-500">Uso de Chamados (Mês Corrente):</span>
+                  <span className="text-zinc-550 dark:text-zinc-500">Uso de Ocorrências (Mês Corrente):</span>
                   <span className="text-zinc-800 dark:text-zinc-200 font-extrabold">
                     {monthlyChamadosCount} / 15
                   </span>
@@ -1392,7 +1405,7 @@ export default function ConfiguracoesPage() {
                 <ul className="space-y-2.5 text-xs font-semibold text-zinc-500 dark:text-zinc-400">
                   <li className="flex items-center text-zinc-750 dark:text-zinc-300">
                     <CheckCircle2 className="w-4 h-4 text-emerald-500 mr-2 shrink-0" />
-                    Chamados de Manutenção Ilimitados
+                    Ocorrências ilimitadas
                   </li>
                   <li className="flex items-center text-zinc-750 dark:text-zinc-300">
                     <CheckCircle2 className="w-4 h-4 text-emerald-500 mr-2 shrink-0" />
@@ -1400,7 +1413,7 @@ export default function ConfiguracoesPage() {
                   </li>
                   <li className="flex items-center text-zinc-750 dark:text-zinc-300">
                     <CheckCircle2 className="w-4 h-4 text-emerald-500 mr-2 shrink-0" />
-                    Mural Kanban Completo
+                    Gestão de Ocorrências completa
                   </li>
                   <li className="flex items-center text-zinc-750 dark:text-zinc-300">
                     <CheckCircle2 className="w-4 h-4 text-emerald-500 mr-2 shrink-0" />
@@ -2096,7 +2109,7 @@ export default function ConfiguracoesPage() {
                       <div className="border-t border-zinc-800/60 pt-4 space-y-2">
                         <div className="flex items-center space-x-2.5 text-[11px]">
                           <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
-                          <span className="text-zinc-300 font-medium">Chamados ilimitados</span>
+                          <span className="text-zinc-300 font-medium">Ocorrências ilimitadas</span>
                         </div>
                         <div className="flex items-center space-x-2.5 text-[11px]">
                           <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />

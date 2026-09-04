@@ -37,7 +37,19 @@ export async function GET(req: NextRequest) {
       ...(foundResult.data || []).map(item => ({ ...item, bloco: '', apartamento: '' })),
     ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
 
-    return NextResponse.json({ chamados, monthlyCount: countResult.count || 0 })
+    const ids = chamados.map(item => item.id)
+    let historico: unknown[] = []
+    let comentarios: unknown[] = []
+    if (ids.length) {
+      const [historyResult, commentsResult] = await Promise.all([
+        admin.from('ocorrencia_historico').select('*').in('chamado_id', ids).eq('visibilidade', 'publico').order('created_at'),
+        admin.from('ocorrencia_comentarios').select('*').in('chamado_id', ids).eq('visibilidade', 'publico').order('created_at'),
+      ])
+      if (!historyResult.error) historico = historyResult.data || []
+      if (!commentsResult.error) comentarios = commentsResult.data || []
+    }
+
+    return NextResponse.json({ chamados, monthlyCount: countResult.count || 0, historico, comentarios })
   } catch (error) {
     console.error('[PORTAL CHAMADOS GET ERROR]', error)
     return NextResponse.json({ error: 'Erro ao carregar chamados.' }, { status: 500 })
@@ -53,8 +65,21 @@ export async function POST(req: NextRequest) {
     const tipo = body.tipo === 'manutencao' || body.tipo === 'achado_perdido' ? body.tipo : null
     const local = typeof body.local === 'string' ? body.local.trim() : ''
     const descricao = typeof body.descricao === 'string' ? body.descricao.trim() : ''
+    const titulo = typeof body.titulo === 'string' ? body.titulo.trim() : ''
+    const categoria = typeof body.categoria === 'string' ? body.categoria.trim() : ''
+    const categoriaOutro = typeof body.categoria_outro === 'string' ? body.categoria_outro.trim() : ''
+    const prioridade = ['baixa', 'normal', 'alta', 'urgente'].includes(body.prioridade) ? body.prioridade : 'normal'
+    const requesterTypes = ['morador', 'sindico', 'zelador', 'porteiro', 'funcionario', 'prestador_servico', 'conselheiro', 'outro']
+    const solicitanteTipo = requesterTypes.includes(body.solicitante_tipo) ? body.solicitante_tipo : 'morador'
+    const solicitanteTipoOutro = typeof body.solicitante_tipo_outro === 'string' ? body.solicitante_tipo_outro.trim() : ''
+    const solicitanteNome = typeof body.solicitante_nome === 'string' ? body.solicitante_nome.trim() : ''
+    const solicitanteWhatsapp = typeof body.solicitante_whatsapp === 'string' ? body.solicitante_whatsapp.trim() : ''
+    const whatsappDigits = solicitanteWhatsapp.replace(/\D/g, '')
+    const anonimo = body.anonimo !== false
     const fotoUrl = typeof body.foto_url === 'string' ? body.foto_url : ''
-    if (!tipo || !local || !descricao || local.length > 100 || descricao.length > 2000 || fotoUrl.length > 2048) {
+    if (!tipo || !local || !descricao || (tipo === 'manutencao' && (!titulo || !categoria)) ||
+      local.length > 100 || titulo.length > 120 || categoria.length > 100 || descricao.length > 2000 ||
+      solicitanteNome.length > 120 || (!!solicitanteWhatsapp && ![10, 11].includes(whatsappDigits.length)) || fotoUrl.length > 2048) {
       return NextResponse.json({ error: 'Dados do chamado inválidos.' }, { status: 400 })
     }
     if (fotoUrl && !isChamadoUrlForCondominio(fotoUrl, session.condominioId)) {
@@ -70,6 +95,15 @@ export async function POST(req: NextRequest) {
       p_apartamento: session.apartamento,
       p_descricao: descricao,
       p_foto_url: fotoUrl || null,
+      p_titulo: titulo || descricao.slice(0, 120),
+      p_categoria: categoria || (tipo === 'manutencao' ? 'Manutenção' : 'Outro'),
+      p_categoria_outro: categoriaOutro || null,
+      p_prioridade: prioridade,
+      p_solicitante_tipo: solicitanteTipo,
+      p_solicitante_tipo_outro: solicitanteTipoOutro || null,
+      p_solicitante_nome: solicitanteNome || null,
+      p_solicitante_whatsapp: solicitanteWhatsapp || null,
+      p_anonimo: anonimo,
     })
     const rpcUnavailable = atomicError?.code === 'PGRST202' || atomicError?.code === '42883'
     if (!rpcUnavailable) {
@@ -83,6 +117,9 @@ export async function POST(req: NextRequest) {
         }
         if (atomicError.message.includes('CONDOMINIO_NAO_ENCONTRADO')) {
           return NextResponse.json({ error: 'Condomínio não encontrado.' }, { status: 404 })
+        }
+        if (atomicError.message.includes('IDENTIFICACAO_OBRIGATORIA')) {
+          return NextResponse.json({ error: 'Este condomínio exige a identificação do solicitante.' }, { status: 400 })
         }
         throw atomicError
       }
@@ -122,6 +159,15 @@ export async function POST(req: NextRequest) {
       bloco: session.bloco,
       apartamento: session.apartamento,
       descricao,
+      titulo: titulo || descricao.slice(0, 120),
+      categoria: categoria || (tipo === 'manutencao' ? 'Manutenção' : 'Outro'),
+      categoria_outro: categoriaOutro || null,
+      prioridade,
+      solicitante_tipo: solicitanteTipo,
+      solicitante_tipo_outro: solicitanteTipoOutro || null,
+      solicitante_nome: anonimo ? null : solicitanteNome || null,
+      solicitante_whatsapp: solicitanteWhatsapp || null,
+      anonimo,
       foto_url: fotoUrl || null,
       status: tipo === 'manutencao' ? 'pendente' : 'encontrado',
       created_at: timestamp,

@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { db, Chamado, Condominio, UsuarioGestor, safeCondoForStorage } from '@/lib/db';
 import { useCondominio } from '@/contexts/CondominioContext';
+import { OCCURRENCE_CATEGORIES, PRIORITIES, averageResolutionTime, formatDuration, occurrenceTitle } from '@/lib/occurrences';
 
 function DashboardHomeContent() {
   const router = useRouter();
@@ -43,9 +44,14 @@ function DashboardHomeContent() {
     totalChamados: number;
     pendentes: number;
     emExecucao: number;
+    urgentes: number;
+    antigas: number;
+    tempoMedio: number;
+    tickets: Chamado[];
     health: 'Estável' | 'Atenção' | 'Crítico';
   }>>([]);
   const [toastMsg, setToastMsg] = useState<{ type: 'upgrade' | 'error'; title: string; text: string } | null>(null);
+  const [portfolioFilters, setPortfolioFilters] = useState({ condominio: 'todos', categoria: 'todas', prioridade: 'todas', status: 'todos', periodo: 'todos', responsavel: '' });
 
   // Verificar sessão do gestor e condomínio ativo
   const [pendingPlan, setPendingPlan] = useState<string | null>(null);
@@ -93,6 +99,8 @@ function DashboardHomeContent() {
             const total = tickets.length;
             const pending = tickets.filter(t => t.tipo === 'manutencao' && t.status === 'pendente').length;
             const running = tickets.filter(t => t.tipo === 'manutencao' && t.status === 'em_execucao').length;
+            const urgentes = tickets.filter(t => t.tipo === 'manutencao' && t.prioridade === 'urgente' && t.status !== 'resolvido').length;
+            const antigas = tickets.filter(t => t.tipo === 'manutencao' && t.status !== 'resolvido' && Date.now() - new Date(t.created_at).getTime() > 7 * 86400000).length;
             
             let healthState: 'Estável' | 'Atenção' | 'Crítico' = 'Estável';
             if (pending >= 4) {
@@ -110,6 +118,10 @@ function DashboardHomeContent() {
               totalChamados: total,
               pendentes: pending,
               emExecucao: running,
+              urgentes,
+              antigas,
+              tempoMedio: averageResolutionTime(tickets.filter(t => t.tipo === 'manutencao')),
+              tickets,
               health: healthState
             };
           }));
@@ -179,9 +191,9 @@ function DashboardHomeContent() {
       c.local,
       c.bloco === 'Portaria' ? 'Portaria' : `${c.bloco} - Apto ${c.apartamento}`,
       `"${c.descricao.replace(/"/g, '""').replace(/\r?\n/g, ' ')}"`,
-      c.status === 'pendente' ? 'Pendente' 
+      c.status === 'pendente' ? 'Recebida'
         : c.status === 'em_execucao' ? 'Em andamento' 
-        : c.status === 'resolvido' ? 'Resolvido'
+        : c.status === 'resolvido' ? 'Concluída'
         : c.status === 'encontrado' ? 'Na Portaria'
         : c.status === 'aguardando_retirada' ? 'Aguardando Retirada'
         : 'Entregue'
@@ -272,7 +284,7 @@ function DashboardHomeContent() {
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(8);
       doc.setTextColor(82, 82, 91);
-      doc.text('Pendentes', 25, 67);
+      doc.text('Recebidas', 25, 67);
       
       // Em Execução
       doc.setFont('helvetica', 'bold');
@@ -282,7 +294,7 @@ function DashboardHomeContent() {
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(8);
       doc.setTextColor(82, 82, 91);
-      doc.text('Em Execução', 67, 67);
+      doc.text('Em andamento', 67, 67);
       
       // Resolvidos
       doc.setFont('helvetica', 'bold');
@@ -312,9 +324,9 @@ function DashboardHomeContent() {
         c.local,
         c.bloco === 'Portaria' ? 'Portaria' : `${c.bloco} - Apto ${c.apartamento}`,
         c.descricao,
-        c.status === 'pendente' ? 'Pendente' 
+        c.status === 'pendente' ? 'Recebida'
           : c.status === 'em_execucao' ? 'Em andamento' 
-          : c.status === 'resolvido' ? 'Resolvido'
+          : c.status === 'resolvido' ? 'Concluída'
           : c.status === 'encontrado' ? 'Na Portaria'
           : c.status === 'aguardando_retirada' ? 'Aguardando Retirada'
           : 'Entregue'
@@ -367,7 +379,7 @@ function DashboardHomeContent() {
   };
 
   const handleExportPortfolioCSV = () => {
-    const headers = ['Condomínio', 'Plano', 'Status Assinatura', 'Total Chamados', 'Chamados Pendentes', 'Chamados Em Execução', 'Saúde Operacional'];
+    const headers = ['Condomínio', 'Plano', 'Status Assinatura', 'Total Ocorrências', 'Ocorrências Recebidas', 'Ocorrências Em Andamento', 'Saúde Operacional'];
     const rows = portfolioCondos.map(item => [
       item.nome,
       item.plan_type.toUpperCase(),
@@ -427,7 +439,7 @@ function DashboardHomeContent() {
       doc.text(`Administradora / Gestor: ${gestor?.nome}`, 20, 42);
       doc.text(`Total de Prédios na Carteira: ${portfolioCondos.length}`, 20, 47);
       
-      const tableHeaders = [['Condomínio', 'Plano', 'Status Assinatura', 'Total Ocorrências', 'Pendentes', 'Em Execução', 'Saúde Operacional']];
+      const tableHeaders = [['Condomínio', 'Plano', 'Status Assinatura', 'Total Ocorrências', 'Recebidas', 'Em andamento', 'Saúde Operacional']];
       const tableRows = portfolioCondos.map(item => [
         item.nome,
         item.plan_type.toUpperCase(),
@@ -553,18 +565,32 @@ function DashboardHomeContent() {
 
   // --- MODO PORTFÓLIO ---
   if (isPortfolioView || (isCorporate && !condominio)) {
-    const totalPrédios = portfolioCondos.length;
-    const totalChamadosTodos = portfolioCondos.reduce((acc, c) => acc + c.totalChamados, 0);
-    const prediosSaudaveis = portfolioCondos.filter(c => c.health === 'Estável').length;
-    const totalPendencias = portfolioCondos.reduce((acc, c) => acc + c.pendentes, 0);
+    const now = Date.now();
+    const filteredPortfolio = portfolioCondos.filter(item => portfolioFilters.condominio === 'todos' || item.id === portfolioFilters.condominio).map(item => {
+      const tickets = item.tickets.filter(ticket => {
+        if (portfolioFilters.categoria !== 'todas' && (ticket.categoria || 'Manutenção') !== portfolioFilters.categoria) return false;
+        if (portfolioFilters.prioridade !== 'todas' && (ticket.prioridade || 'normal') !== portfolioFilters.prioridade) return false;
+        if (portfolioFilters.status !== 'todos' && ticket.status !== portfolioFilters.status) return false;
+        if (portfolioFilters.periodo !== 'todos' && now - new Date(ticket.created_at).getTime() > Number(portfolioFilters.periodo) * 86400000) return false;
+        if (portfolioFilters.responsavel && !(ticket.responsavel || '').toLowerCase().includes(portfolioFilters.responsavel.toLowerCase())) return false;
+        return ticket.tipo === 'manutencao';
+      });
+      return { ...item, totalChamados: tickets.length, pendentes: tickets.filter(t => t.status === 'pendente').length, emExecucao: tickets.filter(t => t.status === 'em_execucao').length, urgentes: tickets.filter(t => t.prioridade === 'urgente' && t.status !== 'resolvido').length, antigas: tickets.filter(t => t.status !== 'resolvido' && now - new Date(t.created_at).getTime() > 7 * 86400000).length, tempoMedio: averageResolutionTime(tickets) };
+    });
+    const totalPrédios = filteredPortfolio.length;
+    const totalChamadosTodos = filteredPortfolio.reduce((acc, c) => acc + c.pendentes + c.emExecucao, 0);
+    const totalUrgentes = filteredPortfolio.reduce((acc, c) => acc + c.urgentes, 0);
+    const totalAntigas = filteredPortfolio.reduce((acc, c) => acc + c.antigas, 0);
+    const resolutionValues = filteredPortfolio.filter(c => c.tempoMedio > 0);
+    const tempoMedioCarteira = resolutionValues.length ? resolutionValues.reduce((sum, c) => sum + c.tempoMedio, 0) / resolutionValues.length : 0;
 
     return (
       <div className="space-y-6 relative">
         {/* CABEÇALHO PORTFÓLIO */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-zinc-200 dark:border-zinc-800 pb-4">
           <div>
-            <h1 className="text-base font-bold text-zinc-900 dark:text-white uppercase tracking-wider">Carteira de Condomínios</h1>
-            <p className="text-xs text-zinc-500 font-medium">Visão de gerenciamento multi-condomínio e saúde operacional</p>
+            <h1 className="text-base font-bold text-zinc-900 dark:text-white uppercase tracking-wider">Visão da Administradora</h1>
+            <p className="text-xs text-zinc-500 font-medium">Visão consolidada da operação de todos os condomínios</p>
           </div>
           <div className="flex flex-wrap gap-2">
             <button 
@@ -582,6 +608,15 @@ function DashboardHomeContent() {
               <span>Exportar CSV</span>
             </button>
           </div>
+        </div>
+
+        <div className="grid grid-cols-2 lg:grid-cols-6 gap-2 bg-white dark:bg-zinc-925/60 border border-zinc-200 dark:border-zinc-800 rounded-xl p-3">
+          <select value={portfolioFilters.condominio} onChange={e => setPortfolioFilters(value => ({ ...value, condominio: e.target.value }))} className="filter-field"><option value="todos">Todos os condomínios</option>{portfolioCondos.map(item => <option key={item.id} value={item.id}>{item.nome}</option>)}</select>
+          <select value={portfolioFilters.categoria} onChange={e => setPortfolioFilters(value => ({ ...value, categoria: e.target.value }))} className="filter-field"><option value="todas">Todas as categorias</option>{OCCURRENCE_CATEGORIES.map(value => <option key={value}>{value}</option>)}</select>
+          <select value={portfolioFilters.prioridade} onChange={e => setPortfolioFilters(value => ({ ...value, prioridade: e.target.value }))} className="filter-field"><option value="todas">Todas as prioridades</option>{PRIORITIES.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select>
+          <select value={portfolioFilters.status} onChange={e => setPortfolioFilters(value => ({ ...value, status: e.target.value }))} className="filter-field"><option value="todos">Todos os status</option><option value="pendente">Recebidas</option><option value="em_execucao">Em andamento</option><option value="resolvido">Concluídas</option></select>
+          <select value={portfolioFilters.periodo} onChange={e => setPortfolioFilters(value => ({ ...value, periodo: e.target.value }))} className="filter-field"><option value="todos">Todo o período</option><option value="7">Últimos 7 dias</option><option value="30">Últimos 30 dias</option><option value="90">Últimos 90 dias</option></select>
+          <input value={portfolioFilters.responsavel} onChange={e => setPortfolioFilters(value => ({ ...value, responsavel: e.target.value }))} placeholder="Responsável" className="filter-field" />
         </div>
 
         {/* GRID DE MÉTRICAS PORTFÓLIO */}
@@ -603,42 +638,42 @@ function DashboardHomeContent() {
           {/* CARD 2: OCORRÊNCIAS TOTAIS */}
           <div className="bg-white dark:bg-zinc-925/80 border border-zinc-200 dark:border-zinc-800 p-5 rounded-2xl flex flex-col justify-between shadow-sm dark:shadow-xl hover:border-zinc-300 dark:hover:border-zinc-700 transition-all group">
             <div className="flex justify-between items-center">
-              <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Chamados Totais</span>
+              <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Ocorrências abertas</span>
               <div className="w-8 h-8 rounded-lg bg-brand/10 border border-brand/15 flex items-center justify-center text-brand group-hover:scale-105 transition-transform">
                 <Activity className="w-4 h-4" />
               </div>
             </div>
             <div className="pt-4">
               <span className="text-3xl font-black text-zinc-900 dark:text-white tracking-tight">{totalChamadosTodos}</span>
-              <p className="text-[10px] text-zinc-550 mt-1 font-semibold">Ocorrências registradas na carteira</p>
+              <p className="text-[10px] text-zinc-550 mt-1 font-semibold">Recebidas e em andamento</p>
             </div>
           </div>
 
           {/* CARD 3: PRÉDIOS SAUDÁVEIS */}
           <div className="bg-white dark:bg-zinc-925/80 border border-zinc-200 dark:border-zinc-800 p-5 rounded-2xl flex flex-col justify-between shadow-sm dark:shadow-xl hover:border-zinc-300 dark:hover:border-zinc-700 transition-all group">
             <div className="flex justify-between items-center">
-              <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Prédios Saudáveis</span>
+              <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Urgentes</span>
               <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/15 flex items-center justify-center text-emerald-500 group-hover:scale-105 transition-transform">
                 <CheckCircle2 className="w-4 h-4" />
               </div>
             </div>
             <div className="pt-4">
-              <span className="text-3xl font-black text-zinc-900 dark:text-white tracking-tight">{prediosSaudaveis}</span>
-              <p className="text-[10px] text-zinc-500 mt-1 font-semibold">Nenhuma pendência ativa</p>
+              <span className="text-3xl font-black text-zinc-900 dark:text-white tracking-tight">{totalUrgentes}</span>
+              <p className="text-[10px] text-zinc-500 mt-1 font-semibold">Exigem atenção imediata</p>
             </div>
           </div>
 
           {/* CARD 4: MANUTENÇÕES PENDENTES */}
           <div className="bg-white dark:bg-zinc-925/80 border border-zinc-200 dark:border-zinc-800 p-5 rounded-2xl flex flex-col justify-between shadow-sm dark:shadow-xl hover:border-zinc-300 dark:hover:border-zinc-700 transition-all group">
             <div className="flex justify-between items-center">
-              <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Pendências Críticas</span>
+              <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Abertas há mais de 7 dias</span>
               <div className="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/15 flex items-center justify-center text-amber-500 group-hover:scale-105 transition-transform">
                 <Wrench className="w-4 h-4" />
               </div>
             </div>
             <div className="pt-4">
-              <span className="text-3xl font-black text-zinc-900 dark:text-white tracking-tight">{totalPendencias}</span>
-              <p className="text-[10px] text-zinc-500 mt-1 font-semibold">Chamados aguardando revisão</p>
+              <span className="text-3xl font-black text-zinc-900 dark:text-white tracking-tight">{totalAntigas}</span>
+              <p className="text-[10px] text-zinc-500 mt-1 font-semibold">Tempo médio: {formatDuration(tempoMedioCarteira)}</p>
             </div>
           </div>
         </div>
@@ -662,7 +697,7 @@ function DashboardHomeContent() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800/50">
-                {portfolioCondos.map((item) => (
+                {filteredPortfolio.map((item) => (
                   <tr key={item.id} className="hover:bg-zinc-55/20 dark:hover:bg-white/[0.01] transition-all">
                     {/* NOME / SLUG */}
                     <td className="px-5 py-4">
@@ -701,12 +736,12 @@ function DashboardHomeContent() {
                     <td className="px-5 py-4">
                       <div>
                         <span className="text-xs font-semibold text-zinc-850 dark:text-zinc-200">
-                          {item.totalChamados} chamados
+                          {item.pendentes + item.emExecucao} abertas
                         </span>
                         <div className="text-[10px] text-zinc-500 mt-0.5 flex space-x-1.5">
-                          <span>{item.pendentes} pendentes</span>
+                          <span>{item.urgentes} urgentes</span>
                           <span>•</span>
-                          <span>{item.emExecucao} em andamento</span>
+                          <span>{item.emExecucao} em andamento · média {formatDuration(item.tempoMedio)}</span>
                         </div>
                       </div>
                     </td>
@@ -752,10 +787,11 @@ function DashboardHomeContent() {
   const manutencoes = chamados.filter(c => c.tipo === 'manutencao');
   const pendentes = manutencoes.filter(c => c.status === 'pendente').length;
   const emExecucao = manutencoes.filter(c => c.status === 'em_execucao').length;
-  const resolvidos = manutencoes.filter(c => c.status === 'resolvido').length;
+  const urgentes = manutencoes.filter(c => c.prioridade === 'urgente' && c.status !== 'resolvido').length;
+  const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1).getTime();
+  const concluidasNoMes = manutencoes.filter(c => c.completed_at && new Date(c.completed_at).getTime() >= startOfMonth).length;
+  const tempoMedioResolucao = averageResolutionTime(manutencoes);
 
-  const achados = chamados.filter(c => c.tipo === 'achado_perdido');
-  const achadosAtivos = achados.filter(c => c.status === 'encontrado' || c.status === 'aguardando_retirada').length;
 
   const ultimasAtividades = chamados.slice(0, 5);
 
@@ -818,7 +854,7 @@ function DashboardHomeContent() {
       {/* CABEÇALHO */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-zinc-200 dark:border-zinc-800 pb-4">
         <div>
-          <h1 className="text-base font-bold text-zinc-900 dark:text-white uppercase tracking-wider">Painel Operacional</h1>
+          <h1 className="text-base font-bold text-zinc-900 dark:text-white uppercase tracking-wider">Visão Geral</h1>
           <p className="text-xs text-zinc-500 font-medium">Resumo de atividades e métricas do {condominio?.nome}</p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -840,7 +876,7 @@ function DashboardHomeContent() {
             onClick={() => router.push('/dashboard/kanban')}
             className="bg-brand hover:bg-brand/90 text-white text-xs font-semibold px-4 py-2.5 rounded-lg flex items-center space-x-1.5 transition-all shadow-[0_4px_20px_rgba(0,51,255,0.25)] active:scale-[0.98] cursor-pointer"
           >
-            <span>Ver Kanban</span>
+            <span>Gestão de Ocorrências</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </button>
         </div>
@@ -851,21 +887,21 @@ function DashboardHomeContent() {
         {/* CARD 1: PENDENTES */}
         <div className="bg-white dark:bg-zinc-925/80 border border-zinc-200 dark:border-zinc-800 p-5 rounded-2xl flex flex-col justify-between shadow-sm dark:shadow-xl transition-all hover:border-zinc-300 dark:hover:border-zinc-700 group">
           <div className="flex justify-between items-center">
-            <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Pendentes</span>
+            <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Ocorrências abertas</span>
             <div className="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/15 flex items-center justify-center text-amber-500 group-hover:scale-105 transition-transform">
               <Clock className="w-4 h-4" />
             </div>
           </div>
           <div className="pt-4">
-            <span className="text-3xl font-black text-zinc-900 dark:text-white tracking-tight">{pendentes}</span>
-            <p className="text-[10px] text-zinc-550 mt-1 font-semibold">Chamados aguardando revisão</p>
+            <span className="text-3xl font-black text-zinc-900 dark:text-white tracking-tight">{pendentes + emExecucao}</span>
+            <p className="text-[10px] text-zinc-550 mt-1 font-semibold">Recebidas e em andamento</p>
           </div>
         </div>
 
         {/* CARD 2: EM EXECUÇÃO */}
         <div className="bg-white dark:bg-zinc-925/80 border border-zinc-200 dark:border-zinc-800 p-5 rounded-2xl flex flex-col justify-between shadow-sm dark:shadow-xl transition-all hover:border-zinc-300 dark:hover:border-zinc-700 group">
           <div className="flex justify-between items-center">
-            <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Em Execução</span>
+            <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Em andamento</span>
             <div className="w-8 h-8 rounded-lg bg-brand/10 border border-brand/15 flex items-center justify-center text-brand group-hover:scale-105 transition-transform">
               <Wrench className="w-4 h-4" />
             </div>
@@ -876,31 +912,31 @@ function DashboardHomeContent() {
           </div>
         </div>
 
-        {/* CARD 3: ACHADOS ATIVOS */}
+        {/* CARD 3: URGENTES */}
         <div className="bg-white dark:bg-zinc-925/80 border border-zinc-200 dark:border-zinc-800 p-5 rounded-2xl flex flex-col justify-between shadow-sm dark:shadow-xl transition-all hover:border-zinc-300 dark:hover:border-zinc-700 group">
           <div className="flex justify-between items-center">
-            <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Achados Ativos</span>
+            <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Urgentes</span>
             <div className="w-8 h-8 rounded-lg bg-blue-500/10 border border-blue-500/15 flex items-center justify-center text-blue-450 group-hover:scale-105 transition-transform">
-              <Package className="w-4 h-4" />
+              <AlertTriangle className="w-4 h-4" />
             </div>
           </div>
           <div className="pt-4">
-            <span className="text-3xl font-black text-zinc-900 dark:text-white tracking-tight">{achadosAtivos}</span>
-            <p className="text-[10px] text-zinc-550 mt-1 font-semibold">Pertences retidos na portaria</p>
+            <span className="text-3xl font-black text-zinc-900 dark:text-white tracking-tight">{urgentes}</span>
+            <p className="text-[10px] text-zinc-550 mt-1 font-semibold">Exigem atenção imediata</p>
           </div>
         </div>
 
         {/* CARD 4: RESOLVIDOS */}
         <div className="bg-white dark:bg-zinc-925/80 border border-zinc-200 dark:border-zinc-800 p-5 rounded-2xl flex flex-col justify-between shadow-sm dark:shadow-xl transition-all hover:border-zinc-300 dark:hover:border-zinc-700 group">
           <div className="flex justify-between items-center">
-            <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Concluídos</span>
+            <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Concluídas no mês</span>
             <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/15 flex items-center justify-center text-emerald-450 group-hover:scale-105 transition-transform">
               <CheckCircle2 className="w-4 h-4" />
             </div>
           </div>
           <div className="pt-4">
-            <span className="text-3xl font-black text-zinc-900 dark:text-white tracking-tight">{resolvidos}</span>
-            <p className="text-[10px] text-zinc-550 mt-1 font-semibold">Manutenções finalizadas</p>
+            <span className="text-3xl font-black text-zinc-900 dark:text-white tracking-tight">{concluidasNoMes}</span>
+            <p className="text-[10px] text-zinc-550 mt-1 font-semibold">Tempo médio: {formatDuration(tempoMedioResolucao)}</p>
           </div>
         </div>
       </div>
@@ -934,7 +970,7 @@ function DashboardHomeContent() {
                   <div className="min-w-0">
                     <div className="flex items-center space-x-2 flex-wrap gap-y-1">
                       <span className="text-xs font-semibold text-zinc-800 dark:text-zinc-200">
-                        {item.tipo === 'manutencao' ? 'Manutenção' : 'Achado e Perdido'}
+                        {item.tipo === 'manutencao' ? occurrenceTitle(item) : 'Achado e Perdido'}
                       </span>
                       <span className="text-zinc-700 text-[10px]">•</span>
                       <span className="text-[10px] text-zinc-500 dark:text-zinc-400 font-semibold flex items-center bg-zinc-100 dark:bg-zinc-950/50 px-2 py-0.5 rounded border border-zinc-200 dark:border-zinc-800">
@@ -960,9 +996,9 @@ function DashboardHomeContent() {
                         ? 'bg-brand/10 text-brand border-brand/15'
                         : 'bg-emerald-500/10 text-emerald-450 border-emerald-500/15'
                   }`}>
-                    {item.status === 'pendente' ? 'Pendente' 
+                    {item.status === 'pendente' ? 'Recebida'
                       : item.status === 'em_execucao' ? 'Em andamento' 
-                      : item.status === 'resolvido' ? 'Resolvido'
+                      : item.status === 'resolvido' ? 'Concluída'
                       : item.status === 'encontrado' ? 'Na Portaria'
                       : item.status === 'aguardando_retirada' ? 'Aguardando Retirada'
                       : 'Entregue'}

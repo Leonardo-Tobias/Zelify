@@ -1,537 +1,155 @@
-'use client';
+'use client'
 
-import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { 
-  Clock, 
-  Wrench, 
-  CheckCircle2, 
-  MapPin, 
-  Building,
-  ChevronRight,
-  ChevronLeft,
-  ArrowRightLeft,
-  X,
-  Lock,
-  Trash2,
-  Paperclip
-} from 'lucide-react';
-import { db, Chamado } from '@/lib/db';
-import { useCondominio } from '@/contexts/CondominioContext';
+import React, { useEffect, useMemo, useState } from 'react'
+import { CheckCircle2, ChevronLeft, ChevronRight, Clock, Lock, MapPin, MessageSquare, Paperclip, Trash2, UserRound, Wrench, X } from 'lucide-react'
+import { db, Chamado, OcorrenciaComentario, OcorrenciaHistorico } from '@/lib/db'
+import { useCondominio } from '@/contexts/CondominioContext'
+import { OCCURRENCE_CATEGORIES, PRIORITIES, STATUS_LABELS, formatOccurrenceAge, occurrenceTitle, priorityLabel, requesterLabel } from '@/lib/occurrences'
 
-type StatusType = 'pendente' | 'em_execucao' | 'resolvido';
+type StatusType = 'pendente' | 'em_execucao' | 'resolvido'
+const columns: Array<{ title: string; status: StatusType; color: string; icon: typeof Clock }> = [
+  { title: 'Recebidas', status: 'pendente', color: 'border-t-amber-500', icon: Clock },
+  { title: 'Em andamento', status: 'em_execucao', color: 'border-t-brand', icon: Wrench },
+  { title: 'Concluídas', status: 'resolvido', color: 'border-t-emerald-500', icon: CheckCircle2 },
+]
 
-const getPrioridade = (id: string, descricao: string) => {
-  const sum = id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-  if (
-    descricao.toLowerCase().includes('urgente') || 
-    descricao.toLowerCase().includes('risco') || 
-    descricao.toLowerCase().includes('vazamento') || 
-    sum % 3 === 0
-  ) {
-    return 'Alta';
-  }
-  if (descricao.toLowerCase().includes('lâmpada') || sum % 3 === 1) {
-    return 'Média';
-  }
-  return 'Baixa';
-};
+function PriorityBadge({ value }: { value?: Chamado['prioridade'] }) {
+  const style = value === 'urgente' ? 'bg-red-500/15 text-red-500 dark:text-red-400 border-red-500/30' : value === 'alta' ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20' : 'bg-zinc-100 dark:bg-white/[0.03] text-zinc-500 border-zinc-200 dark:border-white/[0.07]'
+  return <span className={`text-[9px] font-bold px-2 py-0.5 rounded border ${style}`}>{priorityLabel(value)}</span>
+}
 
-const getTitleAndDesc = (text: string) => {
-  const index = text.indexOf('.');
-  if (index !== -1 && index < 50) {
-    return {
-      title: text.substring(0, index).trim(),
-      desc: text.substring(index + 1).trim()
-    };
-  }
-  const words = text.split(' ');
-  if (words.length > 5) {
-    const title = words.slice(0, 4).join(' ');
-    const desc = words.slice(4).join(' ');
-    return {
-      title: title + '...',
-      desc: desc
-    };
-  }
-  return {
-    title: text,
-    desc: ''
-  };
-};
+function Info({ label, value }: { label: string; value: string }) {
+  return <div className="min-w-0"><span className="text-[9px] text-zinc-500 font-bold uppercase tracking-wider">{label}</span><p className="font-semibold text-zinc-800 dark:text-zinc-300 mt-1 break-words">{value}</p></div>
+}
 
 export default function KanbanPage() {
-  const router = useRouter();
-  const { condominio } = useCondominio();
-  const [chamados, setChamados] = useState<Chamado[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedChamado, setSelectedChamado] = useState<Chamado | null>(null);
-  
-  const [draggedId, setDraggedId] = useState<string | null>(null);
-
-  const loadData = async (condoId: string) => {
-    try {
-      const data = await db.getChamados(condoId, 'manutencao');
-      setChamados(data);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { condominio } = useCondominio()
+  const [chamados, setChamados] = useState<Chamado[]>([])
+  const [loading, setLoading] = useState(true)
+  const [selected, setSelected] = useState<Chamado | null>(null)
+  const [draggedId, setDraggedId] = useState<string | null>(null)
+  const [categoria, setCategoria] = useState('todas')
+  const [prioridade, setPrioridade] = useState('todas')
+  const [busca, setBusca] = useState('')
+  const [historico, setHistorico] = useState<OcorrenciaHistorico[]>([])
+  const [comentarios, setComentarios] = useState<OcorrenciaComentario[]>([])
+  const [novoComentario, setNovoComentario] = useState('')
+  const [visibilidade, setVisibilidade] = useState<'interno' | 'publico'>('interno')
+  const [savingComment, setSavingComment] = useState(false)
+  const [responsavel, setResponsavel] = useState('')
 
   useEffect(() => {
-    if (condominio?.id) {
-      loadData(condominio.id);
-    }
-  }, [condominio?.id]);
+    if (!condominio?.id) return
+    setLoading(true)
+    db.getChamados(condominio.id, 'manutencao').then(setChamados).catch(console.error).finally(() => setLoading(false))
+  }, [condominio?.id])
 
-  // Alterar status de um chamado
-  const handleUpdateStatus = async (id: string, newStatus: StatusType) => {
+  useEffect(() => {
+    if (!selected) return
+    setResponsavel(selected.responsavel || '')
+    db.getOcorrenciaDetalhes(selected.id).then(data => {
+      setHistorico(data.historico); setComentarios(data.comentarios)
+    }).catch(error => { console.error(error); setHistorico([]); setComentarios([]) })
+  }, [selected])
+
+  const filtered = useMemo(() => chamados.filter(item => {
+    if (categoria !== 'todas' && (item.categoria || 'Manutenção') !== categoria) return false
+    if (prioridade !== 'todas' && (item.prioridade || 'normal') !== prioridade) return false
+    const term = busca.trim().toLowerCase()
+    return !term || `${item.titulo || ''} ${item.descricao} ${item.local} ${item.responsavel || ''}`.toLowerCase().includes(term)
+  }), [chamados, categoria, prioridade, busca])
+
+  const updateStatus = async (id: string, status: StatusType) => {
     try {
-      const updated = await db.updateChamadoStatus(id, newStatus);
-      if (updated && condominio) {
-        // Atualizar lista local
-        setChamados(prev => prev.map(c => c.id === id ? { ...c, status: newStatus, updated_at: new Date().toISOString() } : c));
-        if (selectedChamado && selectedChamado.id === id) {
-          setSelectedChamado(prev => prev ? { ...prev, status: newStatus, updated_at: new Date().toISOString() } : null);
-        }
+      const updated = await db.updateChamadoStatus(id, status)
+      if (!updated) return
+      setChamados(items => items.map(item => item.id === id ? { ...item, ...updated } : item))
+      setSelected(item => item?.id === id ? { ...item, ...updated } : item)
+      if (selected?.id === id) {
+        const details = await db.getOcorrenciaDetalhes(id)
+        setHistorico(details.historico)
       }
-    } catch (err) {
-      alert('Erro ao atualizar status.');
-      console.error(err);
-    }
-  };
-
-  const handleDeleteChamado = async (id: string) => {
-    try {
-      await db.deleteChamado(id);
-      setChamados(prev => prev.filter(c => c.id !== id));
-      if (selectedChamado && selectedChamado.id === id) {
-        setSelectedChamado(null);
-      }
-    } catch (err) {
-      alert('Erro ao excluir chamado.');
-      console.error(err);
-    }
-  };
-
-  // Drag and drop handlers
-  const handleDragStart = (e: React.DragEvent, id: string) => {
-    setDraggedId(id);
-    e.dataTransfer.setData('text/plain', id);
-  };
-
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-  };
-
-  const handleDrop = async (e: React.DragEvent, status: StatusType) => {
-    e.preventDefault();
-    const id = e.dataTransfer.getData('text/plain') || draggedId;
-    if (id) {
-      await handleUpdateStatus(id, status);
-    }
-    setDraggedId(null);
-  };
-
-  if (loading) {
-    return (
-      <div className="h-full flex items-center justify-center py-20 text-zinc-500">
-        <Clock className="w-5 h-5 animate-spin mr-2" />
-        <span className="text-xs font-medium">Carregando quadro...</span>
-      </div>
-    );
+    } catch (error) { console.error(error); alert('Não foi possível atualizar a ocorrência.') }
   }
 
-  // Filtrar chamados por coluna
-  const colunas: { title: string; status: StatusType; color: string; icon: React.ComponentType<{ className?: string }> }[] = [
-    { title: 'Pendentes', status: 'pendente', color: 'border-t-amber-500', icon: Clock },
-    { title: 'Em Execução', status: 'em_execucao', color: 'border-t-blue-500', icon: Wrench },
-    { title: 'Resolvidos', status: 'resolvido', color: 'border-t-emerald-500', icon: CheckCircle2 }
-  ];
+  const removeOccurrence = async (id: string) => {
+    if (!confirm('Excluir esta ocorrência permanentemente?')) return
+    try { await db.deleteChamado(id); setChamados(items => items.filter(item => item.id !== id)); setSelected(null) }
+    catch (error) { console.error(error); alert('Não foi possível excluir a ocorrência.') }
+  }
 
-  const isBlocked = condominio?.subscription_status !== 'active' && condominio?.plan_type !== 'free';
+  const addComment = async () => {
+    if (!selected || !novoComentario.trim()) return
+    setSavingComment(true)
+    try {
+      const gestor = JSON.parse(localStorage.getItem('zelcon_gestor') || '{}')
+      const created = await db.addOcorrenciaComentario(selected, novoComentario, visibilidade, gestor.nome)
+      setComentarios(items => [...items, created]); setNovoComentario('')
+      if (visibilidade === 'publico') {
+        const details = await db.getOcorrenciaDetalhes(selected.id)
+        setHistorico(details.historico)
+      }
+    } catch (error) { console.error(error); alert('Não foi possível adicionar o comentário.') }
+    finally { setSavingComment(false) }
+  }
 
-  return (
-    <div className="space-y-6 flex flex-col h-full min-h-[calc(100vh-140px)] relative">
-      
-      {/* BLOQUEIO POR INADIMPLÊNCIA */}
-      {isBlocked && (
-        <div className="flex-1 flex items-center justify-center">
-          <div className="text-center space-y-4 max-w-md">
-            <div className="w-14 h-14 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center mx-auto">
-              <Lock className="w-6 h-6 text-red-400" />
-            </div>
-            <h2 className="text-base font-bold text-white">Assinatura Bloqueada</h2>
-            <p className="text-sm text-zinc-400 leading-relaxed">
-              Seu acesso ao Mural de Ocorrências está temporariamente suspenso devido a pendências de pagamento na sua assinatura.
-            </p>
-            <button
-              onClick={() => router.push('/dashboard/configuracoes?tab=faturamento')}
-              className="inline-flex items-center space-x-2 bg-brand hover:bg-brand/90 text-white text-xs font-semibold px-5 py-2.5 rounded-lg transition-all active:scale-[0.98]"
-            >
-              <span>Regularizar Assinatura</span>
-            </button>
-          </div>
-        </div>
-      )}
-      
-      {/* HEADER DO QUADRO */}
-      <div className="flex justify-between items-center shrink-0 border-b border-zinc-200 dark:border-zinc-800 pb-4">
-        <div>
-          <h1 className="text-base font-bold text-zinc-900 dark:text-white uppercase tracking-wider">Mural de Ocorrências</h1>
-          <p className="text-xs text-zinc-500 font-medium">Controle e gestão de ocorrências do condomínio</p>
-        </div>
-        <div className="text-[10px] text-zinc-600 dark:text-zinc-400 font-bold uppercase tracking-wider bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 px-2.5 py-1 rounded-lg">
-          Total: {chamados.length} ocorrências
+  const saveResponsible = async () => {
+    if (!selected) return
+    try {
+      const updated = await db.updateChamadoResponsavel(selected.id, responsavel)
+      if (!updated) return
+      setSelected(updated)
+      setChamados(items => items.map(item => item.id === updated.id ? updated : item))
+    } catch (error) { console.error(error); alert('Não foi possível atribuir o responsável.') }
+  }
+
+  if (!condominio) return null
+  if (condominio.subscription_status !== 'active' && condominio.plan_type !== 'free') return <div className="h-full flex flex-col items-center justify-center p-10 text-center"><Lock className="w-10 h-10 text-amber-500 mb-4" /><h1 className="font-bold text-zinc-900 dark:text-white">Gestão de Ocorrências indisponível</h1><p className="text-xs text-zinc-500 mt-2 max-w-sm">Regularize a assinatura para voltar a gerenciar as ocorrências.</p></div>
+
+  return <div className="h-full flex flex-col bg-zinc-50 dark:bg-[#09090b] text-zinc-700 dark:text-zinc-300">
+    <header className="px-5 md:px-8 py-5 border-b border-zinc-200 dark:border-white/[0.06] bg-white dark:bg-[#09090b]">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        <div><h1 className="text-base font-bold text-zinc-900 dark:text-white uppercase tracking-wider">Gestão de Ocorrências</h1><p className="text-[10px] text-zinc-500 mt-1">Acompanhe o fluxo operacional de {condominio.nome}</p></div>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 w-full lg:w-auto">
+          <input value={busca} onChange={e => setBusca(e.target.value)} placeholder="Buscar ocorrência" className="bg-white dark:bg-[#0d0d0f] border border-zinc-200 dark:border-white/[0.08] rounded-lg px-3 py-2 text-xs outline-none focus:border-brand" />
+          <select value={categoria} onChange={e => setCategoria(e.target.value)} className="bg-white dark:bg-[#0d0d0f] border border-zinc-200 dark:border-white/[0.08] rounded-lg px-3 py-2 text-xs outline-none"><option value="todas">Todas as categorias</option>{OCCURRENCE_CATEGORIES.map(value => <option key={value}>{value}</option>)}</select>
+          <select value={prioridade} onChange={e => setPrioridade(e.target.value)} className="bg-white dark:bg-[#0d0d0f] border border-zinc-200 dark:border-white/[0.08] rounded-lg px-3 py-2 text-xs outline-none"><option value="todas">Todas as prioridades</option>{PRIORITIES.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select>
         </div>
       </div>
+    </header>
 
-      {/* QUADROS (KANBAN COLUMNS) */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1 items-start min-h-[500px]">
-        {colunas.map((col) => {
-          const colChamados = chamados.filter(c => c.status === col.status);
-          
-          // Determine theme-specific color settings
-          const themeStyles = {
-            pendente: {
-              border: 'border-zinc-200 dark:border-zinc-800/80',
-              bgHeader: 'bg-amber-500/5',
-              badge: 'bg-amber-500 text-white',
-              text: 'text-amber-600 dark:text-amber-500',
-              borderHeader: 'border-b-amber-500 dark:border-b-amber-500/30',
-              hover: 'hover:border-amber-500/30 dark:hover:border-amber-500/40'
-            },
-            em_execucao: {
-              border: 'border-zinc-200 dark:border-zinc-800/80',
-              bgHeader: 'bg-brand/5',
-              badge: 'bg-brand text-white',
-              text: 'text-brand',
-              borderHeader: 'border-b-brand dark:border-b-brand/30',
-              hover: 'hover:border-blue-500/30 dark:hover:border-blue-500/40'
-            },
-            resolvido: {
-              border: 'border-zinc-200 dark:border-zinc-800/80',
-              bgHeader: 'bg-emerald-500/5',
-              badge: 'bg-emerald-500 text-white',
-              text: 'text-emerald-600 dark:text-emerald-500',
-              borderHeader: 'border-b-emerald-500 dark:border-b-emerald-500/30',
-              hover: 'hover:border-emerald-500/30 dark:hover:border-emerald-500/40'
-            }
-          }[col.status];
-
-          return (
-            <div 
-              key={col.status}
-              onDragOver={handleDragOver}
-              onDrop={(e) => handleDrop(e, col.status)}
-              className={`bg-zinc-50/50 dark:bg-[#070A13] border ${themeStyles.border} rounded-xl flex flex-col h-full min-h-[400px] lg:max-h-[calc(100vh-220px)] overflow-hidden shadow-sm`}
-            >
-              {/* TÍTULO DA COLUNA */}
-              <div className={`p-4 border-b ${themeStyles.borderHeader} flex items-center justify-between shrink-0 ${themeStyles.bgHeader}`}>
-                <div className="flex items-center space-x-2">
-                  <col.icon className={`w-4 h-4 ${themeStyles.text}`} />
-                  <span className={`text-xs font-bold uppercase tracking-wider ${themeStyles.text}`}>{col.title}</span>
-                </div>
-                <span className={`text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center shrink-0 shadow-sm ${themeStyles.badge}`}>
-                  {colChamados.length}
-                </span>
-              </div>
-
-              {/* LISTA DE CARDS */}
-              <div className="p-3 space-y-3 overflow-y-auto flex-1 custom-scrollbar">
-                {colChamados.length === 0 ? (
-                  <div className="py-16 text-center text-zinc-400 dark:text-zinc-500 flex flex-col items-center justify-center space-y-1">
-                    <col.icon className="w-5 h-5 opacity-20 mb-1" />
-                    <span className="text-[10px] font-bold uppercase tracking-wider">Nenhum chamado</span>
-                  </div>
-                ) : (
-                  colChamados.map((item) => (
-                    <div
-                      key={item.id}
-                      draggable
-                      onDragStart={(e) => handleDragStart(e, item.id)}
-                      onClick={() => setSelectedChamado(item)}
-                      className={`bg-white dark:bg-[#13192B] border border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 hover:bg-zinc-50/80 dark:hover:bg-[#182037] rounded-xl p-3.5 space-y-3.5 cursor-pointer transition-all shadow-sm group text-left`}
-                    >
-                      {/* HEADER DO CARD (LOCATION & PRIORITY) */}
-                      <div className="flex items-center justify-between">
-                        <span className="flex items-center text-[10px] font-bold text-indigo-500 dark:text-indigo-400 uppercase tracking-wider">
-                          <MapPin className="w-3.5 h-3.5 mr-1 text-indigo-500 dark:text-indigo-400 shrink-0" />
-                          {item.local}
-                        </span>
-                        
-                        {(() => {
-                          const prio = getPrioridade(item.id, item.descricao);
-                          const badgeStyles = {
-                            Alta: 'text-red-500 border border-red-500/30 bg-red-500/5 dark:bg-red-500/10',
-                            Média: 'text-amber-500 border border-amber-500/30 bg-amber-500/5 dark:bg-amber-500/10',
-                            Baixa: 'text-emerald-500 border border-emerald-500/30 bg-emerald-500/5 dark:bg-emerald-500/10'
-                          }[prio];
-                          return (
-                            <span className={`text-[9px] font-black px-2 py-0.5 rounded uppercase tracking-wide ${badgeStyles}`}>
-                              {prio}
-                            </span>
-                          );
-                        })()}
-                      </div>
-
-                      {/* CORPO DO CARD (TITLE & DESCRIPTION OR PHOTO LINK) */}
-                      <div className="space-y-1.5">
-                        {(() => {
-                          const { title, desc } = getTitleAndDesc(item.descricao);
-                          return (
-                            <>
-                              <h4 className="text-xs font-bold text-zinc-900 dark:text-white leading-snug">
-                                {title}
-                              </h4>
-                              {desc && (
-                                <p className="text-[11px] text-zinc-550 dark:text-zinc-400 font-medium leading-relaxed">
-                                  {desc}
-                                </p>
-                              )}
-                            </>
-                          );
-                        })()}
-                        
-                        {/* PHOTO LINK AS SPECIFIED IN DESIGN */}
-                        {item.foto_url && (
-                          <div 
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setSelectedChamado(item);
-                            }}
-                            className="flex items-center space-x-1 text-[10.5px] text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-semibold cursor-pointer py-0.5 inline-flex"
-                          >
-                            <Paperclip className="w-3.5 h-3.5 shrink-0" />
-                            <span>Ver foto do chamado</span>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* RODAPÉ DO CARD / NAV ARROWS */}
-                      <div className="pt-2.5 border-t border-zinc-150 dark:border-zinc-800/80 flex items-center justify-between text-[10px] text-zinc-500 dark:text-zinc-400 font-medium">
-                        <span className="flex items-center font-semibold text-zinc-500 dark:text-zinc-400">
-                          <Building className="w-3.5 h-3.5 mr-1 text-zinc-450 dark:text-zinc-500 shrink-0" />
-                          {item.bloco === 'Portaria' ? 'Portaria' : `Bloco ${item.bloco} · Apt ${item.apartamento}`}
-                        </span>
-
-                        <div className="flex items-center space-x-3 shrink-0">
-                          <span className="font-mono text-[9px] text-zinc-400 dark:text-zinc-555 pl-2">
-                            {new Date(item.created_at).toLocaleDateString('pt-BR')}
-                          </span>
-                          
-                          {/* BOTÕES DE TRANSIÇÃO (CIRCULAR DESIGN) */}
-                          <div className="flex items-center space-x-1 shrink-0">
-                            {col.status !== 'pendente' && (
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleUpdateStatus(item.id, col.status === 'resolvido' ? 'em_execucao' : 'pendente');
-                                }}
-                                className="w-5 h-5 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors cursor-pointer border border-zinc-200 dark:border-zinc-700"
-                                title="Mover para esquerda"
-                              >
-                                <ChevronLeft className="w-3.5 h-3.5" />
-                              </button>
-                            )}
-                            {col.status !== 'resolvido' && (
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleUpdateStatus(item.id, col.status === 'pendente' ? 'em_execucao' : 'resolvido');
-                                }}
-                                className="w-5 h-5 rounded-full bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 flex items-center justify-center hover:bg-zinc-800 dark:hover:bg-white transition-colors cursor-pointer border border-zinc-900 dark:border-zinc-100"
-                                title="Mover para direita"
-                              >
-                                <ChevronRight className="w-3.5 h-3.5" />
-                              </button>
-                            )}
-                            {col.status === 'resolvido' && (
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  if (window.confirm('Excluir este chamado permanentemente?')) {
-                                    handleDeleteChamado(item.id);
-                                  }
-                                }}
-                                className="w-5 h-5 rounded-full bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-500 hover:text-red-450 flex items-center justify-center transition-colors cursor-pointer"
-                                title="Excluir chamado"
-                              >
-                                <Trash2 className="w-3.5 h-3.5" />
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-
-                    </div>
-                  ))
-                )}
-              </div>
-
-              {/* COLUMN FOOTER - + NOVO CHAMADO ACTIONS */}
-              <div className="p-3 border-t border-zinc-200 dark:border-zinc-800/80 bg-zinc-100/30 dark:bg-zinc-950/40 shrink-0">
-                <a 
-                  href={`/${condominio?.slug}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="w-full py-2 rounded-lg border border-dashed border-zinc-300 dark:border-zinc-850 hover:border-brand dark:hover:border-blue-500 text-zinc-500 hover:text-brand dark:hover:text-blue-400 text-[11px] font-bold tracking-wide transition-all flex items-center justify-center space-x-1.5 cursor-pointer bg-white dark:bg-[#13192B]/30 shadow-sm"
-                >
-                  <span>+ Novo chamado</span>
-                </a>
-              </div>
+    <main className="flex-1 overflow-x-auto p-4 md:p-6">
+      {loading ? <div className="h-56 flex items-center justify-center text-xs text-zinc-500">Carregando ocorrências...</div> : <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 min-w-0 lg:min-w-[900px] h-full">
+        {columns.map(column => {
+          const items = filtered.filter(item => item.status === column.status)
+          return <section key={column.status} onDragOver={event => event.preventDefault()} onDrop={() => { if (draggedId) updateStatus(draggedId, column.status); setDraggedId(null) }} className={`bg-zinc-100/70 dark:bg-[#0c0c0e] border border-zinc-200 dark:border-white/[0.06] border-t-2 ${column.color} rounded-xl min-h-[260px] flex flex-col`}>
+            <div className="p-4 flex items-center justify-between border-b border-zinc-200 dark:border-white/[0.05]"><div className="flex items-center gap-2"><column.icon className="w-4 h-4 text-zinc-500" /><h2 className="text-xs font-bold text-zinc-800 dark:text-zinc-200 uppercase tracking-wider">{column.title}</h2></div><span className="text-[10px] font-bold bg-white dark:bg-white/[0.04] border border-zinc-200 dark:border-white/[0.06] px-2 py-0.5 rounded">{items.length}</span></div>
+            <div className="p-3 space-y-3 overflow-y-auto">
+              {!items.length && <div className="h-28 flex items-center justify-center text-[10px] text-zinc-500">Nenhuma ocorrência nesta etapa.</div>}
+              {items.map(item => <article key={item.id} draggable onDragStart={() => setDraggedId(item.id)} onClick={() => setSelected(item)} className="bg-white dark:bg-[#121214] border border-zinc-200 dark:border-white/[0.07] hover:border-brand/30 rounded-xl p-3.5 cursor-pointer shadow-sm transition-colors">
+                <h3 className="text-sm font-bold text-zinc-900 dark:text-white leading-snug line-clamp-2">{occurrenceTitle(item)}</h3>
+                <p className="mt-2 text-[10px] text-zinc-500 flex items-center"><MapPin className="w-3 h-3 mr-1" />{item.local}</p>
+                <div className="flex flex-wrap gap-1.5 mt-3"><span className="text-[9px] font-bold px-2 py-0.5 rounded border border-zinc-200 dark:border-white/[0.07] bg-zinc-50 dark:bg-white/[0.03]">{item.categoria || 'Manutenção'}</span><PriorityBadge value={item.prioridade} /></div>
+                <div className="mt-3 pt-2.5 border-t border-zinc-100 dark:border-white/[0.05] flex items-center justify-between text-[9px] text-zinc-500"><span>{formatOccurrenceAge(item.created_at)}</span><span className="flex items-center"><UserRound className="w-3 h-3 mr-1" />{requesterLabel(item.solicitante_tipo)}</span></div>
+                <div className="mt-2 flex justify-end gap-1" onClick={event => event.stopPropagation()}>{column.status !== 'pendente' && <button onClick={() => updateStatus(item.id, column.status === 'resolvido' ? 'em_execucao' : 'pendente')} className="p-1.5 rounded hover:bg-zinc-100 dark:hover:bg-white/[0.05]" aria-label="Mover para trás"><ChevronLeft className="w-3.5 h-3.5" /></button>}{column.status !== 'resolvido' && <button onClick={() => updateStatus(item.id, column.status === 'pendente' ? 'em_execucao' : 'resolvido')} className="p-1.5 rounded hover:bg-zinc-100 dark:hover:bg-white/[0.05]" aria-label="Mover para frente"><ChevronRight className="w-3.5 h-3.5" /></button>}</div>
+              </article>)}
             </div>
-          );
+          </section>
         })}
+      </div>}
+    </main>
+
+    {selected && <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-end md:items-center justify-center p-0 md:p-4" onClick={() => setSelected(null)}><div className="w-full max-w-2xl max-h-[92vh] overflow-y-auto bg-white dark:bg-[#0d0d0f] rounded-t-2xl md:rounded-2xl border border-zinc-200 dark:border-white/[0.08] shadow-2xl" onClick={event => event.stopPropagation()}>
+      <div className="sticky top-0 z-10 flex items-center justify-between px-5 py-4 bg-white/95 dark:bg-[#0d0d0f]/95 border-b border-zinc-200 dark:border-white/[0.06] backdrop-blur"><div><span className="text-[9px] text-zinc-500 uppercase font-bold tracking-wider">Detalhes da ocorrência</span><h2 className="text-base font-bold text-zinc-900 dark:text-white mt-0.5">{occurrenceTitle(selected)}</h2></div><button onClick={() => setSelected(null)} className="p-2 rounded-lg hover:bg-zinc-100 dark:hover:bg-white/[0.05]"><X className="w-4 h-4" /></button></div>
+      <div className="p-5 space-y-6">
+        <section><h3 className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-3">Informações principais</h3><div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs"><Info label="Condomínio" value={condominio.nome} /><Info label="Localização" value={selected.local} /><Info label="Categoria" value={selected.categoria || 'Manutenção'} /><Info label="Prioridade" value={priorityLabel(selected.prioridade)} /><Info label="Status" value={STATUS_LABELS[selected.status]} /><Info label="Unidade" value={`${selected.bloco} · ${selected.apartamento}`} /><Info label="Responsável" value={selected.responsavel || 'Não atribuído'} /><Info label="Atualização" value={new Date(selected.updated_at).toLocaleString('pt-BR')} /></div><p className="mt-4 p-3 rounded-lg bg-zinc-50 dark:bg-white/[0.025] border border-zinc-200 dark:border-white/[0.05] text-xs leading-relaxed">{selected.descricao}</p></section>
+        <section><h3 className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-3">Solicitante</h3><div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs"><Info label="Tipo" value={requesterLabel(selected.solicitante_tipo)} /><Info label="Identidade" value={selected.anonimo !== false ? 'Anônimo' : selected.solicitante_nome || 'Não informada'} /><Info label="WhatsApp" value={selected.solicitante_whatsapp || 'Não fornecido'} /><Info label="Abertura" value={new Date(selected.created_at).toLocaleString('pt-BR')} /></div></section>
+        <section><h3 className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-3">Operação</h3><div className="flex gap-2"><input value={responsavel} onChange={event => setResponsavel(event.target.value)} maxLength={120} placeholder="Nome do responsável" className="flex-1 rounded-lg bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-white/[0.07] p-2.5 text-xs outline-none focus:border-brand" /><button onClick={saveResponsible} className="px-3 rounded-lg bg-zinc-100 dark:bg-white/[0.05] border border-zinc-200 dark:border-white/[0.07] text-xs font-bold">Atribuir</button></div></section>
+        {selected.foto_url && <section><h3 className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-3">Conteúdo</h3><a href={selected.foto_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-xs text-brand font-bold"><Paperclip className="w-4 h-4" />Abrir foto anexada</a></section>}
+        <section><h3 className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-3">Histórico</h3><div className="border-l border-brand/30 pl-4 space-y-4">{historico.length ? historico.map(item => <div key={item.id}><p className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">{item.descricao}</p><p className="text-[9px] text-zinc-500 mt-1">{new Date(item.created_at).toLocaleString('pt-BR')} · {item.visibilidade === 'publico' ? 'Visível ao solicitante' : 'Interno'}</p></div>) : <p className="text-xs text-zinc-500">O histórico começa com as próximas alterações desta ocorrência.</p>}</div></section>
+        <section><div className="flex items-center justify-between mb-3"><h3 className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Comentários</h3><MessageSquare className="w-4 h-4 text-zinc-500" /></div><div className="space-y-2 mb-3">{comentarios.map(item => <div key={item.id} className={`p-3 rounded-lg border text-xs ${item.visibilidade === 'interno' ? 'bg-amber-500/5 border-amber-500/15' : 'bg-brand/5 border-brand/15'}`}><p>{item.conteudo}</p><p className="text-[9px] text-zinc-500 mt-1.5">{item.visibilidade === 'interno' ? 'Comentário interno' : 'Atualização para o solicitante'} · {new Date(item.created_at).toLocaleString('pt-BR')}</p></div>)}</div><div className="flex gap-2 mb-2"><button onClick={() => setVisibilidade('interno')} className={`text-[10px] font-bold px-3 py-1.5 rounded-lg border ${visibilidade === 'interno' ? 'border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400' : 'border-zinc-200 dark:border-white/[0.07] text-zinc-500'}`}>Comentário interno</button><button onClick={() => setVisibilidade('publico')} className={`text-[10px] font-bold px-3 py-1.5 rounded-lg border ${visibilidade === 'publico' ? 'border-brand/30 bg-brand/10 text-brand' : 'border-zinc-200 dark:border-white/[0.07] text-zinc-500'}`}>Atualização para o solicitante</button></div><textarea value={novoComentario} onChange={event => setNovoComentario(event.target.value)} maxLength={2000} rows={3} placeholder={visibilidade === 'interno' ? 'Somente a equipe verá este comentário.' : 'Esta atualização aparecerá no portal do solicitante.'} className="w-full rounded-lg bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-white/[0.07] p-3 text-xs outline-none focus:border-brand" /><button disabled={savingComment || !novoComentario.trim()} onClick={addComment} className="mt-2 bg-brand text-white text-xs font-bold px-4 py-2 rounded-lg disabled:opacity-50">{savingComment ? 'Salvando...' : 'Adicionar comentário'}</button></section>
       </div>
-
-      {/* DETAIL MODAL (ESTILO LINEAR / DEEP DARK) */}
-      {selectedChamado && (
-        <div className="fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4 backdrop-blur-md">
-          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 w-full max-w-lg rounded-2xl overflow-hidden shadow-2xl animate-in zoom-in-95 duration-150 relative">
-            
-            {/* CABEÇALHO MODAL */}
-            <div className="px-5 py-4 border-b border-zinc-200 dark:border-zinc-800 flex justify-between items-center bg-zinc-50 dark:bg-zinc-950">
-              <div className="flex items-center space-x-2 text-[10px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-widest">
-                <Wrench className="w-4 h-4 text-brand" />
-                <span>
-                  Ocorrência #
-                  {(() => {
-                    const cleanId = selectedChamado.id.replace('chamado-', '');
-                    return cleanId.length > 8 ? cleanId.substring(0, 8).toUpperCase() : cleanId;
-                  })()}
-                </span>
-              </div>
-              <button 
-                onClick={() => setSelectedChamado(null)}
-                className="text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 bg-zinc-100 dark:bg-zinc-900 hover:bg-zinc-200 dark:hover:bg-zinc-800 p-1.5 rounded-lg border border-zinc-200 dark:border-zinc-800 transition-all"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            {/* CONTEÚDO MODAL */}
-            <div className="p-6 space-y-5 max-h-[75vh] overflow-y-auto">
-              
-              {/* IMAGEM AMPLIADA */}
-              {selectedChamado.foto_url && (
-                <div className="rounded-xl overflow-hidden bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 aspect-video relative">
-                  <img src={selectedChamado.foto_url} alt="Problema Ampliado" className="w-full h-full object-contain bg-black/40" />
-                </div>
-              )}
-
-              {/* INFO CHAVE DENSE */}
-              <div className="grid grid-cols-2 gap-4 bg-zinc-50 dark:bg-zinc-950 p-4 rounded-xl border border-zinc-200 dark:border-zinc-800 text-xs">
-                <div>
-                  <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">Local</span>
-                  <p className="text-zinc-900 dark:text-white font-bold mt-1 flex items-center">
-                    <MapPin className="w-4 h-4 mr-1 text-zinc-400 dark:text-zinc-500 shrink-0" />
-                    {selectedChamado.local}
-                  </p>
-                </div>
-                <div>
-                  <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">Solicitante</span>
-                  <p className="text-zinc-900 dark:text-white font-bold mt-1 flex items-center">
-                    <Building className="w-4 h-4 mr-1 text-zinc-400 dark:text-zinc-500 shrink-0" />
-                    Unidade {selectedChamado.bloco} - Apto {selectedChamado.apartamento}
-                  </p>
-                </div>
-                <div>
-                  <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">Data de Abertura</span>
-                  <p className="text-zinc-700 dark:text-zinc-350 font-semibold mt-1 font-mono">
-                    {new Date(selectedChamado.created_at).toLocaleString('pt-BR')}
-                  </p>
-                </div>
-                <div>
-                  <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">Estado do Chamado</span>
-                  <div className="mt-1 flex items-center space-x-2">
-                    <span className={`w-1.5 h-1.5 rounded-full ${
-                      selectedChamado.status === 'pendente' ? 'bg-amber-500 animate-pulse' : selectedChamado.status === 'em_execucao' ? 'bg-brand' : 'bg-emerald-400'
-                    }`}></span>
-                    <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded border uppercase tracking-wider ${
-                      selectedChamado.status === 'pendente' 
-                        ? 'bg-amber-500/10 border-amber-500/25 text-amber-600 dark:text-amber-400' 
-                        : selectedChamado.status === 'em_execucao' 
-                          ? 'bg-brand/10 border-brand/25 text-brand' 
-                          : 'bg-emerald-500/10 border-emerald-500/25 text-emerald-600 dark:text-emerald-400'
-                    }`}>
-                      {selectedChamado.status === 'pendente' ? 'Pendente' : selectedChamado.status === 'em_execucao' ? 'Em andamento' : 'Resolvido'}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* DESCRIÇÃO */}
-              <div className="space-y-1.5">
-                <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">Descrição</span>
-                <p className="text-xs text-zinc-800 dark:text-zinc-200 leading-relaxed font-semibold bg-zinc-50 dark:bg-zinc-950 p-3 rounded-lg border border-zinc-200 dark:border-zinc-800">
-                  {selectedChamado.descricao}
-                </p>
-              </div>
-
-              {/* CONTROLES DE STATUS */}
-              <div className="pt-4 border-t border-zinc-200 dark:border-zinc-800 space-y-2.5">
-                <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider flex items-center">
-                  <ArrowRightLeft className="w-3.5 h-3.5 mr-1 text-zinc-500" />
-                  Atualizar Status Operacional
-                </span>
-                <div className="grid grid-cols-3 gap-2">
-                  <button
-                    onClick={() => handleUpdateStatus(selectedChamado.id, 'pendente')}
-                    className={`py-2 px-3 rounded-lg text-xs font-bold transition-all border ${
-                      selectedChamado.status === 'pendente'
-                        ? 'bg-amber-500/10 border-amber-500/30 text-amber-600 dark:text-amber-400 font-bold shadow-sm'
-                        : 'bg-zinc-100 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-300'
-                    }`}
-                  >
-                    Pendente
-                  </button>
-                  <button
-                    onClick={() => handleUpdateStatus(selectedChamado.id, 'em_execucao')}
-                    className={`py-2 px-3 rounded-lg text-xs font-bold transition-all border ${
-                      selectedChamado.status === 'em_execucao'
-                        ? 'bg-brand/10 border-brand/30 text-brand font-bold shadow-sm'
-                        : 'bg-zinc-100 dark:bg-zinc-925 border border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-300'
-                    }`}
-                  >
-                    Em Execução
-                  </button>
-                  <button
-                    onClick={() => handleUpdateStatus(selectedChamado.id, 'resolvido')}
-                    className={`py-2 px-3 rounded-lg text-xs font-bold transition-all border ${
-                      selectedChamado.status === 'resolvido'
-                        ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400 font-bold shadow-sm'
-                        : 'bg-zinc-100 dark:bg-zinc-925 border border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-300'
-                    }`}
-                  >
-                    Resolvido
-                  </button>
-                </div>
-              </div>
-
-              {selectedChamado.status === 'resolvido' && (
-                <div className="pt-2 border-t border-zinc-800/60">
-                  <button
-                    onClick={() => {
-                      if (window.confirm('Excluir este chamado permanentemente?')) {
-                        handleDeleteChamado(selectedChamado.id);
-                      }
-                    }}
-                    className="w-full py-2 px-3 rounded-lg text-xs font-bold transition-all border bg-red-500/10 border-red-500/20 text-red-500 hover:bg-red-500/20 flex items-center justify-center space-x-1.5 cursor-pointer"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                    <span>Excluir permanentemente</span>
-                  </button>
-                </div>
-              )}
-
-            </div>
-          </div>
-        </div>
-      )}
-
-    </div>
-  );
+      <div className="px-5 py-4 border-t border-zinc-200 dark:border-white/[0.06] flex flex-col sm:flex-row gap-3 items-center justify-between"><button onClick={() => removeOccurrence(selected.id)} className="text-red-500 text-xs font-bold flex items-center gap-1.5"><Trash2 className="w-4 h-4" />Excluir</button><div className="flex gap-2">{columns.map(column => <button key={column.status} disabled={selected.status === column.status} onClick={() => updateStatus(selected.id, column.status)} className="px-3 py-2 text-[10px] font-bold rounded-lg border border-zinc-200 dark:border-white/[0.07] disabled:opacity-40">{column.title}</button>)}</div></div>
+    </div></div>}
+  </div>
 }

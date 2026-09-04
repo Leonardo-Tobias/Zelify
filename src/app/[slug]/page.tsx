@@ -19,6 +19,17 @@ import {
 } from 'lucide-react';
 import { db, Condominio, Chamado, isSupabaseConfigured } from '@/lib/db';
 import { compressImage } from '@/lib/imageCompressor';
+import {
+  OCCURRENCE_CATEGORIES,
+  PRIORITIES,
+  REQUESTER_TYPES,
+  STATUS_LABELS,
+  maskBrazilianPhone,
+  isValidBrazilianPhone,
+  occurrenceTitle,
+  priorityLabel,
+  requesterLabel,
+} from '@/lib/occurrences';
 
 export default function MoradorPortal() {
   const params = useParams();
@@ -90,6 +101,18 @@ export default function MoradorPortal() {
   const [localProblema, setLocalProblema] = useState('Garagem');
   const [outroLocal, setOutroLocal] = useState('');
   const [descricaoProblema, setDescricaoProblema] = useState('');
+  const [tituloProblema, setTituloProblema] = useState('');
+  const [categoriaProblema, setCategoriaProblema] = useState('Manutenção');
+  const [categoriaOutro, setCategoriaOutro] = useState('');
+  const [prioridadeProblema, setPrioridadeProblema] = useState<Chamado['prioridade']>('normal');
+  const [solicitanteTipo, setSolicitanteTipo] = useState<NonNullable<Chamado['solicitante_tipo']>>('morador');
+  const [solicitanteTipoOutro, setSolicitanteTipoOutro] = useState('');
+  const [solicitanteNome, setSolicitanteNome] = useState('');
+  const [solicitanteWhatsapp, setSolicitanteWhatsapp] = useState('');
+  const [anonimo, setAnonimo] = useState(true);
+  const [mostrarContato, setMostrarContato] = useState(false);
+  const [historicoPublico, setHistoricoPublico] = useState<Array<{ chamado_id: string; descricao: string; created_at: string }>>([]);
+  const [comentariosPublicos, setComentariosPublicos] = useState<Array<{ chamado_id: string; conteudo: string; created_at: string }>>([]);
   const [fotoProblema, setFotoProblema] = useState<string>('');
   const [compressingImage, setCompressingImage] = useState(false);
   const [submittingProblema, setSubmittingProblema] = useState(false);
@@ -171,6 +194,11 @@ export default function MoradorPortal() {
     loadCondo();
   }, [slug]);
 
+  useEffect(() => {
+    if (condominio?.identificacao_ocorrencias === 'obrigatoria') setAnonimo(false);
+    if (condominio?.identificacao_ocorrencias === 'anonima') setAnonimo(true);
+  }, [condominio?.identificacao_ocorrencias]);
+
   // Carregar chamados sempre que validação ou aba mudar
   useEffect(() => {
     if (!condominio || !validated || !portalToken) return;
@@ -182,6 +210,8 @@ export default function MoradorPortal() {
           const data = await db.getPortalChamados(portalToken);
           setChamados(data.chamados);
           setMonthlyCount(data.monthlyCount);
+          setHistoricoPublico(data.historico || []);
+          setComentariosPublicos(data.comentarios || []);
         } else {
           const data = await db.getChamados(condominio!.id);
           setChamados(data);
@@ -287,8 +317,20 @@ export default function MoradorPortal() {
     e.preventDefault();
     if (isLimitReached) return;
 
-    if (!descricaoProblema.trim()) {
-      alert('Por favor, descreva o problema.');
+    if (!tituloProblema.trim() || !descricaoProblema.trim() || !categoriaProblema) {
+      alert('Preencha o título, a categoria e a descrição da ocorrência.');
+      return;
+    }
+    if (categoriaProblema === 'Outro' && !categoriaOutro.trim()) {
+      alert('Descreva a categoria da ocorrência.');
+      return;
+    }
+    if (condominio?.identificacao_ocorrencias === 'obrigatoria' && (anonimo || !solicitanteNome.trim())) {
+      alert('Este condomínio exige a identificação do solicitante.');
+      return;
+    }
+    if (!isValidBrazilianPhone(solicitanteWhatsapp)) {
+      alert('Informe um WhatsApp válido com DDD ou deixe o campo vazio.');
       return;
     }
 
@@ -308,8 +350,17 @@ export default function MoradorPortal() {
         ? await db.createPortalChamado(portalToken, {
             tipo: 'manutencao',
             local: localReal || 'Outro',
+            titulo: tituloProblema,
             descricao: descricaoProblema,
             foto_url: finalFotoUrl,
+            categoria: categoriaProblema,
+            categoria_outro: categoriaOutro || null,
+            prioridade: prioridadeProblema,
+            solicitante_tipo: solicitanteTipo,
+            solicitante_tipo_outro: solicitanteTipoOutro || null,
+            solicitante_nome: solicitanteNome || null,
+            solicitante_whatsapp: solicitanteWhatsapp || null,
+            anonimo,
           })
         : await db.createChamado({
             condominio_id: condominio!.id,
@@ -317,9 +368,18 @@ export default function MoradorPortal() {
             local: localReal || 'Outro',
             bloco,
             apartamento,
+            titulo: tituloProblema,
             descricao: descricaoProblema,
             foto_url: finalFotoUrl,
-            status: 'pendente'
+            status: 'pendente',
+            categoria: categoriaProblema,
+            categoria_outro: categoriaOutro || null,
+            prioridade: prioridadeProblema,
+            solicitante_tipo: solicitanteTipo,
+            solicitante_tipo_outro: solicitanteTipoOutro || null,
+            solicitante_nome: anonimo ? null : solicitanteNome || null,
+            solicitante_whatsapp: solicitanteWhatsapp || null,
+            anonimo,
           });
 
       // Re-fetch contagem mensal após envio bem-sucedido
@@ -341,6 +401,16 @@ export default function MoradorPortal() {
         setLocalProblema('Garagem');
         setOutroLocal('');
         setDescricaoProblema('');
+        setTituloProblema('');
+        setCategoriaProblema('Manutenção');
+        setCategoriaOutro('');
+        setPrioridadeProblema('normal');
+        setSolicitanteTipo('morador');
+        setSolicitanteTipoOutro('');
+        setSolicitanteNome('');
+        setSolicitanteWhatsapp('');
+        setAnonimo(condominio?.identificacao_ocorrencias !== 'obrigatoria');
+        setMostrarContato(false);
         setFotoProblema('');
       }, 1500);
     } catch (err) {
@@ -624,7 +694,7 @@ export default function MoradorPortal() {
             </p>
             {condominio.plan_type === 'free' && (
               <p className="text-[9px] text-zinc-600 font-semibold mt-0.5">
-                Chamados este mês: {monthlyCount}/15
+                Ocorrências este mês: {monthlyCount}/15
               </p>
             )}
           </div>
@@ -662,7 +732,7 @@ export default function MoradorPortal() {
             ) : meusChamados.length === 0 ? (
               <div className="bg-[#0c0c0e]/40 border border-white/[0.04] rounded-xl p-8 text-center shadow-xl backdrop-blur-sm">
                 <Wrench className="w-8 h-8 text-zinc-650 mx-auto mb-3" />
-                <h3 className="text-sm font-bold text-zinc-200 mb-1">Nenhum chamado de manutenção</h3>
+                <h3 className="text-sm font-bold text-zinc-200 mb-1">Nenhuma ocorrência registrada</h3>
                 <p className="text-xs text-zinc-500 max-w-[240px] mx-auto mb-4 font-medium leading-relaxed">
                   Se você encontrou algum problema nas áreas comuns do condomínio, relate-o clicando abaixo.
                 </p>
@@ -670,7 +740,7 @@ export default function MoradorPortal() {
                   onClick={() => setShowManutencaoModal(true)}
                   className="text-xs font-bold text-brand bg-brand/10 hover:bg-brand/20 px-3.5 py-1.5 rounded-lg transition-colors inline-block"
                 >
-                  Relatar Novo Chamado
+                  Registrar ocorrência
                 </button>
               </div>
             ) : (
@@ -705,7 +775,7 @@ export default function MoradorPortal() {
                               ? 'bg-brand/10 text-blue-400 border-blue-500/15' 
                               : 'bg-emerald-500/10 text-emerald-450 border-emerald-500/15'
                         }`}>
-                          {item.status === 'pendente' ? 'Pendente' : item.status === 'em_execucao' ? 'Em execução' : 'Resolvido'}
+                          {item.status === 'pendente' ? 'Recebida' : item.status === 'em_execucao' ? 'Em andamento' : 'Concluída'}
                         </span>
                       </div>
                       <p className="text-xs text-zinc-300 font-semibold line-clamp-2 leading-relaxed">{item.descricao}</p>
@@ -804,7 +874,7 @@ export default function MoradorPortal() {
         {/* --- ABA 3: RESOLVIDOS --- */}
         {activeTab === 'historico' && (
           <div className="space-y-4">
-            <h2 className="text-xs font-bold text-zinc-450 uppercase tracking-widest">Resolvidos Recentes</h2>
+            <h2 className="text-xs font-bold text-zinc-450 uppercase tracking-widest">Concluídas recentemente</h2>
 
             {loadingChamados ? (
               <div className="py-12 flex justify-center">
@@ -813,7 +883,7 @@ export default function MoradorPortal() {
             ) : resolvidosRecentes.length === 0 ? (
               <div className="bg-[#0c0c0e]/40 border border-white/[0.04] rounded-xl p-8 text-center shadow-xl backdrop-blur-sm">
                 <CheckCircle2 className="w-8 h-8 text-zinc-650 mx-auto mb-3" />
-                <h3 className="text-sm font-bold text-zinc-200 mb-1">Nenhum chamado concluído</h3>
+                <h3 className="text-sm font-bold text-zinc-200 mb-1">Nenhuma ocorrência concluída</h3>
                 <p className="text-xs text-zinc-500 max-w-[240px] mx-auto font-medium leading-relaxed">
                   Chamados finalizados pela gestão operacional do condomínio aparecerão listados aqui.
                 </p>
@@ -894,7 +964,7 @@ export default function MoradorPortal() {
             }`}
           >
             <CheckCircle2 className="w-5 h-5 mb-0.5" />
-            <span className="text-[9px] uppercase tracking-wider font-bold">Resolvidos</span>
+            <span className="text-[9px] uppercase tracking-wider font-bold">Concluídas</span>
           </button>
         </div>
       </nav>
@@ -918,11 +988,35 @@ export default function MoradorPortal() {
                 <div className="w-12 h-12 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full flex items-center justify-center animate-bounce">
                   <Check className="w-6 h-6" />
                 </div>
-                <h4 className="text-sm font-bold text-white">Chamado Enviado com Sucesso!</h4>
-                <p className="text-xs text-zinc-400">O zelador e o síndico foram notificados.</p>
+                <h4 className="text-sm font-bold text-white">Ocorrência enviada com sucesso!</h4>
+                <p className="text-xs text-zinc-400">A administração já pode acompanhar e atualizar o andamento.</p>
               </div>
             ) : (
               <form onSubmit={handleSubmeteProblema} className="space-y-4">
+                <div>
+                  <label className="block text-[10px] font-bold text-zinc-400 mb-1.5 uppercase tracking-wider">O que aconteceu?</label>
+                  <input type="text" maxLength={120} placeholder="Ex: Balanço do playground quebrado" value={tituloProblema} onChange={(e) => setTituloProblema(e.target.value)} className="w-full px-3 py-2 bg-zinc-950 border border-white/[0.06] rounded-lg text-sm text-white focus:ring-1 focus:ring-brand focus:border-brand outline-none font-medium placeholder-zinc-650" required />
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-bold text-zinc-400 mb-1.5 uppercase tracking-wider">Categoria</label>
+                  <select value={categoriaProblema} onChange={(e) => setCategoriaProblema(e.target.value)} className="w-full px-3 py-2 border border-white/[0.06] rounded-lg text-sm bg-zinc-950 focus:ring-1 focus:ring-brand focus:border-brand outline-none font-medium text-white appearance-none" required>
+                    {OCCURRENCE_CATEGORIES.map(category => <option key={category} value={category}>{category}</option>)}
+                  </select>
+                </div>
+
+                {categoriaProblema === 'Outro' && (
+                  <input type="text" maxLength={100} placeholder="Qual categoria?" value={categoriaOutro} onChange={(e) => setCategoriaOutro(e.target.value)} className="w-full px-3 py-2 bg-zinc-950 border border-white/[0.06] rounded-lg text-sm text-white focus:ring-1 focus:ring-brand outline-none" required />
+                )}
+
+                <div>
+                  <label className="block text-[10px] font-bold text-zinc-400 mb-1.5 uppercase tracking-wider">Prioridade</label>
+                  <div className="grid grid-cols-4 gap-1.5">
+                    {PRIORITIES.map(([value, label]) => (
+                      <button key={value} type="button" onClick={() => setPrioridadeProblema(value)} className={`py-2 rounded-lg border text-[10px] font-bold transition-colors ${prioridadeProblema === value ? 'bg-brand/15 border-brand/40 text-white' : 'bg-zinc-950 border-white/[0.06] text-zinc-500'}`}>{label}</button>
+                    ))}
+                  </div>
+                </div>
                 <div>
                   <label className="block text-[10px] font-bold text-zinc-400 mb-1.5 uppercase tracking-wider">Local do Ocorrido</label>
                   <select
@@ -964,6 +1058,41 @@ export default function MoradorPortal() {
                     className="w-full px-3 py-2 bg-zinc-950 border border-white/[0.06] rounded-lg text-sm text-white focus:ring-1 focus:ring-brand focus:border-brand outline-none font-medium placeholder-zinc-650"
                     required
                   ></textarea>
+                </div>
+
+                <div className="rounded-xl border border-white/[0.06] bg-white/[0.01] overflow-hidden">
+                  <button type="button" onClick={() => setMostrarContato(value => !value)} className="w-full px-3 py-3 flex items-center justify-between text-left">
+                    <span>
+                      <strong className="block text-[11px] text-zinc-300">Identificação e contato</strong>
+                      <span className="text-[10px] text-zinc-500">Opcional, conforme a regra do condomínio</span>
+                    </span>
+                    <span className="text-brand text-xs font-bold">{mostrarContato ? 'Ocultar' : 'Adicionar'}</span>
+                  </button>
+                  {(mostrarContato || condominio.identificacao_ocorrencias === 'obrigatoria') && (
+                    <div className="p-3 pt-0 space-y-3">
+                      <div>
+                        <label className="block text-[10px] font-bold text-zinc-500 mb-1.5">Quem está registrando esta ocorrência?</label>
+                        <select value={solicitanteTipo} onChange={(e) => setSolicitanteTipo(e.target.value as NonNullable<Chamado['solicitante_tipo']>)} className="w-full px-3 py-2 border border-white/[0.06] rounded-lg text-sm bg-zinc-950 text-white outline-none">
+                          {REQUESTER_TYPES.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+                        </select>
+                      </div>
+                      {solicitanteTipo === 'outro' && (
+                        <input value={solicitanteTipoOutro} onChange={(e) => setSolicitanteTipoOutro(e.target.value)} maxLength={80} placeholder="Perfil (opcional)" className="w-full px-3 py-2 bg-zinc-950 border border-white/[0.06] rounded-lg text-sm text-white outline-none" />
+                      )}
+                      {condominio.identificacao_ocorrencias !== 'anonima' && (
+                        <>
+                          {condominio.identificacao_ocorrencias !== 'obrigatoria' && (
+                            <label className="flex items-center gap-2 text-xs text-zinc-400"><input type="checkbox" checked={anonimo} onChange={(e) => setAnonimo(e.target.checked)} className="accent-blue-600" /> Registrar como anônimo</label>
+                          )}
+                          {!anonimo && <input value={solicitanteNome} onChange={(e) => setSolicitanteNome(e.target.value)} maxLength={120} placeholder="Seu nome" required={condominio.identificacao_ocorrencias === 'obrigatoria'} className="w-full px-3 py-2 bg-zinc-950 border border-white/[0.06] rounded-lg text-sm text-white outline-none" />}
+                        </>
+                      )}
+                      <div>
+                        <input inputMode="tel" value={solicitanteWhatsapp} onChange={(e) => setSolicitanteWhatsapp(maskBrazilianPhone(e.target.value))} placeholder="WhatsApp para contato" className="w-full px-3 py-2 bg-zinc-950 border border-white/[0.06] rounded-lg text-sm text-white outline-none" />
+                        <p className="text-[9px] text-zinc-550 mt-1.5 leading-relaxed">Opcional. Informe seu WhatsApp caso a administração precise entrar em contato sobre esta ocorrência.</p>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div>
@@ -1041,10 +1170,10 @@ export default function MoradorPortal() {
                       {submittingProblema ? (
                         <>
                           <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                          Registrando chamado...
+                          Registrando ocorrência...
                         </>
                       ) : (
-                        'Enviar Chamado'
+                        'Enviar ocorrência'
                       )}
                     </button>
                   )}
@@ -1231,6 +1360,15 @@ export default function MoradorPortal() {
             )}
 
             {/* GRID DE INFORMAÇÕES */}
+            {selectedChamado.tipo === 'manutencao' && (
+              <div>
+                <h3 className="text-base font-bold text-white">{occurrenceTitle(selectedChamado)}</h3>
+                <div className="flex flex-wrap gap-1.5 mt-2">
+                  <span className="text-[9px] font-bold px-2 py-1 rounded border border-white/[0.08] bg-white/[0.03] text-zinc-300">{selectedChamado.categoria || 'Manutenção'}</span>
+                  <span className={`text-[9px] font-bold px-2 py-1 rounded border ${selectedChamado.prioridade === 'urgente' ? 'bg-red-500/15 text-red-400 border-red-500/30' : 'bg-white/[0.03] text-zinc-400 border-white/[0.08]'}`}>{priorityLabel(selectedChamado.prioridade)}</span>
+                </div>
+              </div>
+            )}
             <div className="grid grid-cols-2 gap-4 bg-zinc-950/50 p-4 rounded-xl border border-white/[0.04] text-xs">
               <div>
                 <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">Local</span>
@@ -1268,16 +1406,32 @@ export default function MoradorPortal() {
                         ? 'bg-brand/10 text-blue-400 border-blue-500/15'
                         : 'bg-emerald-500/10 text-emerald-450 border-emerald-500/15'
                   }`}>
-                    {selectedChamado.status === 'pendente' ? 'Pendente' 
-                      : selectedChamado.status === 'em_execucao' ? 'Em execução' 
-                      : selectedChamado.status === 'resolvido' ? 'Resolvido'
-                      : selectedChamado.status === 'encontrado' ? 'Na Portaria'
-                      : selectedChamado.status === 'aguardando_retirada' ? 'Retirar'
-                      : 'Entregue'}
+                    {STATUS_LABELS[selectedChamado.status]}
                   </span>
                 </div>
               </div>
             </div>
+
+            {selectedChamado.tipo === 'manutencao' && (
+              <div className="grid grid-cols-2 gap-3 bg-zinc-950/50 p-4 rounded-xl border border-white/[0.04] text-xs">
+                <div><span className="text-[9px] uppercase tracking-wider text-zinc-500 font-bold">Solicitante</span><p className="text-zinc-300 font-semibold mt-1">{requesterLabel(selectedChamado.solicitante_tipo)}</p></div>
+                <div><span className="text-[9px] uppercase tracking-wider text-zinc-500 font-bold">Identidade</span><p className="text-zinc-300 font-semibold mt-1">{selectedChamado.anonimo !== false ? 'Anônimo' : selectedChamado.solicitante_nome || 'Não informada'}</p></div>
+              </div>
+            )}
+
+            {historicoPublico.some(item => item.chamado_id === selectedChamado.id) && (
+              <div className="space-y-2">
+                <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">Acompanhamento</span>
+                <div className="border-l border-brand/30 pl-3 space-y-3">
+                  {historicoPublico.filter(item => item.chamado_id === selectedChamado.id).map((item, index) => (
+                    <div key={`${item.created_at}-${index}`}><p className="text-xs text-zinc-300 font-semibold">{item.descricao}</p><p className="text-[9px] text-zinc-550 mt-0.5">{new Date(item.created_at).toLocaleString('pt-BR')}</p></div>
+                  ))}
+                  {comentariosPublicos.filter(item => item.chamado_id === selectedChamado.id).map((item, index) => (
+                    <div key={`${item.created_at}-comment-${index}`} className="bg-brand/5 border border-brand/10 rounded-lg p-2.5"><p className="text-xs text-zinc-300">{item.conteudo}</p><p className="text-[9px] text-zinc-550 mt-1">Atualização da administração · {new Date(item.created_at).toLocaleString('pt-BR')}</p></div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* DESCRIÇÃO */}
             <div className="space-y-1.5 text-xs">

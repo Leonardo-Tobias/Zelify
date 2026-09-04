@@ -37,6 +37,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
   const [condoDropdownOpen, setCondoDropdownOpen] = useState(false);
   const [showPosterModal, setShowPosterModal] = useState(false);
+  const [monthlyCount, setMonthlyCount] = useState(0);
 
   const handleSwitchCondo = (target: Condominio) => {
     setCondoDropdownOpen(false);
@@ -104,6 +105,11 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
     if (!ctxLoading && gestor) setLoading(false);
   }, [ctxLoading, gestor]);
 
+  useEffect(() => {
+    if (condominio?.plan_type !== 'free') return;
+    db.getMonthlyChamadosCount(condominio.id).then(setMonthlyCount).catch(console.error);
+  }, [condominio?.id, condominio?.plan_type, pathname]);
+
   // Alternar Modo Claro / Modo Escuro
   const handleToggleTheme = () => {
     const nextTheme = theme === 'dark' ? 'light' : 'dark';
@@ -127,7 +133,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   // Atualizar título do navegador dinamicamente
   useEffect(() => {
     if (pathname === '/dashboard/kanban') {
-      document.title = "Kanban de Ocorrências | Zelcon";
+      document.title = "Gestão de Ocorrências | Zelcon";
     } else {
       document.title = "Zelcon | Gestão Operacional de Condomínios";
     }
@@ -163,14 +169,14 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
 
   const navigation = [
     { 
-      name: 'Painel do Prédio', 
+      name: 'Visão Geral',
       href: '/dashboard', 
       icon: LayoutDashboard, 
       active: !isPortfolioView && pathname === '/dashboard', 
       disabled: isPortfolioView || isSubscriptionLocked 
     },
     { 
-      name: 'Mural de Ocorrências', 
+      name: 'Gestão de Ocorrências',
       href: '/dashboard/kanban', 
       icon: ClipboardList, 
       active: !isPortfolioView && pathname === '/dashboard/kanban', 
@@ -245,6 +251,9 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
             {isCorporate && condominios.length > 1 && (
               <div className="space-y-1">
                 <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-wider px-3 pb-1 block">Condomínios</span>
+                <button onClick={() => { setMobileMenuOpen(false); router.push('/dashboard?view=portfolio'); }} className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-sm pl-8 ${isPortfolioView ? 'bg-brand/10 text-brand font-bold border border-brand/20' : 'text-zinc-500 hover:bg-zinc-50 dark:hover:bg-white/[0.03]'}`}>
+                  <LayoutDashboard className="w-4 h-4" /><span>Todos os condomínios</span>
+                </button>
                 {condominios.slice(0, 5).map((c) => (
                   <button
                     key={c.id}
@@ -320,9 +329,10 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                   <Sparkles className="w-3.5 h-3.5 text-brand animate-pulse" />
                   <span>Zelcon Starter</span>
                 </div>
-                <p className="text-[11px] font-bold text-zinc-900 dark:text-white leading-tight">Limite de 15 Chamados/mês</p>
+                <p className="text-[11px] font-bold text-zinc-900 dark:text-white leading-tight">{monthlyCount} de 15 ocorrências utilizadas</p>
+                <div className="h-1.5 rounded-full bg-zinc-200 dark:bg-zinc-800 mt-2 overflow-hidden"><div className="h-full bg-brand rounded-full transition-all" style={{ width: `${Math.min(monthlyCount / 15 * 100, 100)}%` }} /></div>
                 <p className="text-[10px] text-zinc-500 dark:text-zinc-400 mt-1 leading-normal font-medium">
-                  Faça o upgrade e libere chamados ilimitados para seus moradores.
+                  Continue recebendo ocorrências sem limite com o Zelcon Pro.
                 </p>
                 <button
                   onClick={() => {
@@ -402,6 +412,9 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
 
                 {/* Lista de condomínios */}
                 <div className="max-h-[200px] overflow-y-auto scrollbar-thin scrollbar-thumb-zinc-700 scrollbar-track-transparent">
+                  <button onClick={() => { setCondoDropdownOpen(false); router.push('/dashboard?view=portfolio'); }} className={`w-full flex items-center space-x-3 px-3 py-2.5 text-xs transition-colors ${isPortfolioView ? 'bg-brand/15 text-white font-bold' : 'text-zinc-400 hover:text-white hover:bg-zinc-800/60'}`}>
+                    <LayoutDashboard className="w-4 h-4 text-brand" /><span>Todos os condomínios</span>
+                  </button>
                   {condominios.map((c) => {
                     const isActive = c.id === condominio.id;
                     return (
@@ -513,9 +526,10 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                 <Sparkles className="w-3.5 h-3.5 text-brand animate-pulse" />
                 <span>Zelcon Starter</span>
               </div>
-              <p className="text-[11px] font-bold text-zinc-900 dark:text-white leading-tight">Limite de 15 Chamados/mês</p>
+              <p className="text-[11px] font-bold text-zinc-900 dark:text-white leading-tight">{monthlyCount} de 15 ocorrências utilizadas</p>
+              <div className="h-1.5 rounded-full bg-zinc-200 dark:bg-zinc-800 mt-2 overflow-hidden"><div className="h-full bg-brand rounded-full transition-all" style={{ width: `${Math.min(monthlyCount / 15 * 100, 100)}%` }} /></div>
               <p className="text-[10px] text-zinc-500 dark:text-zinc-400 mt-1 leading-normal font-medium">
-                Faça o upgrade e libere chamados ilimitados para seus moradores.
+                Continue recebendo ocorrências sem limite com o Zelcon Pro.
               </p>
               <button
                 onClick={() => router.push('/dashboard/configuracoes?tab=faturamento')}
@@ -588,7 +602,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
         {/* DESKTOP TOP HEADER */}
         <header className="hidden md:flex items-center justify-between border-b border-zinc-200 dark:border-white/[0.06] px-6 py-3.5 z-30 shrink-0 bg-white/85 dark:bg-[#09090b]/85 backdrop-blur-md sticky top-0 transition-colors duration-200">
           <h2 className="text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-widest">
-            {pathname === '/dashboard/kanban' ? 'KANBAN DE OCORRÊNCIAS' : (navigation.find(nav => nav.active)?.name || 'Área Administrativa')}
+            {pathname === '/dashboard/kanban' ? 'GESTÃO DE OCORRÊNCIAS' : (navigation.find(nav => nav.active)?.name || 'Área Administrativa')}
           </h2>
           <div className="flex items-center space-x-4">
             <button

@@ -1,5 +1,23 @@
 @import "tailwindcss";
 
+.filter-field {
+  min-width: 0;
+  border: 1px solid rgb(228 228 231);
+  border-radius: 0.5rem;
+  background: white;
+  padding: 0.5rem 0.625rem;
+  font-size: 0.7rem;
+  outline: none;
+}
+
+.dark .filter-field {
+  border-color: rgb(39 39 42);
+  background: rgb(9 9 11);
+  color: rgb(212 212 216);
+}
+
+.filter-field:focus { border-color: #0033ff; }
+
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {

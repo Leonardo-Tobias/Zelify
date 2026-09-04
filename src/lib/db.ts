@@ -656,13 +656,14 @@ export const db = {
   async isSlugUnique(slug: string): Promise<boolean> {
     const cleanSlug = slug.trim().toLowerCase();
     if (supabase) {
-      const { data, error } = await supabase
-        .from('condominios')
-        .select('id')
-        .eq('slug', cleanSlug)
-        .maybeSingle();
-      if (error) return false;
-      return !data;
+      const response = await fetch(
+        `/api/portal/condominio?slug=${encodeURIComponent(cleanSlug)}`,
+        { cache: 'no-store' }
+      );
+
+      if (response.status === 404) return true;
+      if (response.ok) return false;
+      throw new Error('Não foi possível verificar a disponibilidade do endereço. Tente novamente.');
     } else {
       const condominios = localDB.getCondominios();
       const exists = condominios.some(c => c.slug && c.slug.toLowerCase() === cleanSlug);

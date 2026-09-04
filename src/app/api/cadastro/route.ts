@@ -13,6 +13,7 @@ type CadastroBody = {
 export async function POST(req: NextRequest) {
   let createdUserId: string | null = null
   let createdCondominioId: string | null = null
+  let currentStage = 'validação dos dados'
 
   try {
     const body = await req.json() as CadastroBody
@@ -33,18 +34,21 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'O código de acesso deve conter de 4 a 8 números.' }, { status: 400 })
     }
 
+    currentStage = 'conexão com o banco'
     const admin = getSupabaseAdmin()
+    currentStage = 'verificação do endereço'
     const { data: existingCondominio, error: slugError } = await admin
       .from('condominios')
       .select('id')
       .eq('slug', condominioSlug)
       .maybeSingle()
 
-    if (slugError) throw slugError
+    if (slugError) throw new Error(slugError.message)
     if (existingCondominio) {
       return NextResponse.json({ error: 'Este endereço (slug) já está em uso por outro condomínio.' }, { status: 409 })
     }
 
+    currentStage = 'criação do usuário'
     const { data: authData, error: authError } = await admin.auth.admin.createUser({
       email,
       password,
@@ -60,6 +64,7 @@ export async function POST(req: NextRequest) {
     }
     createdUserId = authData.user.id
 
+    currentStage = 'criação do condomínio'
     const { data: condominio, error: condominioError } = await admin
       .from('condominios')
       .insert({
@@ -73,9 +78,12 @@ export async function POST(req: NextRequest) {
       .select()
       .single()
 
-    if (condominioError || !condominio) throw condominioError || new Error('Falha ao criar condomínio.')
+    if (condominioError || !condominio) {
+      throw new Error(condominioError?.message || 'Falha ao criar condomínio.')
+    }
     createdCondominioId = condominio.id
 
+    currentStage = 'criação do perfil do gestor'
     const { data: gestor, error: gestorError } = await admin
       .from('usuarios_gestores')
       .insert({
@@ -87,7 +95,9 @@ export async function POST(req: NextRequest) {
       .select()
       .single()
 
-    if (gestorError || !gestor) throw gestorError || new Error('Falha ao criar perfil do gestor.')
+    if (gestorError || !gestor) {
+      throw new Error(gestorError?.message || 'Falha ao criar perfil do gestor.')
+    }
 
     return NextResponse.json({ gestor, condominio }, { status: 201 })
   } catch (error) {
@@ -105,6 +115,10 @@ export async function POST(req: NextRequest) {
       console.error('[CADASTRO ROLLBACK ERROR]', rollbackError)
     }
 
-    return NextResponse.json({ error: 'Não foi possível concluir o cadastro. Tente novamente.' }, { status: 500 })
+    const message = error instanceof Error ? error.message : 'Erro inesperado.'
+    return NextResponse.json(
+      { error: `Falha na ${currentStage}: ${message}` },
+      { status: 500 }
+    )
   }
 }

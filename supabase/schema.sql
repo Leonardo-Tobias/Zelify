@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS public.condominios (
   nome TEXT NOT NULL,
   slug TEXT UNIQUE,
   codigo_acesso TEXT,
+  codigo_acesso_cifrado TEXT,
   plan_type TEXT DEFAULT 'free' CHECK (plan_type IN ('free', 'pro', 'corporate')) NOT NULL,
   subscription_status TEXT DEFAULT 'active' CHECK (subscription_status IN ('active', 'past_due', 'canceled')) NOT NULL,
   asaas_customer_id TEXT,
@@ -345,6 +346,8 @@ GRANT EXECUTE ON FUNCTION public.criar_chamado_portal(UUID, TEXT, TEXT, TEXT, TE
 
 GRANT SELECT, INSERT ON public.condominios TO authenticated;
 GRANT UPDATE (nome, slug, codigo_acesso, identificacao_ocorrencias) ON public.condominios TO authenticated;
+REVOKE SELECT (codigo_acesso_cifrado), INSERT (codigo_acesso_cifrado), UPDATE (codigo_acesso_cifrado)
+  ON public.condominios FROM anon, authenticated;
 GRANT SELECT ON public.categorias_ocorrencias, public.ocorrencia_historico, public.ocorrencia_comentarios, public.ocorrencia_anexos TO authenticated;
 GRANT INSERT ON public.ocorrencia_comentarios, public.ocorrencia_historico TO authenticated;
 GRANT SELECT, INSERT ON public.usuarios_gestores TO authenticated;

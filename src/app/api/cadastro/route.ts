@@ -1,6 +1,7 @@
 import crypto from 'crypto'
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/serverAuth'
+import { encryptAccessCode } from '@/lib/serverAccessCode'
 
 type CadastroBody = {
   nome?: string
@@ -114,6 +115,7 @@ export async function POST(req: NextRequest) {
         nome: condominioNome,
         slug: condominioSlug,
         codigo_acesso: codigoAcesso,
+        codigo_acesso_cifrado: encryptAccessCode(codigoAcesso),
         created_by: createdUserId,
         plan_type: 'free',
         subscription_status: 'active',
@@ -153,7 +155,9 @@ export async function POST(req: NextRequest) {
     }
     if (consentError) console.warn('[CADASTRO] Migration de consentimento ainda não aplicada.')
 
-    const safeCondominio = { ...condominio, codigo_acesso: undefined }
+    const { codigo_acesso_cifrado: _encryptedCode, ...condominioWithoutEncryptedCode } = condominio
+    void _encryptedCode
+    const safeCondominio = { ...condominioWithoutEncryptedCode, codigo_acesso: undefined }
     return NextResponse.json({ gestor, condominio: safeCondominio }, { status: 201 })
   } catch (error) {
     console.error('[CADASTRO ERROR]', error)

@@ -73,6 +73,22 @@ export function CondominioProvider({ children }: { children: React.ReactNode }) 
       .catch((err) => console.error('Erro ao carregar condominios:', err))
   }, [userId])
 
+  // O banco mantém o código principal como hash. A API autenticada recupera a
+  // cópia cifrada somente para o gestor montar e reimprimir a placa informativa.
+  useEffect(() => {
+    if (!condominio?.id || (condominio.codigo_acesso && !condominio.codigo_acesso.startsWith('$2'))) return
+    let active = true
+
+    db.getCondominioAccessCode(condominio.id).then((codigoAcesso) => {
+      if (!active || !codigoAcesso) return
+      setCondominio((current) => current?.id === condominio.id
+        ? { ...current, codigo_acesso: codigoAcesso }
+        : current)
+    }).catch(() => {})
+
+    return () => { active = false }
+  }, [condominio?.id, condominio?.codigo_acesso])
+
   // Refresh silencioso quando a janela recuperar o foco (voltar de outra aba)
   useEffect(() => {
     const onFocus = () => {

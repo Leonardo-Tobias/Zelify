@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { authErrorResponse, requireUser } from '@/lib/serverAuth'
+import { encryptAccessCode } from '@/lib/serverAccessCode'
 
 export async function POST(req: NextRequest) {
   try {
@@ -78,6 +79,7 @@ export async function POST(req: NextRequest) {
         nome,
         slug: cleanSlug,
         codigo_acesso,
+        codigo_acesso_cifrado: encryptAccessCode(codigo_acesso),
         created_by: user.id,
         plan_type: 'corporate',
         subscription_status: 'active',
@@ -108,7 +110,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: `Erro ao vincular gestor: ${linkError.message}` }, { status: 500 })
     }
 
-    return NextResponse.json({ success: true, condominio: newCondo })
+    const { codigo_acesso_cifrado: _encryptedCode, ...safeCondominio } = newCondo
+    void _encryptedCode
+    return NextResponse.json({ success: true, condominio: safeCondominio })
   } catch (err) {
     const authResponse = authErrorResponse(err)
     if (authResponse) return authResponse

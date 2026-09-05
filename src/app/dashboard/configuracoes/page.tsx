@@ -354,7 +354,7 @@ export default function ConfiguracoesPage() {
         setError('Não foi possível salvar as configurações.');
       }
     } catch (err) {
-      setError('Erro ao salvar no banco de dados. Verifique a unicidade do slug.');
+      setError(err instanceof Error ? err.message : 'Erro ao salvar no banco de dados.');
       console.error(err);
     } finally {
       setSaving(false);

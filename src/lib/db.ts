@@ -689,19 +689,26 @@ export const db = {
     identificacaoOcorrencias?: Condominio['identificacao_ocorrencias']
   ): Promise<Condominio | null> {
     if (supabase) {
-      const { data, error } = await supabase
-        .from('condominios')
-        .update({
+      const { data: sessionData } = await supabase.auth.getSession();
+      const token = sessionData.session?.access_token;
+      if (!token) throw new Error('Sessão expirada. Faça login novamente.');
+
+      const response = await fetch('/api/condominios/configuracoes', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', authorization: `Bearer ${token}` },
+        body: JSON.stringify({
+          condominioId: id,
           nome,
           slug,
-          codigo_acesso: codigoAcesso,
-          ...(identificacaoOcorrencias ? { identificacao_ocorrencias: identificacaoOcorrencias } : {})
-        })
-        .eq('id', id)
-        .select()
-        .maybeSingle();
-      if (error) throw error;
-      return data;
+          codigoAcesso,
+          identificacaoOcorrencias,
+        }),
+      });
+      const result = await response.json() as { error?: string; condominio?: Condominio };
+      if (!response.ok || !result.condominio) {
+        throw new Error(result.error || 'Não foi possível salvar as configurações.');
+      }
+      return result.condominio;
     } else {
       const condominios = localDB.getCondominios();
       const index = condominios.findIndex(c => c.id === id);
@@ -717,6 +724,24 @@ export const db = {
       localDB.saveCondominios(condominios);
       return condominios[index];
     }
+  },
+
+  async getCondominioAccessCode(id: string): Promise<string | null> {
+    if (!supabase) {
+      return localDB.getCondominios().find(c => c.id === id)?.codigo_acesso || null;
+    }
+
+    const { data: sessionData } = await supabase.auth.getSession();
+    const token = sessionData.session?.access_token;
+    if (!token) return null;
+
+    const response = await fetch(`/api/condominios/configuracoes?id=${encodeURIComponent(id)}`, {
+      headers: { authorization: `Bearer ${token}` },
+      cache: 'no-store',
+    });
+    if (!response.ok) return null;
+    const result = await response.json() as { codigoAcesso?: string | null };
+    return result.codigoAcesso || null;
   },
 
   /**

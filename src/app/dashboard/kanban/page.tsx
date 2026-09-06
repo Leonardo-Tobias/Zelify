@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import NextImage from 'next/image'
 import { CheckCircle2, ChevronLeft, ChevronRight, Clock, ExternalLink, ImageIcon, Lock, MapPin, MessageSquare, Search, Trash2, UserRound, Wrench, X } from 'lucide-react'
 import { db, Chamado, OcorrenciaComentario, OcorrenciaHistorico } from '@/lib/db'
@@ -39,6 +39,7 @@ export default function KanbanPage() {
   const [chamados, setChamados] = useState<Chamado[]>([])
   const [loading, setLoading] = useState(true)
   const [selected, setSelected] = useState<Chamado | null>(null)
+  const [panelClosing, setPanelClosing] = useState(false)
   const [draggedId, setDraggedId] = useState<string | null>(null)
   const [categoria, setCategoria] = useState('todas')
   const [prioridade, setPrioridade] = useState('todas')
@@ -49,6 +50,15 @@ export default function KanbanPage() {
   const [visibilidade, setVisibilidade] = useState<'interno' | 'publico'>('interno')
   const [savingComment, setSavingComment] = useState(false)
   const [responsavel, setResponsavel] = useState('')
+
+  const closeOccurrencePanel = useCallback(() => {
+    if (!selected || panelClosing) return
+    setPanelClosing(true)
+    window.setTimeout(() => {
+      setSelected(null)
+      setPanelClosing(false)
+    }, 220)
+  }, [panelClosing, selected])
 
   useEffect(() => {
     if (!condominio?.id) return
@@ -68,7 +78,7 @@ export default function KanbanPage() {
     if (!selected) return
     const previousOverflow = document.body.style.overflow
     const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setSelected(null)
+      if (event.key === 'Escape') closeOccurrencePanel()
     }
 
     document.body.style.overflow = 'hidden'
@@ -77,7 +87,7 @@ export default function KanbanPage() {
       document.body.style.overflow = previousOverflow
       document.removeEventListener('keydown', closeOnEscape)
     }
-  }, [selected])
+  }, [closeOccurrencePanel, selected])
 
   const filtered = useMemo(() => chamados.filter(item => {
     if (categoria !== 'todas' && (item.categoria || 'Manutenção') !== categoria) return false
@@ -162,7 +172,7 @@ export default function KanbanPage() {
             <div className="p-4 flex items-center justify-between border-b border-zinc-200 dark:border-white/[0.05]"><div className="flex items-center gap-2"><column.icon className="w-4 h-4 text-zinc-500" /><h2 className="text-sm font-semibold text-zinc-800 dark:text-zinc-200">{column.title}</h2></div><span className="text-[11px] font-medium bg-white dark:bg-white/[0.04] border border-zinc-200 dark:border-white/[0.06] px-2 py-0.5 rounded">{items.length}</span></div>
             <div className="p-3 space-y-3 overflow-y-auto">
               {!items.length && <div className="h-28 flex items-center justify-center text-[10px] text-zinc-500">Nenhuma ocorrência nesta etapa.</div>}
-              {items.map(item => <article key={item.id} draggable onDragStart={() => setDraggedId(item.id)} onClick={() => setSelected(item)} className="bg-white dark:bg-[#1b1d22] border border-zinc-200 dark:border-white/[0.07] hover:border-brand/40 rounded-lg p-4 cursor-pointer transition-colors">
+              {items.map(item => <article key={item.id} draggable onDragStart={() => setDraggedId(item.id)} onClick={() => { setPanelClosing(false); setSelected(item) }} className="bg-white dark:bg-[#1b1d22] border border-zinc-200 dark:border-white/[0.07] hover:border-brand/40 rounded-lg p-4 cursor-pointer transition-colors">
                 <h3 className="text-sm font-semibold text-zinc-900 dark:text-white leading-snug line-clamp-2">{occurrenceTitle(item)}</h3>
                 <p className="mt-2 text-[11px] text-zinc-500 flex items-center"><MapPin className="w-3 h-3 mr-1" />{item.local}</p>
                 <div className="flex flex-wrap gap-1.5 mt-3"><span className="text-[9px] font-bold px-2 py-0.5 rounded border border-zinc-200 dark:border-white/[0.07] bg-zinc-50 dark:bg-white/[0.03]">{item.categoria || 'Manutenção'}</span><PriorityBadge value={item.prioridade} /></div>
@@ -176,12 +186,12 @@ export default function KanbanPage() {
     </main>
 
     {selected && (
-      <div className="fixed inset-0 z-50 flex justify-end bg-black/60" onMouseDown={() => setSelected(null)}>
+      <div className={`occurrence-drawer-backdrop fixed inset-0 z-50 flex justify-end bg-black/60 ${panelClosing ? 'occurrence-drawer-backdrop--closing' : ''}`} onMouseDown={closeOccurrencePanel}>
         <aside
           role="dialog"
           aria-modal="true"
           aria-labelledby="occurrence-panel-title"
-          className="flex h-full w-full flex-col border-l border-zinc-200 bg-white shadow-2xl animate-in slide-in-from-right duration-200 sm:max-w-xl lg:max-w-2xl dark:border-white/[0.08] dark:bg-[#17191d]"
+          className={`occurrence-drawer flex h-full w-full flex-col border-l border-zinc-200 bg-white shadow-2xl sm:max-w-xl lg:max-w-2xl dark:border-white/[0.08] dark:bg-[#17191d] ${panelClosing ? 'occurrence-drawer--closing' : ''}`}
           onMouseDown={event => event.stopPropagation()}
         >
           <header className="shrink-0 border-b border-zinc-200 px-5 py-4 dark:border-white/[0.07] sm:px-6">
@@ -201,7 +211,7 @@ export default function KanbanPage() {
               </div>
               <button
                 type="button"
-                onClick={() => setSelected(null)}
+                onClick={closeOccurrencePanel}
                 className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-zinc-200 text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:border-white/[0.08] dark:hover:bg-white/[0.05] dark:hover:text-white"
                 aria-label="Fechar detalhes"
               >

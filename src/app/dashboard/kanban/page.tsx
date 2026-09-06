@@ -15,11 +15,11 @@ const columns: Array<{ title: string; status: StatusType; color: string; icon: t
 
 function PriorityBadge({ value }: { value?: Chamado['prioridade'] }) {
   const style = value === 'urgente' ? 'bg-red-500/15 text-red-500 dark:text-red-400 border-red-500/30' : value === 'alta' ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20' : 'bg-zinc-100 dark:bg-white/[0.03] text-zinc-500 border-zinc-200 dark:border-white/[0.07]'
-  return <span className={`text-[9px] font-bold px-2 py-0.5 rounded border ${style}`}>{priorityLabel(value)}</span>
+  return <span className={`text-[11px] font-medium px-2 py-0.5 rounded border ${style}`}>{priorityLabel(value)}</span>
 }
 
 function Info({ label, value }: { label: string; value: string }) {
-  return <div className="min-w-0"><span className="text-[9px] text-zinc-500 font-bold uppercase tracking-wider">{label}</span><p className="font-semibold text-zinc-800 dark:text-zinc-300 mt-1 break-words">{value}</p></div>
+  return <div className="min-w-0"><span className="text-[11px] text-zinc-500 font-medium">{label}</span><p className="font-medium text-zinc-800 dark:text-zinc-300 mt-1 break-words">{value}</p></div>
 }
 
 export default function KanbanPage() {
@@ -106,10 +106,10 @@ export default function KanbanPage() {
   if (!condominio) return null
   if (condominio.subscription_status !== 'active' && condominio.plan_type !== 'free') return <div className="h-full flex flex-col items-center justify-center p-10 text-center"><Lock className="w-10 h-10 text-amber-500 mb-4" /><h1 className="font-bold text-zinc-900 dark:text-white">Gestão de Ocorrências indisponível</h1><p className="text-xs text-zinc-500 mt-2 max-w-sm">Regularize a assinatura para voltar a gerenciar as ocorrências.</p></div>
 
-  return <div className="h-full flex flex-col bg-zinc-50 dark:bg-[#09090b] text-zinc-700 dark:text-zinc-300">
-    <header className="px-5 md:px-8 py-5 border-b border-zinc-200 dark:border-white/[0.06] bg-white dark:bg-[#09090b]">
+  return <div className="h-full flex flex-col bg-zinc-50 dark:bg-[#111316] text-zinc-700 dark:text-zinc-300">
+    <header className="px-5 md:px-8 py-5 border-b border-zinc-200 dark:border-white/[0.06] bg-white dark:bg-[#111316]">
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-        <div><h1 className="text-base font-bold text-zinc-900 dark:text-white uppercase tracking-wider">Gestão de Ocorrências</h1><p className="text-[10px] text-zinc-500 mt-1">Acompanhe o fluxo operacional de {condominio.nome}</p></div>
+        <div><h1 className="text-lg font-semibold text-zinc-900 dark:text-white">Gestão de ocorrências</h1><p className="text-xs text-zinc-500 mt-1">Acompanhe o fluxo operacional de {condominio.nome}</p></div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 w-full lg:w-auto">
           <input value={busca} onChange={e => setBusca(e.target.value)} placeholder="Buscar ocorrência" className="bg-white dark:bg-[#0d0d0f] border border-zinc-200 dark:border-white/[0.08] rounded-lg px-3 py-2 text-xs outline-none focus:border-brand" />
           <select value={categoria} onChange={e => setCategoria(e.target.value)} className="bg-white dark:bg-[#0d0d0f] border border-zinc-200 dark:border-white/[0.08] rounded-lg px-3 py-2 text-xs outline-none"><option value="todas">Todas as categorias</option>{OCCURRENCE_CATEGORIES.map(value => <option key={value}>{value}</option>)}</select>
@@ -122,15 +122,15 @@ export default function KanbanPage() {
       {loading ? <div className="h-56 flex items-center justify-center text-xs text-zinc-500">Carregando ocorrências...</div> : <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 min-w-0 lg:min-w-[900px] h-full">
         {columns.map(column => {
           const items = filtered.filter(item => item.status === column.status)
-          return <section key={column.status} onDragOver={event => event.preventDefault()} onDrop={() => { if (draggedId) updateStatus(draggedId, column.status); setDraggedId(null) }} className={`bg-zinc-100/70 dark:bg-[#0c0c0e] border border-zinc-200 dark:border-white/[0.06] border-t-2 ${column.color} rounded-xl min-h-[260px] flex flex-col`}>
-            <div className="p-4 flex items-center justify-between border-b border-zinc-200 dark:border-white/[0.05]"><div className="flex items-center gap-2"><column.icon className="w-4 h-4 text-zinc-500" /><h2 className="text-xs font-bold text-zinc-800 dark:text-zinc-200 uppercase tracking-wider">{column.title}</h2></div><span className="text-[10px] font-bold bg-white dark:bg-white/[0.04] border border-zinc-200 dark:border-white/[0.06] px-2 py-0.5 rounded">{items.length}</span></div>
+          return <section key={column.status} onDragOver={event => event.preventDefault()} onDrop={() => { if (draggedId) updateStatus(draggedId, column.status); setDraggedId(null) }} className={`bg-zinc-100/70 dark:bg-[#17191d] border border-zinc-200 dark:border-white/[0.06] ${column.color} rounded-xl min-h-[260px] flex flex-col`}>
+            <div className="p-4 flex items-center justify-between border-b border-zinc-200 dark:border-white/[0.05]"><div className="flex items-center gap-2"><column.icon className="w-4 h-4 text-zinc-500" /><h2 className="text-sm font-semibold text-zinc-800 dark:text-zinc-200">{column.title}</h2></div><span className="text-[11px] font-medium bg-white dark:bg-white/[0.04] border border-zinc-200 dark:border-white/[0.06] px-2 py-0.5 rounded">{items.length}</span></div>
             <div className="p-3 space-y-3 overflow-y-auto">
               {!items.length && <div className="h-28 flex items-center justify-center text-[10px] text-zinc-500">Nenhuma ocorrência nesta etapa.</div>}
-              {items.map(item => <article key={item.id} draggable onDragStart={() => setDraggedId(item.id)} onClick={() => setSelected(item)} className="bg-white dark:bg-[#121214] border border-zinc-200 dark:border-white/[0.07] hover:border-brand/30 rounded-xl p-3.5 cursor-pointer shadow-sm transition-colors">
-                <h3 className="text-sm font-bold text-zinc-900 dark:text-white leading-snug line-clamp-2">{occurrenceTitle(item)}</h3>
-                <p className="mt-2 text-[10px] text-zinc-500 flex items-center"><MapPin className="w-3 h-3 mr-1" />{item.local}</p>
+              {items.map(item => <article key={item.id} draggable onDragStart={() => setDraggedId(item.id)} onClick={() => setSelected(item)} className="bg-white dark:bg-[#1b1d22] border border-zinc-200 dark:border-white/[0.07] hover:border-brand/40 rounded-lg p-4 cursor-pointer transition-colors">
+                <h3 className="text-sm font-semibold text-zinc-900 dark:text-white leading-snug line-clamp-2">{occurrenceTitle(item)}</h3>
+                <p className="mt-2 text-[11px] text-zinc-500 flex items-center"><MapPin className="w-3 h-3 mr-1" />{item.local}</p>
                 <div className="flex flex-wrap gap-1.5 mt-3"><span className="text-[9px] font-bold px-2 py-0.5 rounded border border-zinc-200 dark:border-white/[0.07] bg-zinc-50 dark:bg-white/[0.03]">{item.categoria || 'Manutenção'}</span><PriorityBadge value={item.prioridade} /></div>
-                <div className="mt-3 pt-2.5 border-t border-zinc-100 dark:border-white/[0.05] flex items-center justify-between text-[9px] text-zinc-500"><span>{formatOccurrenceAge(item.created_at)}</span><span className="flex items-center"><UserRound className="w-3 h-3 mr-1" />{requesterLabel(item.solicitante_tipo)}</span></div>
+                <div className="mt-3 pt-2.5 border-t border-zinc-100 dark:border-white/[0.05] flex items-center justify-between text-[11px] text-zinc-500"><span>{formatOccurrenceAge(item.created_at)}</span><span className="flex items-center"><UserRound className="w-3 h-3 mr-1" />{requesterLabel(item.solicitante_tipo)}</span></div>
                 <div className="mt-2 flex justify-end gap-1" onClick={event => event.stopPropagation()}>{column.status !== 'pendente' && <button onClick={() => updateStatus(item.id, column.status === 'resolvido' ? 'em_execucao' : 'pendente')} className="p-1.5 rounded hover:bg-zinc-100 dark:hover:bg-white/[0.05]" aria-label="Mover para trás"><ChevronLeft className="w-3.5 h-3.5" /></button>}{column.status !== 'resolvido' && <button onClick={() => updateStatus(item.id, column.status === 'pendente' ? 'em_execucao' : 'resolvido')} className="p-1.5 rounded hover:bg-zinc-100 dark:hover:bg-white/[0.05]" aria-label="Mover para frente"><ChevronRight className="w-3.5 h-3.5" /></button>}</div>
               </article>)}
             </div>

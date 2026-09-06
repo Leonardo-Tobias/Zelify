@@ -82,7 +82,7 @@ export default function LoginPage() {
         <div className="text-center">
           <div className="mb-4">
             <span className="auth-logo text-2xl font-black tracking-tight text-white">
-              Zelcon<span className="text-[#001CFF]">.</span>
+              Zelcon<span className="text-brand">.</span>
             </span>
           </div>
           <h1 className="auth-title text-xl font-bold tracking-tight text-white">Acesse o Zelcon Gestor</h1>
@@ -163,7 +163,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full mt-2 bg-gradient-to-r from-brand to-blue-600 hover:opacity-95 text-white text-sm font-semibold py-2 rounded-lg flex items-center justify-center transition-all shadow-[0_4px_20px_rgba(0,51,255,0.25)] active:scale-[0.98] disabled:opacity-50 cursor-pointer"
+              className="w-full mt-2 bg-brand hover:bg-brand/90 text-white text-sm font-semibold py-2 rounded-lg flex items-center justify-center transition-colors disabled:opacity-50 cursor-pointer"
             >
               {loading ? (
                 <>

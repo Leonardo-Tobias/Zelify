@@ -210,7 +210,7 @@ function TermosContent() {
         <div className="text-center pb-8">
           <Link
             href={`/cadastro${step ? `?step=${step}` : ''}`}
-            className="inline-flex items-center space-x-2 bg-brand hover:bg-brand/90 text-white text-xs font-bold px-5 py-2.5 rounded-xl transition-all active:scale-[0.98] shadow-[0_4px_15px_rgba(0,51,255,0.2)]"
+            className="inline-flex items-center space-x-2 bg-brand hover:bg-brand/90 text-white text-xs font-semibold px-5 py-2.5 rounded-lg transition-colors"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
             <span>Voltar ao cadastro</span>

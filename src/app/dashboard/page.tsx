@@ -844,7 +844,7 @@ function DashboardHomeContent() {
             </button>
             <button
               onClick={() => router.push(`/dashboard/configuracoes?tab=faturamento&plan=${pendingPlan}`)}
-              className="bg-brand hover:bg-brand/90 text-white text-[11px] font-bold px-3 py-1.5 rounded-lg transition-all active:scale-[0.97] shadow-[0_2px_8px_rgba(0,51,255,0.2)] cursor-pointer"
+              className="bg-brand hover:bg-brand/90 text-white text-[11px] font-semibold px-3 py-2 rounded-md transition-colors cursor-pointer"
             >
               Finalizar Pagamento
             </button>
@@ -854,7 +854,7 @@ function DashboardHomeContent() {
       {/* CABEÇALHO */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-zinc-200 dark:border-zinc-800 pb-4">
         <div>
-          <h1 className="text-base font-bold text-zinc-900 dark:text-white uppercase tracking-wider">Visão Geral</h1>
+          <h1 className="text-lg font-semibold text-zinc-900 dark:text-white">Visão geral</h1>
           <p className="text-xs text-zinc-500 font-medium">Resumo de atividades e métricas do {condominio?.nome}</p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -874,7 +874,7 @@ function DashboardHomeContent() {
           </button>
           <button 
             onClick={() => router.push('/dashboard/kanban')}
-            className="bg-brand hover:bg-brand/90 text-white text-xs font-semibold px-4 py-2.5 rounded-lg flex items-center space-x-1.5 transition-all shadow-[0_4px_20px_rgba(0,51,255,0.25)] active:scale-[0.98] cursor-pointer"
+            className="bg-brand hover:bg-brand/90 text-white text-xs font-semibold px-4 py-2.5 rounded-md flex items-center space-x-1.5 transition-colors cursor-pointer"
           >
             <span>Gestão de Ocorrências</span>
             <ArrowRight className="w-3.5 h-3.5" />
@@ -885,67 +885,67 @@ function DashboardHomeContent() {
       {/* GRID DE MÉTRICAS */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {/* CARD 1: PENDENTES */}
-        <div className="bg-white dark:bg-zinc-925/80 border border-zinc-200 dark:border-zinc-800 p-5 rounded-2xl flex flex-col justify-between shadow-sm dark:shadow-xl transition-all hover:border-zinc-300 dark:hover:border-zinc-700 group">
+        <div className="bg-white dark:bg-zinc-925/80 border border-zinc-200 dark:border-zinc-800 p-5 rounded-xl flex flex-col justify-between transition-colors hover:border-zinc-300 dark:hover:border-zinc-700 group">
           <div className="flex justify-between items-center">
-            <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Ocorrências abertas</span>
+            <span className="text-xs font-medium text-zinc-500">Ocorrências abertas</span>
             <div className="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/15 flex items-center justify-center text-amber-500 group-hover:scale-105 transition-transform">
               <Clock className="w-4 h-4" />
             </div>
           </div>
           <div className="pt-4">
-            <span className="text-3xl font-black text-zinc-900 dark:text-white tracking-tight">{pendentes + emExecucao}</span>
-            <p className="text-[10px] text-zinc-550 mt-1 font-semibold">Recebidas e em andamento</p>
+            <span className="text-3xl font-semibold text-zinc-900 dark:text-white tracking-tight">{pendentes + emExecucao}</span>
+            <p className="text-xs text-zinc-500 mt-1">Recebidas e em andamento</p>
           </div>
         </div>
 
         {/* CARD 2: EM EXECUÇÃO */}
-        <div className="bg-white dark:bg-zinc-925/80 border border-zinc-200 dark:border-zinc-800 p-5 rounded-2xl flex flex-col justify-between shadow-sm dark:shadow-xl transition-all hover:border-zinc-300 dark:hover:border-zinc-700 group">
+        <div className="bg-white dark:bg-zinc-925/80 border border-zinc-200 dark:border-zinc-800 p-5 rounded-xl flex flex-col justify-between transition-colors hover:border-zinc-300 dark:hover:border-zinc-700 group">
           <div className="flex justify-between items-center">
-            <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Em andamento</span>
+            <span className="text-xs font-medium text-zinc-500">Em andamento</span>
             <div className="w-8 h-8 rounded-lg bg-brand/10 border border-brand/15 flex items-center justify-center text-brand group-hover:scale-105 transition-transform">
               <Wrench className="w-4 h-4" />
             </div>
           </div>
           <div className="pt-4">
-            <span className="text-3xl font-black text-zinc-900 dark:text-white tracking-tight">{emExecucao}</span>
-            <p className="text-[10px] text-zinc-550 mt-1 font-semibold">Em andamento pelas equipes</p>
+            <span className="text-3xl font-semibold text-zinc-900 dark:text-white tracking-tight">{emExecucao}</span>
+            <p className="text-xs text-zinc-500 mt-1">Em andamento pelas equipes</p>
           </div>
         </div>
 
         {/* CARD 3: URGENTES */}
-        <div className="bg-white dark:bg-zinc-925/80 border border-zinc-200 dark:border-zinc-800 p-5 rounded-2xl flex flex-col justify-between shadow-sm dark:shadow-xl transition-all hover:border-zinc-300 dark:hover:border-zinc-700 group">
+        <div className="bg-white dark:bg-zinc-925/80 border border-zinc-200 dark:border-zinc-800 p-5 rounded-xl flex flex-col justify-between transition-colors hover:border-zinc-300 dark:hover:border-zinc-700 group">
           <div className="flex justify-between items-center">
-            <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Urgentes</span>
+            <span className="text-xs font-medium text-zinc-500">Urgentes</span>
             <div className="w-8 h-8 rounded-lg bg-blue-500/10 border border-blue-500/15 flex items-center justify-center text-blue-450 group-hover:scale-105 transition-transform">
               <AlertTriangle className="w-4 h-4" />
             </div>
           </div>
           <div className="pt-4">
-            <span className="text-3xl font-black text-zinc-900 dark:text-white tracking-tight">{urgentes}</span>
-            <p className="text-[10px] text-zinc-550 mt-1 font-semibold">Exigem atenção imediata</p>
+            <span className="text-3xl font-semibold text-zinc-900 dark:text-white tracking-tight">{urgentes}</span>
+            <p className="text-xs text-zinc-500 mt-1">Exigem atenção imediata</p>
           </div>
         </div>
 
         {/* CARD 4: RESOLVIDOS */}
-        <div className="bg-white dark:bg-zinc-925/80 border border-zinc-200 dark:border-zinc-800 p-5 rounded-2xl flex flex-col justify-between shadow-sm dark:shadow-xl transition-all hover:border-zinc-300 dark:hover:border-zinc-700 group">
+        <div className="bg-white dark:bg-zinc-925/80 border border-zinc-200 dark:border-zinc-800 p-5 rounded-xl flex flex-col justify-between transition-colors hover:border-zinc-300 dark:hover:border-zinc-700 group">
           <div className="flex justify-between items-center">
-            <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Concluídas no mês</span>
+            <span className="text-xs font-medium text-zinc-500">Concluídas no mês</span>
             <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/15 flex items-center justify-center text-emerald-450 group-hover:scale-105 transition-transform">
               <CheckCircle2 className="w-4 h-4" />
             </div>
           </div>
           <div className="pt-4">
-            <span className="text-3xl font-black text-zinc-900 dark:text-white tracking-tight">{concluidasNoMes}</span>
-            <p className="text-[10px] text-zinc-550 mt-1 font-semibold">Tempo médio: {formatDuration(tempoMedioResolucao)}</p>
+            <span className="text-3xl font-semibold text-zinc-900 dark:text-white tracking-tight">{concluidasNoMes}</span>
+            <p className="text-xs text-zinc-500 mt-1">Tempo médio: {formatDuration(tempoMedioResolucao)}</p>
           </div>
         </div>
       </div>
 
       {/* FEED DE OCORRÊNCIAS */}
-      <div className="bg-white dark:bg-zinc-925/60 border border-zinc-200 dark:border-zinc-800 rounded-2xl overflow-hidden shadow-sm dark:shadow-xl">
+      <div className="bg-white dark:bg-zinc-925/60 border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden">
         <div className="px-5 py-4 border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between bg-zinc-50 dark:bg-zinc-950/30">
-          <h3 className="text-xs font-bold text-zinc-600 dark:text-zinc-400 uppercase tracking-wider">Ocorrências Recentes</h3>
-          <span className="text-[9px] bg-zinc-100 dark:bg-zinc-950 text-zinc-500 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-800 px-2 py-0.5 rounded font-bold uppercase tracking-wider">Feed de Atividades</span>
+          <h3 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">Ocorrências recentes</h3>
+          <span className="text-[11px] text-zinc-500 dark:text-zinc-400">Atualizações mais recentes</span>
         </div>
 
         {ultimasAtividades.length === 0 ? (

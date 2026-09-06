@@ -810,7 +810,7 @@ export default function ConfiguracoesPage() {
       
       {/* HEADER */}
       <div className="border-b border-zinc-200 dark:border-zinc-800 pb-4">
-        <h1 className="text-base font-bold text-zinc-900 dark:text-white uppercase tracking-wider">Configurações do Condomínio</h1>
+        <h1 className="text-lg font-semibold text-zinc-900 dark:text-white">Configurações do condomínio</h1>
         <p className="text-xs text-zinc-500 font-medium">Personalize a identidade e acesso dos moradores</p>
       </div>
 
@@ -819,9 +819,9 @@ export default function ConfiguracoesPage() {
         <button
           type="button"
           onClick={() => setActiveTab('geral')}
-          className={`pb-3 text-xs font-bold uppercase tracking-wider transition-all border-b-2 cursor-pointer ${
+          className={`pb-3 text-xs font-semibold transition-colors border-b-2 cursor-pointer ${
             activeTab === 'geral'
-              ? 'border-brand text-brand dark:text-[#3b82f6]'
+              ? 'border-brand text-brand'
               : 'border-transparent text-zinc-550 dark:text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-300'
           }`}
         >
@@ -830,9 +830,9 @@ export default function ConfiguracoesPage() {
         <button
           type="button"
           onClick={() => setActiveTab('faturamento')}
-          className={`pb-3 text-xs font-bold uppercase tracking-wider transition-all border-b-2 cursor-pointer ${
+          className={`pb-3 text-xs font-semibold transition-colors border-b-2 cursor-pointer ${
             activeTab === 'faturamento'
-              ? 'border-brand text-brand dark:text-[#3b82f6]'
+              ? 'border-brand text-brand'
               : 'border-transparent text-zinc-550 dark:text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-300'
           }`}
         >
@@ -844,8 +844,8 @@ export default function ConfiguracoesPage() {
         <><div className="grid grid-cols-1 gap-6">
         
         {/* BOX DO LINK PÚBLICO */}
-        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-6 rounded-xl space-y-4 shadow-sm">
-          <div className="flex items-center space-x-2 text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-widest">
+        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-6 rounded-xl space-y-4">
+          <div className="flex items-center space-x-2 text-sm font-semibold text-zinc-700 dark:text-zinc-300">
             <Compass className="w-4 h-4 text-brand" />
             <span>Endereço de Acesso Público</span>
           </div>
@@ -884,8 +884,8 @@ export default function ConfiguracoesPage() {
         </div>
 
         {/* GERADOR DE PLACA INFORMATIVA E QR CODE */}
-        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6 shadow-sm space-y-6">
-          <div className="flex items-center space-x-2 text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-widest">
+        <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6 space-y-6">
+          <div className="flex items-center space-x-2 text-sm font-semibold text-zinc-700 dark:text-zinc-300">
             <QrCode className="w-4 h-4 text-brand" />
             <span>Placa Informativa & QR Code</span>
           </div>
@@ -1222,7 +1222,7 @@ export default function ConfiguracoesPage() {
               <button
                 type="submit"
                 disabled={saving}
-                className="bg-brand hover:bg-brand/90 text-white text-xs font-bold px-4 py-2 rounded-lg flex items-center space-x-1.5 transition-all shadow-[0_4px_20px_rgba(0,51,255,0.20)] active:scale-[0.98] disabled:opacity-50 cursor-pointer"
+                className="bg-brand hover:bg-brand/90 text-white text-xs font-semibold px-4 py-2 rounded-md flex items-center space-x-1.5 transition-colors disabled:opacity-50 cursor-pointer"
               >
                 {saving ? (
                   <>
@@ -2281,7 +2281,7 @@ export default function ConfiguracoesPage() {
                 <button
                   type="submit"
                   disabled={savingInstance}
-                  className="w-full mt-2 bg-gradient-to-r from-brand to-blue-600 hover:opacity-95 text-white text-sm font-semibold py-2 rounded-lg flex items-center justify-center transition-all shadow-[0_4px_20px_rgba(0,51,255,0.25)] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full mt-2 bg-brand hover:bg-brand/90 text-white text-sm font-semibold py-2 rounded-lg flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {savingInstance ? (
                     <span className="flex items-center space-x-2">

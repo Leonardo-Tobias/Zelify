@@ -200,9 +200,9 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   ].filter(item => !item.hidden);
 
   return (
-    <div className="min-h-screen bg-white dark:bg-[#09090b] text-zinc-700 dark:text-zinc-300 font-sans antialiased flex flex-col md:flex-row transition-colors duration-200">
+    <div className="dashboard-shell min-h-screen bg-white dark:bg-[#111316] text-zinc-700 dark:text-zinc-300 font-sans antialiased flex flex-col md:flex-row transition-colors duration-200">
       {/* MOBILE HEADER */}
-      <div className="md:hidden bg-white/90 dark:bg-[#09090b]/90 backdrop-blur-md border-b border-zinc-200 dark:border-white/[0.06] px-4 py-3 flex items-center justify-between z-20">
+      <div className="md:hidden bg-white/95 dark:bg-[#15171a]/95 backdrop-blur-md border-b border-zinc-200 dark:border-white/[0.06] px-4 py-3 flex items-center justify-between z-20">
         <div className="flex items-center space-x-2">
           <span className="text-lg font-black tracking-tight text-zinc-900 dark:text-white">Zelcon<span className="text-brand">.</span></span>
           {isPortfolioView ? (
@@ -231,7 +231,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
 
       {/* MOBILE SLIDE-OUT MENU */}
       {mobileMenuOpen && (
-        <div className="md:hidden fixed inset-x-0 top-[53px] bottom-0 bg-white/95 dark:bg-[#09090b]/95 backdrop-blur-lg z-30 flex flex-col justify-between p-4 border-t border-zinc-200 dark:border-white/[0.06] animate-in slide-in-from-top duration-200">
+        <div className="md:hidden fixed inset-x-0 top-[53px] bottom-0 bg-white/95 dark:bg-[#15171a]/95 backdrop-blur-lg z-30 flex flex-col justify-between p-4 border-t border-zinc-200 dark:border-white/[0.06] animate-in slide-in-from-top duration-200">
           <div className="space-y-4">
             {!isPortfolioView && (
               <div className="px-2.5 py-2 bg-zinc-50 dark:bg-white/[0.04] rounded-lg border border-zinc-200 dark:border-white/[0.06] flex items-center justify-between text-xs">
@@ -323,10 +323,9 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
           <div className="space-y-4 pt-4 mt-auto">
             {/* UPGRADE CARD FOR FREE PLAN (MOBILE) */}
             {!isPortfolioView && condominio?.plan_type === 'free' && (
-              <div className="p-4 rounded-xl bg-gradient-to-br from-brand/15 via-brand/5 to-transparent border border-brand/20 relative overflow-hidden shadow-sm animate-in fade-in duration-300">
-                <div className="absolute -right-4 -bottom-4 w-16 h-16 bg-brand/10 blur-[20px] rounded-full pointer-events-none"></div>
-                <div className="flex items-center space-x-2 text-[10px] font-bold text-brand uppercase tracking-wider mb-1.5">
-                  <Sparkles className="w-3.5 h-3.5 text-brand animate-pulse" />
+              <div className="p-4 rounded-lg bg-zinc-100 dark:bg-white/[0.025] border border-zinc-200 dark:border-zinc-800 relative overflow-hidden animate-in fade-in duration-300">
+                <div className="flex items-center space-x-2 text-[11px] font-semibold text-zinc-700 dark:text-zinc-300 mb-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-brand" />
                   <span>Zelcon Starter</span>
                 </div>
                 <p className="text-[11px] font-bold text-zinc-900 dark:text-white leading-tight">{monthlyCount} de 15 ocorrências utilizadas</p>
@@ -339,7 +338,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                     setMobileMenuOpen(false);
                     router.push('/dashboard/configuracoes?tab=faturamento');
                   }}
-                  className="w-full mt-3 py-1.5 bg-brand hover:bg-brand/90 text-white text-[10px] font-bold rounded-lg transition-all active:scale-[0.97] cursor-pointer text-center block shadow-[0_2px_8px_rgba(0,51,255,0.2)]"
+                className="w-full mt-3 py-2 bg-brand hover:bg-brand/90 text-white text-[11px] font-semibold rounded-md transition-colors cursor-pointer text-center block"
                 >
                   Fazer Upgrade
                 </button>
@@ -372,7 +371,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
       )}
 
       {/* DESKTOP SIDEBAR */}
-      <aside className="hidden md:flex flex-col justify-between w-64 bg-zinc-50 dark:bg-[#09090b] border-r border-zinc-200 dark:border-white/[0.06] shrink-0 transition-colors duration-200 py-4">
+      <aside className="hidden md:flex flex-col justify-between w-64 bg-zinc-50 dark:bg-[#15171a] border-r border-zinc-200 dark:border-white/[0.06] shrink-0 transition-colors duration-200 py-4">
         <div className="space-y-0">
           {/* LOGO */}
           <div className="px-4 pb-4 border-b border-zinc-200 dark:border-zinc-800">
@@ -386,7 +385,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
             <button
               type="button"
               onClick={() => setCondoDropdownOpen(!condoDropdownOpen)}
-              className="w-full flex items-center justify-between p-2.5 rounded-xl text-left transition-all shadow-sm border bg-white dark:bg-[#13192b] border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700"
+              className="w-full flex items-center justify-between p-2.5 rounded-lg text-left transition-colors border bg-white dark:bg-white/[0.035] border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700"
             >
               <div className="flex items-center space-x-2.5 min-w-0 flex-1">
                 <div className="w-6 h-6 rounded flex items-center justify-center text-[10px] font-extrabold shrink-0 border bg-brand/10 border-brand/20 text-brand">
@@ -403,7 +402,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
               ) : (
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0 shadow-[0_0_8px_rgba(16,185,129,0.7)] animate-pulse ml-2"></span>
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0 ml-2"></span>
               )}
             </button>
 
@@ -476,7 +475,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
               <button
                 type="button"
                 onClick={() => setShowPosterModal(true)}
-                className="w-full flex flex-col p-2.5 bg-zinc-100 dark:bg-[#13192b]/40 border border-zinc-200 dark:border-zinc-800/65 rounded-xl text-left transition-all group hover:border-zinc-300 dark:hover:border-zinc-700 shadow-sm cursor-pointer"
+                className="w-full flex flex-col p-2.5 bg-zinc-100 dark:bg-white/[0.025] border border-zinc-200 dark:border-zinc-800/65 rounded-lg text-left transition-colors group hover:border-zinc-300 dark:hover:border-zinc-700 cursor-pointer"
               >
                 <div className="flex items-center space-x-2 text-[11px] font-bold text-zinc-650 dark:text-zinc-300 group-hover:text-brand transition-colors w-full">
                   <ExternalLink className="w-3.5 h-3.5 text-zinc-500 group-hover:text-brand shrink-0 transition-colors" />
@@ -500,7 +499,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                   onClick={() => router.push(item.href)}
                   className={`w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-xs transition-all ${
                     isActive 
-                      ? 'bg-zinc-100 dark:bg-white/[0.06] text-zinc-900 dark:text-white font-bold border border-zinc-200 dark:border-white/[0.08] shadow-sm' 
+                      ? 'bg-zinc-100 dark:bg-white/[0.055] text-zinc-900 dark:text-white font-semibold border-l-2 border-brand'
                       : item.disabled
                         ? 'opacity-45 text-zinc-450 dark:text-zinc-650 cursor-not-allowed'
                         : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/[0.03] font-medium cursor-pointer'
@@ -520,10 +519,9 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
         <div className="space-y-4 pt-4 mt-auto px-4">
           {/* UPGRADE CARD FOR FREE PLAN */}
           {!isPortfolioView && condominio?.plan_type === 'free' && (
-            <div className="mx-1 p-4 rounded-xl bg-gradient-to-br from-brand/15 via-brand/5 to-transparent border border-brand/20 relative overflow-hidden shadow-sm animate-in fade-in duration-300">
-              <div className="absolute -right-4 -bottom-4 w-16 h-16 bg-brand/10 blur-[20px] rounded-full pointer-events-none"></div>
-              <div className="flex items-center space-x-2 text-[10px] font-bold text-brand uppercase tracking-wider mb-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-brand animate-pulse" />
+            <div className="mx-1 p-4 rounded-lg bg-zinc-100 dark:bg-white/[0.025] border border-zinc-200 dark:border-zinc-800 relative overflow-hidden animate-in fade-in duration-300">
+              <div className="flex items-center space-x-2 text-[11px] font-semibold text-zinc-700 dark:text-zinc-300 mb-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-brand" />
                 <span>Zelcon Starter</span>
               </div>
               <p className="text-[11px] font-bold text-zinc-900 dark:text-white leading-tight">{monthlyCount} de 15 ocorrências utilizadas</p>
@@ -533,7 +531,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
               </p>
               <button
                 onClick={() => router.push('/dashboard/configuracoes?tab=faturamento')}
-                className="w-full mt-3 py-1.5 bg-brand hover:bg-brand/90 text-white text-[10px] font-bold rounded-lg transition-all active:scale-[0.97] cursor-pointer text-center block shadow-[0_2px_8px_rgba(0,51,255,0.2)]"
+                  className="w-full mt-3 py-2 bg-brand hover:bg-brand/90 text-white text-[11px] font-semibold rounded-md transition-colors cursor-pointer text-center block"
               >
                 Fazer Upgrade
               </button>
@@ -596,12 +594,10 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
 
       {/* CONTAINER DO CONTEÚDO PRINCIPAL */}
       <main className="flex-1 flex flex-col min-w-0 bg-zinc-100 dark:bg-zinc-950 overflow-y-auto max-h-screen relative transition-colors duration-200">
-        {/* Subtle glow background */}
-        <div className="absolute top-0 left-1/4 right-1/4 h-[250px] bg-brand/4 blur-[120px] rounded-full pointer-events-none z-0"></div>
 
         {/* DESKTOP TOP HEADER */}
         <header className="hidden md:flex items-center justify-between border-b border-zinc-200 dark:border-white/[0.06] px-6 py-3.5 z-30 shrink-0 bg-white/85 dark:bg-[#09090b]/85 backdrop-blur-md sticky top-0 transition-colors duration-200">
-          <h2 className="text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-widest">
+          <h2 className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 tracking-wide">
             {pathname === '/dashboard/kanban' ? 'GESTÃO DE OCORRÊNCIAS' : (navigation.find(nav => nav.active)?.name || 'Área Administrativa')}
           </h2>
           <div className="flex items-center space-x-4">
@@ -615,7 +611,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
             </button>
             <div className="flex items-center space-x-1.5 text-xs text-zinc-500 font-medium">
               <span>Status:</span>
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.7)] animate-pulse"></span>
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
               <span className="text-zinc-400 font-bold">Online</span>
             </div>
           </div>

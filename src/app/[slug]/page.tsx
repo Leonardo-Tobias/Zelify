@@ -645,7 +645,7 @@ export default function MoradorPortal() {
             <button
               type="submit"
               disabled={validating}
-              className="w-full mt-2 bg-gradient-to-r from-brand to-blue-600 hover:opacity-95 active:scale-[0.98] text-white text-sm font-semibold py-2.5 px-4 rounded-lg flex items-center justify-center transition-all shadow-[0_4px_20px_rgba(0,51,255,0.25)] disabled:opacity-50 cursor-pointer"
+              className="w-full mt-2 bg-brand hover:bg-brand/90 text-white text-sm font-semibold py-2.5 px-4 rounded-lg flex items-center justify-center transition-colors disabled:opacity-50 cursor-pointer"
             >
               {validating ? (
                 <>
@@ -717,7 +717,7 @@ export default function MoradorPortal() {
               <h2 className="text-xs font-bold text-zinc-450 uppercase tracking-widest">Minhas Ocorrências</h2>
               <button
                 onClick={() => setShowManutencaoModal(true)}
-                className="bg-brand hover:bg-brand/90 text-white text-xs font-semibold px-3 py-1.5 rounded-lg flex items-center space-x-1.5 transition-all shadow-[0_4px_15px_rgba(0,51,255,0.2)] active:scale-[0.98]"
+                className="bg-brand hover:bg-brand/90 text-white text-xs font-semibold px-3 py-1.5 rounded-md flex items-center space-x-1.5 transition-colors"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>Relatar Problema</span>
@@ -796,7 +796,7 @@ export default function MoradorPortal() {
               <h2 className="text-xs font-bold text-zinc-450 uppercase tracking-widest">Mural de Achados</h2>
               <button
                 onClick={() => setShowAchadoModal(true)}
-                className="bg-brand hover:bg-brand/90 text-white text-xs font-semibold px-3 py-1.5 rounded-lg flex items-center space-x-1.5 transition-all shadow-[0_4px_15px_rgba(0,51,255,0.2)] active:scale-[0.98]"
+                className="bg-brand hover:bg-brand/90 text-white text-xs font-semibold px-3 py-1.5 rounded-md flex items-center space-x-1.5 transition-colors"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>Cadastrar Achado</span>
@@ -1164,7 +1164,7 @@ export default function MoradorPortal() {
                     <button
                       type="submit"
                       disabled={submittingProblema || compressingImage}
-                      className="w-full bg-brand hover:bg-brand/90 text-white text-sm font-semibold py-2.5 rounded-lg flex items-center justify-center transition-all shadow-[0_4px_15px_rgba(0,51,255,0.2)] disabled:opacity-50 cursor-pointer"
+                      className="w-full bg-brand hover:bg-brand/90 text-white text-sm font-semibold py-2.5 rounded-lg flex items-center justify-center transition-colors disabled:opacity-50 cursor-pointer"
                     >
                       {submittingProblema ? (
                         <>
@@ -1301,7 +1301,7 @@ export default function MoradorPortal() {
                     <button
                       type="submit"
                       disabled={submittingAchado || compressingImage}
-                      className="w-full bg-brand hover:bg-brand/90 text-white text-sm font-semibold py-2.5 rounded-lg flex items-center justify-center transition-all shadow-[0_4px_15px_rgba(0,51,255,0.2)] disabled:opacity-50 cursor-pointer"
+                      className="w-full bg-brand hover:bg-brand/90 text-white text-sm font-semibold py-2.5 rounded-lg flex items-center justify-center transition-colors disabled:opacity-50 cursor-pointer"
                     >
                       {submittingAchado ? (
                         <>

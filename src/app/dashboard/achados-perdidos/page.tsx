@@ -197,7 +197,7 @@ export default function AchadosPerdidosPage() {
         </div>
         <button
           onClick={() => setShowAddForm(true)}
-          className="bg-brand hover:bg-brand/90 text-white text-xs font-bold px-4 py-2 rounded-lg flex items-center space-x-1.5 transition-all shadow-[0_4px_20px_rgba(0,51,255,0.20)] active:scale-[0.98] self-start md:self-auto"
+          className="bg-brand hover:bg-brand/90 text-white text-xs font-semibold px-4 py-2 rounded-md flex items-center space-x-1.5 transition-colors self-start md:self-auto"
         >
           <Plus className="w-4 h-4" />
           <span>Cadastrar Objeto pela Portaria</span>
@@ -441,7 +441,7 @@ export default function AchadosPerdidosPage() {
                   <button
                     type="submit"
                     disabled={submitting || compressing}
-                    className="w-full bg-brand hover:bg-brand/90 text-white text-xs font-bold py-2 rounded-lg flex items-center justify-center transition-all shadow-[0_4px_20px_rgba(0,51,255,0.20)] active:scale-[0.98] disabled:opacity-50"
+                    className="w-full bg-brand hover:bg-brand/90 text-white text-xs font-semibold py-2 rounded-md flex items-center justify-center transition-colors disabled:opacity-50"
                   >
                     {submitting ? (
                       <>

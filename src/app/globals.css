@@ -16,40 +16,159 @@
   color: rgb(212 212 216);
 }
 
-.filter-field:focus { border-color: #0033ff; }
+.filter-field:focus { border-color: var(--brand); }
 
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f6f7f8;
+  --foreground: #202329;
+  --brand: #465a9f;
+  --brand-action: #465a9f;
+  --brand-hover: #3c4e8b;
+  --brand-soft: #eef0f8;
+  --app-surface: #ffffff;
+  --app-surface-raised: #ffffff;
+  --app-border: #e1e4e8;
+  --app-muted: #68707d;
 }
 
 :root.dark {
-  --background: #09090b;
-  --foreground: #ffffff;
-  --color-brand: #60A5FA;
+  --background: #111316;
+  --foreground: #e7e9ed;
+  --brand: #8290cc;
+  --brand-action: #52639f;
+  --brand-hover: #5e70ad;
+  --brand-soft: #202638;
+  --app-surface: #17191d;
+  --app-surface-raised: #1b1d22;
+  --app-border: #2a2d33;
+  --app-muted: #9298a3;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --color-brand: #001CFF;
+  --color-brand: var(--brand);
   --color-zinc-350: #b0b0b8;
   --color-zinc-450: #898992;
   --color-zinc-550: #62626b;
   --color-zinc-650: #494951;
   --color-zinc-925: #111114;
   --color-emerald-450: #2dd4a0;
-  --font-sans: Arial, Helvetica, sans-serif;
+  --font-sans: "Segoe UI Variable", "Segoe UI", Inter, system-ui, sans-serif;
   --font-mono: "Cascadia Mono", Consolas, monospace;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: "Segoe UI Variable", "Segoe UI", Inter, system-ui, sans-serif;
   transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.bg-brand {
+  background-color: var(--brand-action) !important;
+}
+
+.hover\:bg-brand\/90:hover {
+  background-color: var(--brand-hover) !important;
+}
+
+/* Calm Operations: a quieter, denser visual language for the signed-in product. */
+.dashboard-shell {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+.dashboard-shell main {
+  background: var(--background) !important;
+}
+
+.dashboard-shell > aside,
+.dashboard-shell > header,
+.dashboard-shell main > header {
+  background-color: color-mix(in srgb, var(--app-surface) 96%, transparent) !important;
+  border-color: var(--app-border) !important;
+}
+
+.dashboard-shell .bg-brand {
+  background-color: var(--brand-action) !important;
+}
+
+.dashboard-shell .hover\:bg-brand\/90:hover {
+  background-color: var(--brand-hover) !important;
+}
+
+.dashboard-shell .text-brand,
+.dashboard-shell .dark\:text-\[\#3b82f6\]:where(.dark, .dark *) {
+  color: var(--brand) !important;
+}
+
+.dashboard-shell .border-brand {
+  border-color: var(--brand) !important;
+}
+
+.dashboard-shell .focus\:border-brand:focus,
+.dashboard-shell .focus\:border-brand\/50:focus {
+  border-color: var(--brand) !important;
+}
+
+.dashboard-shell .bg-gradient-to-r,
+.dashboard-shell .bg-gradient-to-br {
+  background-image: none !important;
+}
+
+.dashboard-shell [class*="shadow-[0_"] {
+  box-shadow: none !important;
+}
+
+.dashboard-shell .dark\:shadow-xl:where(.dark, .dark *),
+.dashboard-shell .shadow-xl,
+.dashboard-shell .shadow-2xl {
+  box-shadow: none !important;
+}
+
+.dashboard-shell .uppercase {
+  text-transform: none;
+}
+
+.dashboard-shell .tracking-wider,
+.dashboard-shell .tracking-widest {
+  letter-spacing: 0.02em;
+}
+
+.dashboard-shell button,
+.dashboard-shell a,
+.dashboard-shell input,
+.dashboard-shell select,
+.dashboard-shell textarea {
+  outline-color: var(--brand);
+}
+
+.dashboard-shell input:focus,
+.dashboard-shell select:focus,
+.dashboard-shell textarea:focus {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand) 16%, transparent);
+}
+
+.dark .dashboard-shell .dark\:bg-zinc-925\/80,
+.dark .dashboard-shell .dark\:bg-zinc-925\/60,
+.dark .dashboard-shell .dark\:bg-zinc-925,
+.dark .dashboard-shell .dark\:bg-zinc-900 {
+  background-color: var(--app-surface) !important;
+}
+
+.dark .dashboard-shell .dark\:bg-zinc-950,
+.dark .dashboard-shell .dark\:bg-\[\#0d0d0f\] {
+  background-color: #131519 !important;
+}
+
+.dark .dashboard-shell .dark\:border-zinc-800,
+.dark .dashboard-shell .dark\:border-white\/\[0\.06\],
+.dark .dashboard-shell .dark\:border-white\/\[0\.07\],
+.dark .dashboard-shell .dark\:border-white\/\[0\.08\] {
+  border-color: var(--app-border) !important;
 }
 
 /* Auth screens keep a similar visual proportion from notebooks to 2K monitors. */
@@ -147,16 +266,11 @@ body {
   }
 }
 
-/* Smooth theme transitions for all surfaces and borders */
-*, *::before, *::after {
-  transition-property: background-color, border-color, color, box-shadow;
-  transition-duration: 0.25s;
-  transition-timing-function: ease;
-}
-
-/* Don't transition animations or transforms */
-.animate-spin, .animate-pulse, [class*="animate-"] {
-  transition: none !important;
+/* Motion stays intentional: controls respond quickly without animating the entire UI. */
+button, a, input, select, textarea {
+  transition-property: background-color, border-color, color, box-shadow, opacity;
+  transition-duration: 160ms;
+  transition-timing-function: ease-out;
 }
 
 /* Custom scrollbar for kanban columns */

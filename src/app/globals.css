@@ -23,10 +23,10 @@
 :root {
   --background: #f6f7f8;
   --foreground: #202329;
-  --brand: #465a9f;
-  --brand-action: #465a9f;
-  --brand-hover: #3c4e8b;
-  --brand-soft: #eef0f8;
+  --brand: #001cff;
+  --brand-action: #001cff;
+  --brand-hover: #0017d6;
+  --brand-soft: #eef1ff;
   --app-surface: #ffffff;
   --app-surface-raised: #ffffff;
   --app-border: #e1e4e8;

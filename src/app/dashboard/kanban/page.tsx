@@ -1,16 +1,27 @@
 'use client'
 
 import React, { useEffect, useMemo, useState } from 'react'
-import { CheckCircle2, ChevronLeft, ChevronRight, Clock, Lock, MapPin, MessageSquare, Paperclip, Trash2, UserRound, Wrench, X } from 'lucide-react'
+import { CheckCircle2, ChevronLeft, ChevronRight, Clock, Lock, MapPin, MessageSquare, Paperclip, Search, Trash2, UserRound, Wrench, X } from 'lucide-react'
 import { db, Chamado, OcorrenciaComentario, OcorrenciaHistorico } from '@/lib/db'
 import { useCondominio } from '@/contexts/CondominioContext'
 import { OCCURRENCE_CATEGORIES, PRIORITIES, STATUS_LABELS, formatOccurrenceAge, occurrenceTitle, priorityLabel, requesterLabel } from '@/lib/occurrences'
+import { FilterSelect } from '@/components/FilterSelect'
 
 type StatusType = 'pendente' | 'em_execucao' | 'resolvido'
 const columns: Array<{ title: string; status: StatusType; color: string; icon: typeof Clock }> = [
   { title: 'Recebidas', status: 'pendente', color: 'border-t-amber-500', icon: Clock },
   { title: 'Em andamento', status: 'em_execucao', color: 'border-t-brand', icon: Wrench },
   { title: 'Concluídas', status: 'resolvido', color: 'border-t-emerald-500', icon: CheckCircle2 },
+]
+
+const categoryOptions = [
+  { value: 'todas', label: 'Todas as categorias' },
+  ...OCCURRENCE_CATEGORIES.map(value => ({ value, label: value })),
+]
+
+const priorityOptions = [
+  { value: 'todas', label: 'Todas as prioridades' },
+  ...PRIORITIES.map(([value, label]) => ({ value, label })),
 ]
 
 function PriorityBadge({ value }: { value?: Chamado['prioridade'] }) {
@@ -110,10 +121,19 @@ export default function KanbanPage() {
     <header className="px-5 md:px-8 py-5 border-b border-zinc-200 dark:border-white/[0.06] bg-white dark:bg-[#111316]">
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div><h1 className="text-lg font-semibold text-zinc-900 dark:text-white">Gestão de ocorrências</h1><p className="text-xs text-zinc-500 mt-1">Acompanhe o fluxo operacional de {condominio.nome}</p></div>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 w-full lg:w-auto">
-          <input value={busca} onChange={e => setBusca(e.target.value)} placeholder="Buscar ocorrência" className="bg-white dark:bg-[#0d0d0f] border border-zinc-200 dark:border-white/[0.08] rounded-lg px-3 py-2 text-xs outline-none focus:border-brand" />
-          <select value={categoria} onChange={e => setCategoria(e.target.value)} className="bg-white dark:bg-[#0d0d0f] border border-zinc-200 dark:border-white/[0.08] rounded-lg px-3 py-2 text-xs outline-none"><option value="todas">Todas as categorias</option>{OCCURRENCE_CATEGORIES.map(value => <option key={value}>{value}</option>)}</select>
-          <select value={prioridade} onChange={e => setPrioridade(e.target.value)} className="bg-white dark:bg-[#0d0d0f] border border-zinc-200 dark:border-white/[0.08] rounded-lg px-3 py-2 text-xs outline-none"><option value="todas">Todas as prioridades</option>{PRIORITIES.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select>
+        <div className="grid w-full grid-cols-1 gap-2 sm:grid-cols-3 lg:w-[700px] lg:grid-cols-[1.2fr_1fr_1fr]">
+          <label className="relative block min-w-0">
+            <span className="sr-only">Buscar ocorrência</span>
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
+            <input
+              value={busca}
+              onChange={event => setBusca(event.target.value)}
+              placeholder="Buscar ocorrência"
+              className="h-10 w-full rounded-lg border border-zinc-200 bg-white pl-9 pr-3 text-xs text-zinc-700 placeholder:text-zinc-500 focus:border-brand dark:border-white/[0.08] dark:bg-[#17191d] dark:text-zinc-200"
+            />
+          </label>
+          <FilterSelect value={categoria} onChange={setCategoria} options={categoryOptions} ariaLabel="Filtrar por categoria" />
+          <FilterSelect value={prioridade} onChange={setPrioridade} options={priorityOptions} ariaLabel="Filtrar por prioridade" />
         </div>
       </div>
     </header>

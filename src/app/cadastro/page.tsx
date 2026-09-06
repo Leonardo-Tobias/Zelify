@@ -136,28 +136,28 @@ function CadastroForm() {
   };
 
   return (
-    <div className="min-h-screen bg-[#070709] flex flex-col items-center justify-center p-4 antialiased text-zinc-300 relative overflow-hidden">
+    <div className="auth-page min-h-dvh bg-[#070709] flex flex-col items-center justify-center px-4 py-6 antialiased text-zinc-300 relative overflow-x-hidden overflow-y-auto">
       
       {/* Glow de fundo */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-brand/10 blur-[130px] rounded-full pointer-events-none z-0"></div>
+      <div className="auth-page-glow absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-brand/10 blur-[130px] rounded-full pointer-events-none z-0"></div>
 
-      <div className="w-full max-w-md space-y-6 relative z-10">
+      <div className="auth-shell w-full space-y-6 relative z-10 my-auto">
         
         {/* LOGO */}
         <div className="text-center">
           <div className="mb-4">
-            <span className="text-2xl font-black tracking-tight text-white">
+            <span className="auth-logo text-2xl font-black tracking-tight text-white">
               Zelcon<span className="text-[#001CFF]">.</span>
             </span>
           </div>
-          <h1 className="text-xl font-bold tracking-tight text-white">Comece com o Zelcon</h1>
-          <p className="text-sm text-zinc-300 mt-1 font-medium">
+          <h1 className="auth-title text-xl font-bold tracking-tight text-white">Comece com o Zelcon</h1>
+          <p className="auth-subtitle text-sm text-zinc-300 mt-1 font-medium">
             Cadastre seu condomínio e crie sua conta de síndico
           </p>
         </div>
 
         {/* BARRA DE PROGRESSO DE PASSOS */}
-        <div className="flex items-center justify-center space-x-3">
+        <div className="auth-progress flex items-center justify-center space-x-3">
           <div className={`flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold border transition-all ${
             step === 1 
               ? 'bg-brand text-white border-brand shadow-[0_0_8px_rgba(0,51,255,0.4)]' 
@@ -176,7 +176,7 @@ function CadastroForm() {
         </div>
 
         {/* CARD PRINCIPAL */}
-        <div className="bg-[#0f0f13]/90 border border-zinc-800 rounded-2xl p-6 shadow-2xl backdrop-blur-md relative overflow-hidden">
+        <div className="auth-card bg-[#0f0f13]/90 border border-zinc-800 rounded-2xl p-6 shadow-2xl backdrop-blur-md relative overflow-hidden">
           {/* Linha de reflexo azul no topo */}
           <div className="absolute inset-x-0 -top-px h-px bg-gradient-to-r from-transparent via-brand/60 to-transparent"></div>
 
@@ -242,7 +242,7 @@ function CadastroForm() {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-2.5 text-zinc-500 hover:text-zinc-300 transition-colors"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 transition-colors"
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -335,7 +335,7 @@ function CadastroForm() {
                     className="w-full pl-3 pr-10 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-sm text-white placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-brand/50 focus:border-brand/50 hover:border-zinc-700 transition-all font-medium tracking-wider"
                     required
                   />
-                  <Key className="absolute right-3 top-2.5 text-zinc-600 w-4 h-4" />
+                  <Key className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-600 w-4 h-4" />
                 </div>
                 <p className="text-xs text-zinc-400 mt-1.5 font-medium leading-relaxed">
                   Código que os moradores usarão para liberar o envio de chamados.
@@ -390,7 +390,7 @@ function CadastroForm() {
         </div>
 
         {/* DIRECIONAMENTO PARA LOGIN */}
-        <div className="text-center">
+        <div className="auth-footer text-center">
           <p className="text-xs text-zinc-500">
             Já tem uma conta cadastrada?{' '}
             <button

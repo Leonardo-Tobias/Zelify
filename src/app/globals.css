@@ -52,6 +52,101 @@ body {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
+/* Auth screens keep a similar visual proportion from notebooks to 2K monitors. */
+.auth-shell {
+  width: min(calc(100vw - 2rem), clamp(28rem, 23vw, 34rem));
+}
+
+.auth-shell--compact {
+  width: min(calc(100vw - 2rem), clamp(24rem, 20vw, 30rem));
+}
+
+@media (min-width: 2200px) and (min-height: 1200px) {
+  .auth-page {
+    padding-block: 2.5rem;
+  }
+
+  .auth-page-glow {
+    width: 42rem;
+    height: 42rem;
+    filter: blur(10rem);
+  }
+
+  .auth-shell {
+    row-gap: 2rem;
+  }
+
+  .auth-logo {
+    font-size: 1.875rem;
+  }
+
+  .auth-title {
+    font-size: 1.5rem;
+  }
+
+  .auth-subtitle {
+    margin-top: 0.375rem;
+    font-size: 1rem;
+  }
+
+  .auth-progress > div:first-child,
+  .auth-progress > div:last-child {
+    width: 1.875rem;
+    height: 1.875rem;
+    font-size: 0.875rem;
+  }
+
+  .auth-progress > div:nth-child(2) {
+    width: 2.75rem;
+  }
+
+  .auth-card {
+    padding: 2rem;
+    border-radius: 1.25rem;
+  }
+
+  .auth-card form {
+    row-gap: 1.25rem;
+  }
+
+  .auth-card h3 {
+    font-size: 0.9375rem;
+  }
+
+  .auth-card label,
+  .auth-card p,
+  .auth-footer p {
+    font-size: 0.8125rem;
+  }
+
+  .auth-card input {
+    min-height: 2.875rem;
+    padding-block: 0.6875rem;
+    font-size: 0.9375rem;
+  }
+
+  .auth-card button[type='submit'],
+  .auth-card button[type='button'] {
+    min-height: 2.875rem;
+    font-size: 0.9375rem;
+  }
+
+  .auth-card svg {
+    width: 1.125rem;
+    height: 1.125rem;
+  }
+}
+
+@media (max-height: 760px) and (min-width: 640px) {
+  .auth-page {
+    justify-content: flex-start;
+  }
+
+  .auth-shell {
+    margin-block: auto;
+  }
+}
+
 /* Smooth theme transitions for all surfaces and borders */
 *, *::before, *::after {
   transition-property: background-color, border-color, color, box-shadow;

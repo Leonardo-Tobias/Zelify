@@ -32,11 +32,11 @@ export default function RedefinirSenhaPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#070709] flex items-center justify-center p-4 text-zinc-300">
-      <section className="w-full max-w-sm rounded-2xl border border-zinc-800 bg-[#0f0f13] p-6 shadow-2xl">
+    <main className="auth-page min-h-dvh bg-[#070709] flex items-center justify-center px-4 py-6 text-zinc-300 overflow-x-hidden overflow-y-auto">
+      <section className="auth-card auth-shell auth-shell--compact rounded-2xl border border-zinc-800 bg-[#0f0f13] p-6 shadow-2xl my-auto">
         <div className="mb-6 text-center">
-          <div className="text-2xl font-black text-white">Zelcon<span className="text-brand">.</span></div>
-          <h1 className="mt-4 text-xl font-bold text-white">Crie uma nova senha</h1>
+          <div className="auth-logo text-2xl font-black text-white">Zelcon<span className="text-brand">.</span></div>
+          <h1 className="auth-title mt-4 text-xl font-bold text-white">Crie uma nova senha</h1>
         </div>
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (

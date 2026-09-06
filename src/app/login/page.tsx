@@ -71,28 +71,28 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#070709] flex flex-col items-center justify-center p-4 antialiased text-zinc-300 relative overflow-hidden">
+    <div className="auth-page min-h-dvh bg-[#070709] flex flex-col items-center justify-center px-4 py-6 antialiased text-zinc-300 relative overflow-x-hidden overflow-y-auto">
       
       {/* Background glow similar to dashboard/landing page */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-brand/10 blur-[130px] rounded-full pointer-events-none z-0"></div>
+      <div className="auth-page-glow absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-brand/10 blur-[130px] rounded-full pointer-events-none z-0"></div>
 
-      <div className="w-full max-w-sm space-y-6 relative z-10">
+      <div className="auth-shell auth-shell--compact w-full space-y-6 relative z-10 my-auto">
         
         {/* LOGO */}
         <div className="text-center">
           <div className="mb-4">
-            <span className="text-2xl font-black tracking-tight text-white">
+            <span className="auth-logo text-2xl font-black tracking-tight text-white">
               Zelcon<span className="text-[#001CFF]">.</span>
             </span>
           </div>
-          <h1 className="text-xl font-bold tracking-tight text-white">Acesse o Zelcon Gestor</h1>
-          <p className="text-xs text-zinc-400 mt-1 font-medium">
+          <h1 className="auth-title text-xl font-bold tracking-tight text-white">Acesse o Zelcon Gestor</h1>
+          <p className="auth-subtitle text-xs text-zinc-400 mt-1 font-medium">
             Painel administrativo para síndicos e zeladores
           </p>
         </div>
 
         {/* BOX DE LOGIN */}
-        <div className="bg-[#0f0f13]/90 border border-zinc-800 rounded-2xl p-6 shadow-2xl backdrop-blur-md relative overflow-hidden">
+        <div className="auth-card bg-[#0f0f13]/90 border border-zinc-800 rounded-2xl p-6 shadow-2xl backdrop-blur-md relative overflow-hidden">
           {/* Subtle line glow inside */}
           <div className="absolute inset-x-0 -top-px h-px bg-gradient-to-r from-transparent via-brand/60 to-transparent"></div>
 
@@ -152,7 +152,7 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-2.5 text-zinc-500 hover:text-zinc-300 transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 transition-colors"
                   aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -178,7 +178,7 @@ export default function LoginPage() {
         </div>
 
         {/* DIRECIONAMENTO PARA CADASTRO */}
-        <div className="text-center">
+        <div className="auth-footer text-center">
           <p className="text-xs text-zinc-500">
             Não tem uma conta?{' '}
             <button

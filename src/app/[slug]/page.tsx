@@ -28,7 +28,6 @@ import {
   isValidBrazilianPhone,
   occurrenceTitle,
   priorityLabel,
-  requesterLabel,
 } from '@/lib/occurrences';
 
 export default function MoradorPortal() {
@@ -359,7 +358,7 @@ export default function MoradorPortal() {
             solicitante_tipo: solicitanteTipo,
             solicitante_tipo_outro: solicitanteTipoOutro || null,
             solicitante_nome: solicitanteNome || null,
-            solicitante_whatsapp: solicitanteWhatsapp || null,
+            solicitante_whatsapp: anonimo ? null : solicitanteWhatsapp || null,
             anonimo,
           })
         : await db.createChamado({
@@ -1411,13 +1410,6 @@ export default function MoradorPortal() {
                 </div>
               </div>
             </div>
-
-            {selectedChamado.tipo === 'manutencao' && (
-              <div className="grid grid-cols-2 gap-3 bg-zinc-950/50 p-4 rounded-xl border border-white/[0.04] text-xs">
-                <div><span className="text-[9px] uppercase tracking-wider text-zinc-500 font-bold">Solicitante</span><p className="text-zinc-300 font-semibold mt-1">{requesterLabel(selectedChamado.solicitante_tipo)}</p></div>
-                <div><span className="text-[9px] uppercase tracking-wider text-zinc-500 font-bold">Identidade</span><p className="text-zinc-300 font-semibold mt-1">{selectedChamado.anonimo !== false ? 'Anônimo' : selectedChamado.solicitante_nome || 'Não informada'}</p></div>
-              </div>
-            )}
 
             {historicoPublico.some(item => item.chamado_id === selectedChamado.id) && (
               <div className="space-y-2">

@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getPortalBearerToken, verifyPortalSession } from '@/lib/portalSession'
 import { getSupabaseAdmin } from '@/lib/serverAuth'
 import { isChamadoUrlForCondominio, removeChamadoFile } from '@/lib/serverStorage'
+import { toPublicChamado, toPublicComment, toPublicHistory } from '@/lib/publicPortal'
+
+const PUBLIC_CHAMADO_SELECT = 'id, tipo, local, bloco, apartamento, descricao, titulo, categoria, categoria_outro, prioridade, foto_url, status, created_at, updated_at, completed_at'
 
 function getSession(req: NextRequest) {
   return verifyPortalSession(getPortalBearerToken(req.headers.get('authorization')))
@@ -15,12 +18,12 @@ export async function GET(req: NextRequest) {
     const admin = getSupabaseAdmin()
     const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString()
     const [maintenanceResult, foundResult, countResult] = await Promise.all([
-      admin.from('chamados').select('*')
+      admin.from('chamados').select(PUBLIC_CHAMADO_SELECT)
         .eq('condominio_id', session.condominioId)
         .eq('tipo', 'manutencao')
         .eq('bloco', session.bloco)
         .eq('apartamento', session.apartamento),
-      admin.from('chamados').select('*')
+      admin.from('chamados').select(PUBLIC_CHAMADO_SELECT)
         .eq('condominio_id', session.condominioId)
         .eq('tipo', 'achado_perdido'),
       admin.from('chamados').select('*', { count: 'exact', head: true })
@@ -33,20 +36,20 @@ export async function GET(req: NextRequest) {
     if (countResult.error) throw countResult.error
 
     const chamados = [
-      ...(maintenanceResult.data || []),
-      ...(foundResult.data || []).map(item => ({ ...item, bloco: '', apartamento: '' })),
-    ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+      ...(maintenanceResult.data || []).map(item => toPublicChamado(item)),
+      ...(foundResult.data || []).map(item => toPublicChamado(item, true)),
+    ].sort((a, b) => new Date(String(b.created_at)).getTime() - new Date(String(a.created_at)).getTime())
 
     const ids = chamados.map(item => item.id)
     let historico: unknown[] = []
     let comentarios: unknown[] = []
     if (ids.length) {
       const [historyResult, commentsResult] = await Promise.all([
-        admin.from('ocorrencia_historico').select('*').in('chamado_id', ids).eq('visibilidade', 'publico').order('created_at'),
-        admin.from('ocorrencia_comentarios').select('*').in('chamado_id', ids).eq('visibilidade', 'publico').order('created_at'),
+        admin.from('ocorrencia_historico').select('chamado_id, descricao, created_at').in('chamado_id', ids).eq('visibilidade', 'publico').order('created_at'),
+        admin.from('ocorrencia_comentarios').select('chamado_id, conteudo, created_at').in('chamado_id', ids).eq('visibilidade', 'publico').order('created_at'),
       ])
-      if (!historyResult.error) historico = historyResult.data || []
-      if (!commentsResult.error) comentarios = commentsResult.data || []
+      if (!historyResult.error) historico = (historyResult.data || []).map(item => toPublicHistory(item))
+      if (!commentsResult.error) comentarios = (commentsResult.data || []).map(item => toPublicComment(item))
     }
 
     return NextResponse.json({ chamados, monthlyCount: countResult.count || 0, historico, comentarios })
@@ -79,7 +82,7 @@ export async function POST(req: NextRequest) {
     const fotoUrl = typeof body.foto_url === 'string' ? body.foto_url : ''
     if (!tipo || !local || !descricao || (tipo === 'manutencao' && (!titulo || !categoria)) ||
       local.length > 100 || titulo.length > 120 || categoria.length > 100 || descricao.length > 2000 ||
-      solicitanteNome.length > 120 || (!!solicitanteWhatsapp && ![10, 11].includes(whatsappDigits.length)) || fotoUrl.length > 2048) {
+      solicitanteNome.length > 120 || (!anonimo && !!solicitanteWhatsapp && ![10, 11].includes(whatsappDigits.length)) || fotoUrl.length > 2048) {
       return NextResponse.json({ error: 'Dados do chamado inválidos.' }, { status: 400 })
     }
     if (fotoUrl && !isChamadoUrlForCondominio(fotoUrl, session.condominioId)) {
@@ -101,8 +104,8 @@ export async function POST(req: NextRequest) {
       p_prioridade: prioridade,
       p_solicitante_tipo: solicitanteTipo,
       p_solicitante_tipo_outro: solicitanteTipoOutro || null,
-      p_solicitante_nome: solicitanteNome || null,
-      p_solicitante_whatsapp: solicitanteWhatsapp || null,
+      p_solicitante_nome: anonimo ? null : solicitanteNome || null,
+      p_solicitante_whatsapp: anonimo ? null : solicitanteWhatsapp || null,
       p_anonimo: anonimo,
     })
     const rpcUnavailable = atomicError?.code === 'PGRST202' || atomicError?.code === '42883'
@@ -166,7 +169,7 @@ export async function POST(req: NextRequest) {
       solicitante_tipo: solicitanteTipo,
       solicitante_tipo_outro: solicitanteTipoOutro || null,
       solicitante_nome: anonimo ? null : solicitanteNome || null,
-      solicitante_whatsapp: solicitanteWhatsapp || null,
+      solicitante_whatsapp: anonimo ? null : solicitanteWhatsapp || null,
       anonimo,
       foto_url: fotoUrl || null,
       status: tipo === 'manutencao' ? 'pendente' : 'encontrado',

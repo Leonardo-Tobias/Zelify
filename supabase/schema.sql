@@ -299,7 +299,7 @@ BEGIN
     CASE WHEN p_tipo = 'manutencao' THEN 'pendente' ELSE 'encontrado' END,
     p_categoria, p_categoria_outro, p_prioridade, p_solicitante_tipo, p_solicitante_tipo_outro,
     CASE WHEN p_anonimo THEN NULL ELSE NULLIF(TRIM(p_solicitante_nome), '') END,
-    NULLIF(TRIM(p_solicitante_whatsapp), ''), p_anonimo
+    CASE WHEN p_anonimo THEN NULL ELSE NULLIF(TRIM(p_solicitante_whatsapp), '') END, p_anonimo
   ) RETURNING * INTO v_chamado;
   RETURN to_jsonb(v_chamado);
 END;

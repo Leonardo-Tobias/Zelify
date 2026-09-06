@@ -273,19 +273,44 @@ button, a, input, select, textarea {
   transition-timing-function: ease-out;
 }
 
-/* Custom scrollbar for kanban columns */
+/* Compact scrollbar for dense application panels. */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(161 161 170 / 0.55) transparent;
+  scrollbar-gutter: stable;
+}
+
+.dark .custom-scrollbar {
+  scrollbar-color: rgb(113 113 122 / 0.65) transparent;
+}
+
 .custom-scrollbar::-webkit-scrollbar {
-  width: 4px;
+  width: 8px;
+  height: 8px;
 }
 .custom-scrollbar::-webkit-scrollbar-track {
   background: transparent;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(113, 113, 122, 0.3);
-  border-radius: 4px;
+  min-height: 48px;
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background: rgb(161 161 170 / 0.55);
+  background-clip: padding-box;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(113, 113, 122, 0.5);
+  background: rgb(113 113 122 / 0.75);
+  background-clip: padding-box;
+}
+
+.dark .custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgb(113 113 122 / 0.65);
+  background-clip: padding-box;
+}
+
+.dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgb(161 161 170 / 0.75);
+  background-clip: padding-box;
 }
 
 @media (max-width: 767px) {

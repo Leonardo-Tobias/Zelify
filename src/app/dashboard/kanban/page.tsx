@@ -210,7 +210,7 @@ export default function KanbanPage() {
             </div>
           </header>
 
-          <div className="min-h-0 flex-1 overflow-y-auto">
+          <div className="custom-scrollbar min-h-0 flex-1 overflow-y-auto overscroll-contain">
             <div className="space-y-7 p-5 sm:p-6">
               <section>
                 <h3 className="mb-3 text-sm font-semibold text-zinc-900 dark:text-white">Resumo</h3>

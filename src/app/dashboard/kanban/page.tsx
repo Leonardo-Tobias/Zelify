@@ -9,10 +9,10 @@ import { OCCURRENCE_CATEGORIES, PRIORITIES, STATUS_LABELS, formatOccurrenceAge, 
 import { FilterSelect } from '@/components/FilterSelect'
 
 type StatusType = 'pendente' | 'em_execucao' | 'resolvido'
-const columns: Array<{ title: string; status: StatusType; color: string; icon: typeof Clock }> = [
-  { title: 'Recebidas', status: 'pendente', color: 'border-t-amber-500', icon: Clock },
-  { title: 'Em andamento', status: 'em_execucao', color: 'border-t-brand', icon: Wrench },
-  { title: 'Concluídas', status: 'resolvido', color: 'border-t-emerald-500', icon: CheckCircle2 },
+const columns: Array<{ title: string; status: StatusType; icon: typeof Clock }> = [
+  { title: 'Recebidas', status: 'pendente', icon: Clock },
+  { title: 'Em andamento', status: 'em_execucao', icon: Wrench },
+  { title: 'Concluídas', status: 'resolvido', icon: CheckCircle2 },
 ]
 
 const categoryOptions = [
@@ -168,7 +168,7 @@ export default function KanbanPage() {
       {loading ? <div className="h-56 flex items-center justify-center text-xs text-zinc-500">Carregando ocorrências...</div> : <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 min-w-0 lg:min-w-[900px] h-full">
         {columns.map(column => {
           const items = filtered.filter(item => item.status === column.status)
-          return <section key={column.status} onDragOver={event => event.preventDefault()} onDrop={() => { if (draggedId) updateStatus(draggedId, column.status); setDraggedId(null) }} className={`bg-zinc-100/70 dark:bg-[#17191d] border border-zinc-200 dark:border-white/[0.06] ${column.color} rounded-xl min-h-[260px] flex flex-col`}>
+          return <section key={column.status} onDragOver={event => event.preventDefault()} onDrop={() => { if (draggedId) updateStatus(draggedId, column.status); setDraggedId(null) }} className="bg-zinc-100/70 dark:bg-[#17191d] border border-zinc-200 dark:border-white/[0.06] rounded-xl min-h-[260px] flex flex-col">
             <div className="p-4 flex items-center justify-between border-b border-zinc-200 dark:border-white/[0.05]"><div className="flex items-center gap-2"><column.icon className="w-4 h-4 text-zinc-500" /><h2 className="text-sm font-semibold text-zinc-800 dark:text-zinc-200">{column.title}</h2></div><span className="text-[11px] font-medium bg-white dark:bg-white/[0.04] border border-zinc-200 dark:border-white/[0.06] px-2 py-0.5 rounded">{items.length}</span></div>
             <div className="p-3 space-y-3 overflow-y-auto">
               {!items.length && <div className="h-28 flex items-center justify-center text-[10px] text-zinc-500">Nenhuma ocorrência nesta etapa.</div>}

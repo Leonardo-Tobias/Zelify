@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Loader2, AlertCircle, Eye, EyeOff } from 'lucide-react';
 import { db, isSupabaseConfigured, safeCondoForStorage } from '@/lib/db';
+import BrandLogo from '@/components/BrandLogo';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -81,9 +82,7 @@ export default function LoginPage() {
         {/* LOGO */}
         <div className="text-center">
           <div className="mb-4">
-            <span className="auth-logo text-2xl font-black tracking-tight text-white">
-              Zelcon<span className="text-brand">.</span>
-            </span>
+            <BrandLogo variant="light" priority className="auth-logo mx-auto h-8 w-auto" />
           </div>
           <h1 className="auth-title text-xl font-bold tracking-tight text-white">Acesse o Zelcon Gestor</h1>
           <p className="auth-subtitle text-xs text-zinc-400 mt-1 font-medium">

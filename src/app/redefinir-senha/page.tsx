@@ -4,6 +4,7 @@ import { FormEvent, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { AlertCircle, Loader2 } from 'lucide-react'
 import { db } from '@/lib/db'
+import BrandLogo from '@/components/BrandLogo'
 
 export default function RedefinirSenhaPage() {
   const router = useRouter()
@@ -35,7 +36,7 @@ export default function RedefinirSenhaPage() {
     <main className="auth-page min-h-dvh bg-[#070709] flex items-center justify-center px-4 py-6 text-zinc-300 overflow-x-hidden overflow-y-auto">
       <section className="auth-card auth-shell auth-shell--compact rounded-2xl border border-zinc-800 bg-[#0f0f13] p-6 shadow-2xl my-auto">
         <div className="mb-6 text-center">
-          <div className="auth-logo text-2xl font-black text-white">Zelcon<span className="text-brand">.</span></div>
+          <BrandLogo variant="light" priority className="auth-logo mx-auto h-8 w-auto" />
           <h1 className="auth-title mt-4 text-xl font-bold text-white">Crie uma nova senha</h1>
         </div>
         <form onSubmit={handleSubmit} className="space-y-4">

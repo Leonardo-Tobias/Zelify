@@ -21,6 +21,7 @@ import { db, Condominio, UsuarioGestor, isSupabaseConfigured } from '@/lib/db';
 import { CondominioProvider, useCondominio } from '@/contexts/CondominioContext';
 import PosterPreview from '@/components/PosterPreview';
 import { APP_HOST } from '@/lib/appUrl';
+import BrandLogo from '@/components/BrandLogo';
 
 function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -204,7 +205,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
       {/* MOBILE HEADER */}
       <div className="md:hidden bg-white/95 dark:bg-[#15171a]/95 backdrop-blur-md border-b border-zinc-200 dark:border-white/[0.06] px-4 py-3 flex items-center justify-between z-20">
         <div className="flex items-center space-x-2">
-          <span className="text-lg font-black tracking-tight text-zinc-900 dark:text-white">Zelcon<span className="text-brand">.</span></span>
+          <BrandLogo priority className="h-6 w-auto" />
           {isPortfolioView ? (
             <span className="text-[10px] bg-brand/10 text-brand px-1.5 py-0.5 rounded font-bold uppercase border border-brand/20">Carteira</span>
           ) : (
@@ -376,7 +377,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
           {/* LOGO */}
           <div className="px-4 pb-4 border-b border-zinc-200 dark:border-zinc-800">
             <div className="flex items-center space-x-1">
-              <span className="text-xl font-black tracking-tight text-zinc-900 dark:text-white">Zelcon<span className="text-brand">.</span></span>
+              <BrandLogo priority className="h-7 w-auto" />
             </div>
           </div>
           

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Loader2, AlertCircle, Eye, EyeOff, ArrowRight, ArrowLeft, Building, User, Key } from 'lucide-react';
 import { db, safeCondoForStorage } from '@/lib/db';
 import Checkbox from '@/components/ui/checkbox';
+import BrandLogo from '@/components/BrandLogo';
 
 function CadastroForm() {
   const router = useRouter();
@@ -146,9 +147,7 @@ function CadastroForm() {
         {/* LOGO */}
         <div className="text-center">
           <div className="mb-4">
-            <span className="auth-logo text-2xl font-black tracking-tight text-white">
-              Zelcon<span className="text-brand">.</span>
-            </span>
+            <BrandLogo variant="light" priority className="auth-logo mx-auto h-8 w-auto" />
           </div>
           <h1 className="auth-title text-xl font-bold tracking-tight text-white">Comece com o Zelcon</h1>
           <p className="auth-subtitle text-sm text-zinc-300 mt-1 font-medium">

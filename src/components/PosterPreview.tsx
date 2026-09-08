@@ -3,6 +3,7 @@
 import React, { useRef } from 'react'
 import Link from 'next/link'
 import { APP_HOST, APP_URL } from '@/lib/appUrl'
+import BrandLogo from '@/components/BrandLogo'
 
 interface PosterPreviewProps {
   nome: string
@@ -47,9 +48,8 @@ export default function PosterPreview({
             @page { size: A4 portrait; margin: 0; }
             body { margin: 0; padding: 40px; background: white; color: black; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: space-between; min-height: 100vh; box-sizing: border-box; text-align: center; }
             .border-frame { border: 12px double ${themeColor}; padding: 30px; border-radius: 0; width: 100%; height: 100%; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; justify-content: space-between; }
-            .header { display: flex; align-items: center; justify-content: center; gap: 12px; }
-            .header-icon { font-size: 48px; color: ${themeColor}; }
-            .header-title { font-size: 30px; font-weight: 900; letter-spacing: 4px; text-transform: uppercase; }
+            .header { display: flex; align-items: center; justify-content: center; }
+            .header-logo { display: block; width: 220px; height: auto; }
             .badge { background: #E4E4E7; font-weight: 900; text-transform: uppercase; padding: 8px 16px; border-radius: 8px; border: 1px solid #D4D4D8; font-size: 14px; display: inline-block; }
             .main-title { font-size: 36px; font-weight: 900; line-height: 1.2; }
             .subtitle { font-size: 16px; color: #52525B; font-weight: 600; max-width: 500px; line-height: 1.5; }
@@ -66,8 +66,7 @@ export default function PosterPreview({
           <div class="border-frame">
             <div>
               <div class="header">
-                <span class="header-icon">&#9670;</span>
-                <span class="header-title">Zelcon</span>
+                <img class="header-logo" src="${window.location.origin}/logo-escuro.svg" alt="Zelcon" />
               </div>
               <br/>
               <div class="badge">${nome}</div>
@@ -160,9 +159,7 @@ export default function PosterPreview({
         style={{ borderColor: posterTheme === 'blue' ? '#001CFF' : posterTheme === 'emerald' ? '#10B981' : '#18181B' }}
       >
         <div className="p-6 flex flex-col items-center text-center space-y-4">
-          <div className="flex items-center space-x-2">
-            <span className="text-2xl font-black tracking-widest uppercase" style={{ color: posterTheme === 'blue' ? '#001CFF' : posterTheme === 'emerald' ? '#059669' : '#18181B' }}>Zelcon</span>
-          </div>
+          <BrandLogo variant="dark" className="h-8 w-auto" />
           <div className="text-xs bg-zinc-200 font-black uppercase px-3 py-1 rounded-lg tracking-widest border border-zinc-300">
             {nome}
           </div>

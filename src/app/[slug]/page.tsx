@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { db, Condominio, Chamado, isSupabaseConfigured } from '@/lib/db';
 import { compressImage } from '@/lib/imageCompressor';
+import BrandLogo from '@/components/BrandLogo';
 import {
   OCCURRENCE_CATEGORIES,
   PRIORITIES,
@@ -493,7 +494,7 @@ export default function MoradorPortal() {
             <Building className="h-8 w-8 text-brand relative z-10" />
           </div>
           
-          <h2 className="text-xl font-bold text-white tracking-tight">Zelcon</h2>
+          <BrandLogo variant="light" priority className="h-8 w-auto" />
           <p className="mt-2 text-zinc-400 text-sm font-medium flex items-center gap-2">
             <Loader2 className="h-4 w-4 text-brand animate-spin" />
             Carregando o condomínio...
@@ -577,8 +578,8 @@ export default function MoradorPortal() {
           {/* Top glow line */}
           <div className="absolute inset-x-0 -top-px h-px bg-gradient-to-r from-transparent via-brand/40 to-transparent"></div>
           
-          <div className="flex items-center space-x-2 mb-6">
-            <span className="text-2xl font-black tracking-tight text-white">Zelcon<span className="text-brand">.</span></span>
+          <div className="mb-6">
+            <BrandLogo variant="light" priority className="h-8 w-auto" />
           </div>
           
           <div className="mb-6">
@@ -683,8 +684,8 @@ export default function MoradorPortal() {
       <header className="sticky top-0 bg-[#09090b]/85 backdrop-blur-md border-b border-white/[0.04] z-30 px-4 py-3">
         <div className="max-w-md mx-auto flex items-center justify-between">
           <div>
-            <div className="flex items-center space-x-1.5">
-              <span className="text-lg font-black tracking-tight text-white">Zelcon<span className="text-brand">.</span></span>
+            <div className="flex items-center space-x-2">
+              <BrandLogo variant="light" priority className="h-6 w-auto" />
               <span className="text-zinc-700 text-xs">|</span>
               <span className="text-xs font-semibold text-zinc-400 truncate max-w-[140px]">{condominio.nome}</span>
             </div>

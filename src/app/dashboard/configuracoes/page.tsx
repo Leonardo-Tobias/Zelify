@@ -33,6 +33,7 @@ import { useCondominio } from '@/contexts/CondominioContext';
 import { BillingSwitch } from '@/components/ui/switch';
 import Checkbox from '@/components/ui/checkbox';
 import { APP_HOST, APP_URL } from '@/lib/appUrl';
+import BrandLogo from '@/components/BrandLogo';
 
 export default function ConfiguracoesPage() {
   const router = useRouter();
@@ -1051,15 +1052,8 @@ export default function ConfiguracoesPage() {
                 }`}
               >
                 {/* Header do Poster */}
-                <div className="flex items-center space-x-1.5 mb-3">
-                  <Building className={`w-4 h-4 ${
-                    posterTheme === 'blue' 
-                      ? 'text-brand' 
-                      : posterTheme === 'emerald' 
-                      ? 'text-emerald-500' 
-                      : 'text-zinc-800'
-                  }`} />
-                  <span className="font-bold text-[10px] tracking-widest uppercase">Zelcon</span>
+                <div className="mb-3">
+                  <BrandLogo variant="dark" className="h-5 w-auto" />
                 </div>
 
                 {/* Nome do Condominio */}
@@ -2337,15 +2331,8 @@ export default function ConfiguracoesPage() {
         style={{ fontFamily: 'sans-serif' }}
       >
         {/* Header */}
-        <div className="flex items-center justify-center space-x-3 mt-6">
-          <Building className={`w-12 h-12 ${
-            posterTheme === 'blue' 
-              ? 'text-brand' 
-              : posterTheme === 'emerald' 
-              ? 'text-emerald-500' 
-              : 'text-zinc-900'
-          }`} />
-          <span className="font-black text-3xl tracking-widest uppercase">Zelcon</span>
+        <div className="mt-6">
+          <BrandLogo variant="dark" className="h-14 w-auto" />
         </div>
 
         <div className="space-y-4">

@@ -1435,7 +1435,7 @@ export default function ConfiguracoesPage() {
                   className={`w-full text-xs font-bold py-2.5 rounded-lg transition-all text-center flex items-center justify-center space-x-1.5 ${
                     condominio?.plan_type === 'pro' && condominio?.subscription_status === 'active'
                       ? 'bg-zinc-100 dark:bg-zinc-950 text-zinc-400 border border-zinc-200 dark:border-zinc-800 cursor-not-allowed'
-                      : 'bg-brand hover:bg-brand/90 text-white shadow-[0_4px_15px_rgba(0,51,255,0.2)] active:scale-[0.98] cursor-pointer'
+                      : 'bg-brand hover:bg-brand/90 text-white shadow-[0_4px_15px_rgba(0,80,255,0.2)] active:scale-[0.98] cursor-pointer'
                   }`}
                 >
                   <CreditCard className="w-3.5 h-3.5" />
@@ -1496,7 +1496,7 @@ export default function ConfiguracoesPage() {
                         <button
                           type="button"
                           onClick={() => setNumCondos(prev => Math.min(500, prev + 1))}
-                          className="w-6 h-6 rounded bg-brand hover:bg-brand/90 hover:shadow-[0_0_8px_rgba(0,51,255,0.4)] active:scale-[0.92] text-white flex items-center justify-center font-bold transition-all border border-brand/45 cursor-pointer text-xs select-none"
+                          className="w-6 h-6 rounded bg-brand hover:bg-brand/90 hover:shadow-[0_0_8px_rgba(0,80,255,0.4)] active:scale-[0.92] text-white flex items-center justify-center font-bold transition-all border border-brand/45 cursor-pointer text-xs select-none"
                         >
                           +
                         </button>
@@ -1604,7 +1604,7 @@ export default function ConfiguracoesPage() {
                       ? 'bg-zinc-100 dark:bg-zinc-950 text-zinc-400 border border-zinc-200 dark:border-zinc-800 cursor-not-allowed'
                       : isCorporateUnlimited
                         ? 'bg-gradient-to-r from-brand to-blue-600 hover:opacity-95 text-white shadow-lg'
-                        : 'bg-brand hover:bg-brand/90 text-white shadow-[0_4px_15px_rgba(0,51,255,0.2)] active:scale-[0.98] cursor-pointer'
+                        : 'bg-brand hover:bg-brand/90 text-white shadow-[0_4px_15px_rgba(0,80,255,0.2)] active:scale-[0.98] cursor-pointer'
                   }`}
                 >
                   <Calculator className="w-3.5 h-3.5" />

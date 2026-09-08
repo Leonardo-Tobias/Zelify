@@ -159,7 +159,7 @@ function CadastroForm() {
         <div className="auth-progress flex items-center justify-center space-x-3">
           <div className={`flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold border transition-all ${
             step === 1 
-              ? 'bg-brand text-white border-brand shadow-[0_0_8px_rgba(0,51,255,0.4)]' 
+              ? 'bg-brand text-white border-brand shadow-[0_0_8px_rgba(0,80,255,0.4)]'
               : 'bg-zinc-900/50 text-zinc-400 border-zinc-800'
           }`}>
             1
@@ -167,7 +167,7 @@ function CadastroForm() {
           <div className="w-8 h-px bg-zinc-800"></div>
           <div className={`flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold border transition-all ${
             step === 2 
-              ? 'bg-brand text-white border-brand shadow-[0_0_8px_rgba(0,51,255,0.4)]' 
+              ? 'bg-brand text-white border-brand shadow-[0_0_8px_rgba(0,80,255,0.4)]'
               : 'bg-zinc-900/50 text-zinc-400 border-zinc-800'
           }`}>
             2

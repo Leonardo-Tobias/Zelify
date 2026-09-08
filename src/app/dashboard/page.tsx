@@ -231,7 +231,7 @@ function DashboardHomeContent() {
         format: 'a4'
       });
       
-      const primaryColor = [0, 51, 255]; // #001CFF Zelcon Blue
+      const primaryColor = [0, 80, 255]; // #0050FF Zelcon Blue
       const darkColor = [39, 39, 42];    // zinc-800
       const lightGray = [228, 228, 231]; // zinc-200
       
@@ -503,7 +503,7 @@ function DashboardHomeContent() {
       <div className="fixed bottom-6 right-6 z-50 animate-in slide-in-from-bottom-4 fade-in duration-300 max-w-sm w-full">
         <div className={`relative overflow-hidden rounded-2xl border shadow-2xl backdrop-blur-xl ${
           isUpgrade 
-            ? 'bg-gradient-to-br from-brand/15 via-zinc-950/95 to-zinc-950/95 border-brand/25 shadow-[0_8px_40px_rgba(0,51,255,0.15)]' 
+            ? 'bg-gradient-to-br from-brand/15 via-zinc-950/95 to-zinc-950/95 border-brand/25 shadow-[0_8px_40px_rgba(0,80,255,0.15)]'
             : 'bg-gradient-to-br from-red-500/10 via-zinc-950/95 to-zinc-950/95 border-red-500/25 shadow-[0_8px_40px_rgba(239,68,68,0.1)]'
         }`}>
           {/* Glow */}
@@ -542,7 +542,7 @@ function DashboardHomeContent() {
                   setToastMsg(null);
                   router.push('/dashboard/configuracoes?tab=faturamento');
                 }}
-                className="w-full mt-3.5 py-2 bg-brand hover:bg-brand/90 text-white text-[11px] font-bold rounded-lg transition-all active:scale-[0.98] cursor-pointer flex items-center justify-center space-x-1.5 shadow-[0_4px_15px_rgba(0,51,255,0.25)]"
+                className="w-full mt-3.5 py-2 bg-brand hover:bg-brand/90 text-white text-[11px] font-bold rounded-lg transition-all active:scale-[0.98] cursor-pointer flex items-center justify-center space-x-1.5 shadow-[0_4px_15px_rgba(0,80,255,0.25)]"
               >
                 <Sparkles className="w-3.5 h-3.5" />
                 <span>Fazer Upgrade Agora</span>

@@ -36,7 +36,7 @@ export default function PosterPreview({
     const printWindow = window.open('', '_blank')
     if (!printWindow) return
 
-    const themeColor = posterTheme === 'blue' ? '#001CFF'
+    const themeColor = posterTheme === 'blue' ? '#0050FF'
       : posterTheme === 'emerald' ? '#10B981'
       : '#18181B'
 
@@ -156,7 +156,7 @@ export default function PosterPreview({
       <div
         ref={printRef}
         className="bg-white rounded-2xl border-4 border-double overflow-hidden w-full max-w-sm shadow-lg text-zinc-900"
-        style={{ borderColor: posterTheme === 'blue' ? '#001CFF' : posterTheme === 'emerald' ? '#10B981' : '#18181B' }}
+        style={{ borderColor: posterTheme === 'blue' ? '#0050FF' : posterTheme === 'emerald' ? '#10B981' : '#18181B' }}
       >
         <div className="p-6 flex flex-col items-center text-center space-y-4">
           <BrandLogo variant="dark" className="h-8 w-auto" />
@@ -165,13 +165,13 @@ export default function PosterPreview({
           </div>
           <h2 className="text-lg font-black tracking-tight leading-tight">{posterTitle}</h2>
           <p className="text-[11px] text-zinc-600 font-semibold leading-relaxed px-4">{posterInstructions}</p>
-          <div className="bg-zinc-50 p-3 rounded-xl border-2" style={{ borderColor: `${posterTheme === 'blue' ? '#001CFF' : posterTheme === 'emerald' ? '#10B981' : '#18181B'}40` }}>
+          <div className="bg-zinc-50 p-3 rounded-xl border-2" style={{ borderColor: `${posterTheme === 'blue' ? '#0050FF' : posterTheme === 'emerald' ? '#10B981' : '#18181B'}40` }}>
             <img src={qrUrl(150)} alt="QR Code" className="w-32 h-32 object-contain" />
           </div>
           {showCodigo && (
           <div className="w-full bg-zinc-50 rounded-xl border border-zinc-200 p-4 space-y-2">
             <div className="text-[9px] font-black uppercase tracking-widest text-zinc-500">Código de Acesso</div>
-            <div className="text-2xl font-black tracking-widest" style={{ color: posterTheme === 'blue' ? '#001CFF' : posterTheme === 'emerald' ? '#059669' : '#18181B' }}>
+            <div className="text-2xl font-black tracking-widest" style={{ color: posterTheme === 'blue' ? '#0050FF' : posterTheme === 'emerald' ? '#059669' : '#18181B' }}>
               {codigoAcesso || '----'}
             </div>
             <div className="text-[10px] text-zinc-500 font-mono">

@@ -23,9 +23,9 @@
 :root {
   --background: #f6f7f8;
   --foreground: #202329;
-  --brand: #001cff;
-  --brand-action: #001cff;
-  --brand-hover: #0017d6;
+  --brand: #0050ff;
+  --brand-action: #0050ff;
+  --brand-hover: #0040cc;
   --brand-soft: #eef1ff;
   --app-surface: #ffffff;
   --app-surface-raised: #ffffff;
@@ -36,9 +36,9 @@
 :root.dark {
   --background: #111316;
   --foreground: #e7e9ed;
-  --brand: #8290cc;
-  --brand-action: #52639f;
-  --brand-hover: #5e70ad;
+  --brand: #3172ff;
+  --brand-action: #3172ff;
+  --brand-hover: #4b83ff;
   --brand-soft: #202638;
   --app-surface: #17191d;
   --app-surface-raised: #1b1d22;

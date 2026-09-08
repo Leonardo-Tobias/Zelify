@@ -498,12 +498,12 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                   key={item.name}
                   disabled={item.disabled}
                   onClick={() => router.push(item.href)}
-                  className={`w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-xs transition-all ${
+                  className={`w-full flex items-center space-x-3 border px-3 py-2.5 rounded-lg text-xs transition-all ${
                     isActive 
-                      ? 'bg-zinc-100 dark:bg-white/[0.055] text-zinc-900 dark:text-white font-semibold border-l-2 border-brand'
+                      ? 'border-zinc-200 bg-zinc-100 text-zinc-900 font-semibold shadow-sm dark:border-white/[0.08] dark:bg-white/[0.055] dark:text-white dark:shadow-none'
                       : item.disabled
-                        ? 'opacity-45 text-zinc-450 dark:text-zinc-650 cursor-not-allowed'
-                        : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/[0.03] font-medium cursor-pointer'
+                        ? 'border-transparent opacity-45 text-zinc-450 dark:text-zinc-650 cursor-not-allowed'
+                        : 'border-transparent text-zinc-500 hover:border-zinc-200 hover:text-zinc-700 dark:hover:border-white/[0.06] dark:hover:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/[0.03] font-medium cursor-pointer'
                   }`}>
                   <item.icon className={`w-4 h-4 shrink-0 transition-colors ${isActive ? 'text-brand' : 'text-zinc-500'}`} />
                   <span>{item.name}</span>

@@ -143,8 +143,8 @@ export default function KanbanPage() {
   if (!condominio) return null
   if (condominio.subscription_status !== 'active' && condominio.plan_type !== 'free') return <div className="h-full flex flex-col items-center justify-center p-10 text-center"><Lock className="w-10 h-10 text-amber-500 mb-4" /><h1 className="font-bold text-zinc-900 dark:text-white">Gestão de Ocorrências indisponível</h1><p className="text-xs text-zinc-500 mt-2 max-w-sm">Regularize a assinatura para voltar a gerenciar as ocorrências.</p></div>
 
-  return <div className="h-full flex flex-col bg-zinc-50 dark:bg-[#111316] text-zinc-700 dark:text-zinc-300">
-    <header className="px-5 md:px-8 py-5 border-b border-zinc-200 dark:border-white/[0.06] bg-white dark:bg-[#111316]">
+  return <div className="h-full flex flex-col text-zinc-700 dark:text-zinc-300">
+    <header className="pb-5 border-b border-zinc-200 dark:border-white/[0.06]">
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div><h1 className="text-lg font-semibold text-zinc-900 dark:text-white">Gestão de ocorrências</h1><p className="text-xs text-zinc-500 mt-1">Acompanhe o fluxo operacional de {condominio.nome}</p></div>
         <div className="grid w-full grid-cols-1 gap-2 sm:grid-cols-3 lg:w-[700px] lg:grid-cols-[1.2fr_1fr_1fr]">
@@ -164,7 +164,7 @@ export default function KanbanPage() {
       </div>
     </header>
 
-    <main className="flex-1 overflow-x-auto p-4 md:p-6">
+    <main className="flex-1 overflow-x-auto pt-6">
       {loading ? <div className="h-56 flex items-center justify-center text-xs text-zinc-500">Carregando ocorrências...</div> : <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 min-w-0 lg:min-w-[900px] h-full">
         {columns.map(column => {
           const items = filtered.filter(item => item.status === column.status)

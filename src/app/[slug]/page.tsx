@@ -20,6 +20,7 @@ import {
 import { db, Condominio, Chamado, isSupabaseConfigured } from '@/lib/db';
 import { compressImage } from '@/lib/imageCompressor';
 import BrandLogo from '@/components/BrandLogo';
+import PushNotificationButton from '@/components/PushNotificationButton';
 import {
   OCCURRENCE_CATEGORIES,
   PRIORITIES,
@@ -698,13 +699,16 @@ export default function MoradorPortal() {
               </p>
             )}
           </div>
-          <button 
-            onClick={handleLogout}
-            className="p-2 text-zinc-500 hover:text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-900/30 rounded-lg transition-colors"
-            title="Sair do Portal"
-          >
-            <LogOut className="w-4 h-4" />
-          </button>
+          <div className="flex items-center gap-1.5">
+            <PushNotificationButton audience="morador" portalToken={portalToken} />
+            <button
+              onClick={handleLogout}
+              className="p-2 text-zinc-500 hover:text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-900/30 rounded-lg transition-colors"
+              title="Sair do Portal"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
+          </div>
         </div>
       </header>
 

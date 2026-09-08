@@ -94,6 +94,27 @@ CREATE TABLE IF NOT EXISTS public.asaas_webhook_events (
   processed_at TIMESTAMPTZ
 );
 
+CREATE TABLE IF NOT EXISTS public.push_subscriptions (
+  subscription_key TEXT PRIMARY KEY,
+  endpoint TEXT NOT NULL,
+  p256dh TEXT NOT NULL,
+  auth_key TEXT NOT NULL,
+  audience TEXT NOT NULL CHECK (audience IN ('gestor', 'morador')),
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  condominio_id UUID REFERENCES public.condominios(id) ON DELETE CASCADE,
+  bloco TEXT,
+  apartamento TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  CHECK (
+    (audience = 'gestor' AND user_id IS NOT NULL AND condominio_id IS NULL AND bloco IS NULL AND apartamento IS NULL)
+    OR
+    (audience = 'morador' AND user_id IS NULL AND condominio_id IS NOT NULL AND bloco IS NOT NULL AND apartamento IS NOT NULL)
+  )
+);
+CREATE INDEX IF NOT EXISTS idx_push_subscriptions_gestor ON public.push_subscriptions(user_id) WHERE audience = 'gestor';
+CREATE INDEX IF NOT EXISTS idx_push_subscriptions_morador ON public.push_subscriptions(condominio_id, bloco, apartamento) WHERE audience = 'morador';
+
 CREATE TABLE IF NOT EXISTS public.categorias_ocorrencias (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   condominio_id UUID REFERENCES public.condominios(id) ON DELETE CASCADE,
@@ -163,6 +184,7 @@ ALTER TABLE public.portal_access_attempts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.cadastro_attempts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.consentimentos ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.asaas_webhook_events ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.push_subscriptions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.categorias_ocorrencias ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.ocorrencia_historico ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.ocorrencia_comentarios ENABLE ROW LEVEL SECURITY;
@@ -336,6 +358,7 @@ REVOKE ALL ON public.condominios, public.chamados, public.portal_access_attempts
 REVOKE ALL ON public.portal_access_attempts FROM authenticated;
 REVOKE ALL ON public.cadastro_attempts, public.consentimentos FROM anon, authenticated;
 REVOKE ALL ON public.asaas_webhook_events FROM anon, authenticated;
+REVOKE ALL ON public.push_subscriptions FROM anon, authenticated;
 REVOKE ALL ON public.categorias_ocorrencias, public.ocorrencia_historico, public.ocorrencia_comentarios, public.ocorrencia_anexos FROM anon;
 REVOKE EXECUTE ON FUNCTION public.validar_acesso_portal(UUID, TEXT, TEXT) FROM PUBLIC, anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.validar_acesso_portal(UUID, TEXT, TEXT) TO service_role;

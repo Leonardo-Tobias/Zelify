@@ -446,6 +446,24 @@ export const db = {
     return data.session?.access_token || null;
   },
 
+  async notifyOccurrence(chamado: Pick<Chamado, 'id' | 'condominio_id'>, event: 'status' | 'public_comment'): Promise<void> {
+    if (!supabase) return;
+    try {
+      const token = await this.getAccessToken();
+      if (!token) return;
+      const response = await fetch('/api/push/notify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', authorization: `Bearer ${token}` },
+        body: JSON.stringify({ chamadoId: chamado.id, condominioId: chamado.condominio_id, event }),
+      });
+      if (!response.ok && response.status !== 503) {
+        console.error('[PUSH NOTIFY]', await response.text());
+      }
+    } catch (error) {
+      console.error('[PUSH NOTIFY]', error);
+    }
+  },
+
   async logoutGestor(): Promise<void> {
     if (supabase) {
       const { error } = await supabase.auth.signOut();
@@ -589,6 +607,7 @@ export const db = {
         .select()
         .maybeSingle();
       if (error) throw error;
+      if (data) await this.notifyOccurrence(data, 'status');
       return data;
     } else {
       const chamados = localDB.getChamadosRaw();
@@ -674,6 +693,7 @@ export const db = {
         visibilidade: 'publico',
         autor_id: authData.user.id,
       });
+      await this.notifyOccurrence(chamado, 'public_comment');
     }
     return data as OcorrenciaComentario;
   },

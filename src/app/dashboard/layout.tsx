@@ -22,6 +22,7 @@ import { CondominioProvider, useCondominio } from '@/contexts/CondominioContext'
 import PosterPreview from '@/components/PosterPreview';
 import { APP_HOST } from '@/lib/appUrl';
 import BrandLogo from '@/components/BrandLogo';
+import PushNotificationButton from '@/components/PushNotificationButton';
 
 function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -602,6 +603,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
             {pathname === '/dashboard/kanban' ? 'GESTÃO DE OCORRÊNCIAS' : (navigation.find(nav => nav.active)?.name || 'Área Administrativa')}
           </h2>
           <div className="flex items-center space-x-4">
+            <PushNotificationButton audience="gestor" />
             <button
               onClick={handleToggleTheme}
               className="relative w-8 h-8 flex items-center justify-center text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white rounded-lg border border-zinc-200 dark:border-white/[0.06] bg-zinc-100 dark:bg-white/[0.04] transition-all active:scale-[0.95] overflow-hidden"

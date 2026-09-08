@@ -4,11 +4,22 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Zelcon | Gestão Operacional de Condomínios",
   description: "Plataforma mobile-first para moradores e gestores controlarem manutenções, achados e perdidos e rotinas do condomínio.",
+  applicationName: "Zelcon",
+  manifest: "/manifest.webmanifest",
+  appleWebApp: {
+    capable: true,
+    title: "Zelcon",
+    statusBarStyle: "black-translucent",
+  },
 };
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f6f7f8" },
+    { media: "(prefers-color-scheme: dark)", color: "#111316" },
+  ],
 };
 
 export default function RootLayout({

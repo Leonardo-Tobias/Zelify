@@ -17,7 +17,7 @@ Abra `http://localhost:3000`.
 ## Banco de dados
 
 - Instalação nova: execute `supabase/schema.sql` no SQL Editor do Supabase.
-- Banco já existente: execute, nesta ordem, `supabase/security_hardening.sql` (se ainda não foi aplicado) e `supabase/product_review_hardening.sql`.
+- Banco já existente: execute as migrações pendentes e, para ativar as notificações, execute `supabase/pwa_push_notifications.sql`.
 
 A migração remove o acesso anônimo direto às tabelas, transforma códigos de acesso existentes em hashes bcrypt e adiciona limitação persistente de tentativas. Como o código deixa de ser recuperável, o gestor deve definir um novo código se não lembrar do atual.
 
@@ -30,6 +30,8 @@ Em **Authentication > URL Configuration** no Supabase, mantenha `https://zelcon.
 Copie `.env.example` para `.env.local` e preencha todos os valores. Em produção, cadastre os mesmos nomes nas configurações do projeto na Vercel.
 
 `PORTAL_SESSION_SECRET` deve ser um segredo longo e diferente das demais chaves. `SUPABASE_SERVICE_ROLE_KEY`, `ASAAS_API_KEY` e `ASAAS_WEBHOOK_SECRET` nunca podem usar o prefixo `NEXT_PUBLIC_`.
+
+Para Web Push, execute `npx web-push generate-vapid-keys` uma única vez. Cadastre a chave pública em `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, a privada em `VAPID_PRIVATE_KEY` e um e-mail válido em `VAPID_SUBJECT`. A chave privada nunca deve ser exposta no navegador.
 
 No Asaas, configure o webhook para:
 

@@ -3,6 +3,7 @@ import { getPortalBearerToken, verifyPortalSession } from '@/lib/portalSession'
 import { getSupabaseAdmin } from '@/lib/serverAuth'
 import { isChamadoUrlForCondominio, removeChamadoFile } from '@/lib/serverStorage'
 import { toPublicChamado, toPublicComment, toPublicHistory } from '@/lib/publicPortal'
+import { notifyManagersOfNewOccurrence } from '@/lib/pushNotifications'
 
 const PUBLIC_CHAMADO_SELECT = 'id, tipo, local, bloco, apartamento, descricao, titulo, categoria, categoria_outro, prioridade, foto_url, status, created_at, updated_at, completed_at'
 
@@ -126,6 +127,7 @@ export async function POST(req: NextRequest) {
         }
         throw atomicError
       }
+      await notifyManagersOfNewOccurrence(admin, atomicChamado).catch(error => console.error('[PUSH NEW OCCURRENCE]', error))
       return NextResponse.json({ chamado: atomicChamado }, { status: 201 })
     }
 
@@ -185,6 +187,7 @@ export async function POST(req: NextRequest) {
       }
       throw error
     }
+    await notifyManagersOfNewOccurrence(admin, data).catch(error => console.error('[PUSH NEW OCCURRENCE]', error))
     return NextResponse.json({ chamado: data }, { status: 201 })
   } catch (error) {
     console.error('[PORTAL CHAMADOS POST ERROR]', error)
